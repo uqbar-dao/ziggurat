@@ -31,7 +31,7 @@
       [%9 axis=@ subf1=phash leaf=phash path=(list phash)]
       [%10 axis=@ subf1=phash subf2=phash oldleaf=phash path=(list phash)]
       [%cons subf1=phash subf2=phash]
-      ::[%jet core=phash sample=* jet=@t]
+      [%jet head=phash next=phash arm-axis=@ core-axis=@ sam=phash arg=json]
   ==
 :: subject -> formula -> hint
 +$  hints  (mip phash phash cairo-hint)

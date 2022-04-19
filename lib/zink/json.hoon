@@ -93,6 +93,16 @@
           %cons
         ~[s+'cons' s+(num subf1.hin) s+(num subf2.hin)]
       ::
+          %jet
+        :~  s+'jet'
+            s+(num head.hin)
+            s+(num next.hin)
+            s+(num arm-axis.hin)
+            s+(num core-axis.hin)
+            s+(num sam.hin)
+            arg.hin
+        ==
+      ::
       ==
     --
   ::

@@ -217,16 +217,33 @@
   ::
   :: Note that this arm should only be called on an 8
   :: TODO Figure out what CORE-AXIS should be
+  +$  jax  [nam=@tas arm-axis=@ core-axis=@ sam=* arg=*]
   ++  jet
     |=  [head=* next=*]
     ^-  book
     =^  mj  app  (match-jet head next)
     ?~  mj  `app
-    (run-jet u.mj)^app
+    =^  jar=(unit [res=* arg=json])  app
+      (run-jet nam.u.mj arg.u.mj)
+    ?~  jar  `app
+    =^  hhead  cax  (hash head)
+    =^  hnext  cax  (hash next)
+    =^  hsam  cax  (hash sam.u.mj)
+    =.  app
+    %-  put-hint
+    :*  %jet
+        hhead
+        hnext
+        arm-axis.u.mj
+        core-axis.u.mj
+        hsam
+        arg.u.jar
+    ==
+    (some res.u.jar)^app
   ::
   ++  match-jet
     |=  [head=* next=*]
-    ^-  [(unit [@tas *]) appendix]
+    ^-  [(unit jax) appendix]
     ?:  (lth bud 1)  `app
     =.  bud  (sub bud 1)
     ?.  ?=([%9 arm-axis=@ %0 core-axis=@] head)  `app
@@ -236,37 +253,63 @@
       ^$(f head)
     ?~  sub  `app
     =^  arg=body  app
-      ^$(s sub^s, f sam.next)
-    (both mjet arg)^app
+      ^$(s u.sub^s, f sam.next)
+    =^  h  cax  (hash u.sub^s)
+    =^  hsub  cax  (hash u.sub)
+    =^  hs  cax  (hash s)
+    :_  app
+    %+  bind  (both mjet arg)
+    |=  [j=@tas a=*]
+    [j arm-axis.head core-axis.head sam.next a]
   ::
   ++  run-jet
     |=  [arm=@tas sam=*]
-    ^-  body
-    ?+  arm  ~
+    ^-  [(unit [* json]) appendix]
+    ?+  arm  ~^app
     ::
         %dec
-      ?:  (lth bud 1)  ~
+      ?:  (lth bud 1)  ~^app
       =.  bud  (sub bud 1)
-      ?.  ?=(@ sam)  ~
-      (some (dec sam))
+      ?.  ?=(@ sam)  ~^app
+      :_  app
+      %-  some
+      :-  (dec sam)
+      %-  pairs:enjs:format
+      ~[['arg1' s+(num:enjs sam)]]
     ::
         %add
-      ?:  (lth bud 1)  ~
+      ?:  (lth bud 1)  ~^app
       =.  bud  (sub bud 1)
-      ?.  ?=([x=@ud y=@ud] sam)  ~
-      (some (add x.sam y.sam))
+      ?.  ?=([x=@ud y=@ud] sam)  ~^app
+      :_  app
+      %-  some
+      :-  (add x.sam y.sam)
+      %-  pairs:enjs:format
+      :~  ['arg1' s+(num:enjs x.sam)]
+          ['arg2' s+(num:enjs y.sam)]
+      ==
     ::
         %mul
-      ?:  (lth bud 1)  ~
+      ?:  (lth bud 1)  ~^app
       =.  bud  (sub bud 1)
-      ?.  ?=([x=@ud y=@ud] sam)  ~
-      (some (mul x.sam y.sam))
+      ?.  ?=([x=@ud y=@ud] sam)  ~^app
+      :_  app
+      %-  some
+      :-  (mul x.sam y.sam)
+      %-  pairs:enjs:format
+      :~  ['arg1' s+(num:enjs x.sam)]
+          ['arg2' s+(num:enjs y.sam)]
+      ==
     ::
         %double
-      ?:  (lth bud 1)  ~
+      ?:  (lth bud 1)  ~^app
       =.  bud  (sub bud 1)
-      ?.  ?=(@ sam)  ~
-      (some (mul 2 sam))
+      ?.  ?=(@ sam)  ~^app
+      :_  app
+      %-  some
+      :-  (mul 2 sam)
+      %-  pairs:enjs:format
+      ~[['arg1' s+(num:enjs sam)]]
     ==
   ::
   ++  put-hint
@@ -312,22 +355,11 @@
       %2  [``[u.u.mutant +.target] bud]
       %3  [``[-.target u.u.mutant] bud]
     ==
-  ::  hash:
-  ::  if x is an atom then hash(x)=h(x, 0)
-  ::  else hash([x y])=h(hash(x), hash(y))
-  ::  where h = pedersen hash
+  ::
   ++  hash
     |=  n=*
     ^-  [phash cache]
-    =/  mh  (~(get by cax) n)
-    ?^  mh  [u.mh cax]
-    ?@  n
-      =/  h  (hash:pedersen n 0)
-      [h (~(put by cax) n h)]
-    =^  hh  cax  $(n -.n)
-    =^  ht  cax  $(n +.n)
-    =/  h  (hash:pedersen hh ht)
-    [h (~(put by cax) n h)]
+    (^hash n cax)
   ::
   ++  cost                                              ::  gas cost of noun
     |^
@@ -395,7 +427,7 @@
   =/  src  .^(@t %cx file)
   =/  gun  (slap !>(~) (ream src))
   =/  han  (~(mint ut p.gun) %noun gen)
-  =-  [p (create-hints [q.gun q.han] hit.q)]
+  =-  [p (create-hints [q.gun q.han] hit.q ~)]
   (eval-noun [q.gun q.han] bud)
 ::  eval-hoon: compile a hoon file and evaluate it with zink
 ::
@@ -423,25 +455,49 @@
   =/  gun  (slap clib (ream src))
   =/  han  (~(mint ut p.gun) %noun gen)
   (eval-noun-with-cache [q.gun q.han] bud cax)
+::
+::  eval-hoon-with-cache-and-hints: eval hoon and return result w/ hints
+::  as json and with cache
+++  eval-hoon-with-cache-and-hints
+  |=  [file=path lib=(unit path) gen=hoon bud=@ cax=cache]
+  ^-  [book @t]
+  =/  clib
+    ?~  lib  !>(~)
+    =/  libsrc  .^(@t %cx u.lib)
+    (slap !>(~) (ream libsrc))
+  =/  src  .^(@t %cx file)
+  =/  gun  (slap clib (ream src))
+  =/  han  (~(mint ut p.gun) %noun gen)
+  =/  bok  (eval-noun-with-cache [q.gun q.han] bud cax)
+  =/  js  (create-hints [q.gun q.han] hit.q.bok cax)
+  bok^(crip (en-json:html js))
 ::  create-hints: create full hint json
 ::
 ++  create-hints
-  |=  [n=^ h=hints]
-  ^-  js=json
-  =/  hs  (hash -.n)
-  =/  hf  (hash +.n)
+  |=  [n=^ h=hints cax=cache]
+  ^-  json
+  =^  hs  cax  (hash -.n cax)
+  =^  hf  cax  (hash +.n cax)
   %-  pairs:enjs:format
   :~  ['subject' s+(num:enjs hs)]
       ['formula' s+(num:enjs hf)]
       ['hints' (all:enjs h)]
   ==
 ::
+::  hash:
+::  if x is an atom then hash(x)=h(x, 0)
+::  else hash([x y])=h(hash(x), hash(y))
+::  where h = pedersen hash
 ++  hash
-  |=  n=*
-  ^-  phash
+  |=  [n=* cax=cache]
+  ^-  [phash cache]
+  =/  mh  (~(get by cax) n)
+  ?^  mh  [u.mh cax]
   ?@  n
-    (hash:pedersen n 0)
-  =/  hh  $(n -.n)
-  =/  ht  $(n +.n)
-  (hash:pedersen hh ht)
+    =/  h  (hash:pedersen n 0)
+    [h (~(put by cax) n h)]
+  =^  hh  cax  $(n -.n)
+  =^  ht  cax  $(n +.n)
+  =/  h  (hash:pedersen hh ht)
+  [h (~(put by cax) n h)]
 --
