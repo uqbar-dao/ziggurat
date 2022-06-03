@@ -14,8 +14,8 @@
   +$  arguments
     $%  [%add-dao salt=@ =dao:d]
         [%vote dao-id=id:smart proposal-id=id:smart]
-        [%propose dao-id=id:smart =on-chain-update:d]
-        [%execute dao-id=id:smart =on-chain-update:d]  ::  called only by this contract
+        [%propose dao-id=id:smart updates=(list on-chain-update:d)]
+        [%execute dao-id=id:smart updates=(list on-chain-update:d)]  ::  called only by this contract
     ==
   ::
   --

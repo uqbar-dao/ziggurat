@@ -19,8 +19,8 @@
   +$  arguments
     $%  [%add-dao salt=@ =dao:d]
         [%vote dao-id=id proposal-id=id]
-        [%propose dao-id=id =on-chain-update:d]
-        [%execute dao-id=id =on-chain-update:d]  ::  called only by this contract
+        [%propose dao-id=id updates=(list on-chain-update:d)]
+        [%execute dao-id=id updates=(list on-chain-update:d)]  ::  called only by this contract
     ==
   ::
   ++  get-grain-and-dao
@@ -70,16 +70,16 @@
       =.  data.p.germ.dao-grain
         dao(proposals (~(del by proposals.dao) proposal-id))
       %=  $
-          args       [%execute dao-id update.prop]
+          args       [%execute dao-id updates.prop]
           caller-id  me.cart
           owns.cart
         (~(put by owns.cart) dao-id dao-grain)
       ==
-      :: $(args [me.cart `update.prop grains.inp])
     ::
         %propose
-      =*  dao-id  dao-id.args
-      =*  update  on-chain-update.args
+      =*  dao-id   dao-id.args
+      =*  updates  updates.args
+      ?<  =(0 (lent updates))
       =/  [dao-grain=grain =dao:d]  (get-grain-and-dao dao-id)
       ?>  ?=(%& -.germ.dao-grain)
       ?>  %:  is-allowed:dao-lib
@@ -88,22 +88,27 @@
               %write
               [%& dao]
           ==
-      ?<  |(?=(%add-dao -.update) ?=(%remove-dao -.update))
-      =/  proposal-id=@ux  (mug update)
+      :: ?<  |(?=(%add-dao -.update) ?=(%remove-dao -.update))
+      =/  proposal-id=@ux  (mug (jam updates))
       ?<  (~(has by proposals.dao) proposal-id)
       =.  proposals.dao
         %+  ~(put by proposals.dao)
           proposal-id
-        [update=update votes=~]
+        [updates=updates votes=~]
       [%& (malt ~[[id.dao-grain dao-grain(data.p.germ dao)]]) ~ ~]
     ::
         %execute
       ?>  =(me.cart caller-id)
       =*  dao-id  dao-id.args
-      =*  update  on-chain-update.args
       =/  [dao-grain=grain =dao:d]  (get-grain-and-dao dao-id)
       ?>  ?=(%& -.germ.dao-grain)
-      =.  dao
+      |-
+      ?~  updates.args
+        [%& (malt ~[[id.dao-grain dao-grain(data.p.germ dao)]]) ~ ~]
+      =*  update  i.updates.args
+      %=  $
+          updates.args  t.updates.args
+          dao
         ?+    -.update  !!
             %add-member
           (~(add-member update:dao-lib dao) +.+.update)
@@ -130,7 +135,8 @@
           (~(remove-roles update:dao-lib dao) +.+.update)
         ::
         ==
-      [%& (malt ~[[id.dao-grain dao-grain(data.p.germ dao)]]) ~ ~]
+      ::
+      ==
     ::
     ==
   ::
@@ -229,7 +235,7 @@
           subdaos=(set id)
           :: owners=(set id)  ::  ? or have this in permissions?
           threshold=@ud
-          proposals=(map @ux [update=on-chain-update votes=(set id)])
+          proposals=(map @ux [updates=(list on-chain-update) votes=(set id)])
       ==
     ::
     +$  on-chain-update

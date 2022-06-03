@@ -20,7 +20,7 @@
       subdaos=(set id:smart)
       :: owners=(set id:smart)  ::  ? or have this in permissions?
       threshold=@ud
-      proposals=(map @ux [update=on-chain-update votes=(set id:smart)])
+      proposals=(map @ux [updates=(list on-chain-update) votes=(set id:smart)])
   ==
 ::
 +$  on-chain-update

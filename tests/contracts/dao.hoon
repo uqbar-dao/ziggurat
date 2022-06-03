@@ -19,6 +19,9 @@
       1
     ::
     ++  make-placeholder-dao-comms-rid
+      ::  This is used cavalierly below.
+      ::  In a real context, users should have %read/%write
+      ::  permissions to graphs, not the DAO comms "group".
       ^-  resource:r
       [~zod %dao-comms-placeholder]
     ::
@@ -103,6 +106,19 @@
           %read
         make-placeholder-dao-comms-rid
       (~(put in *(set role:d)) %jannie)
+    ::
+    ++  make-add-comms-host-permissions-and-role-updates
+      ^-  (list on-chain-update:d)
+      :+  :-  %add-permissions
+          :^    megacorp-dao-id
+              %host
+            make-placeholder-dao-comms-rid
+          (~(put in *(set role:d)) %comms-host)
+        :-  %add-roles
+        :+  megacorp-dao-id
+          (~(put in *(set role:d)) %comms-host)
+        megacorp-ceo-id
+      ~
     ::
     ++  make-megacorp-ceo-vote-zygote
       |=  proposal-id=id:smart
@@ -276,10 +292,11 @@
         ~
       ::
       ++  make-proposals
-        ^-  (map @ux [update=on-chain-update:d votes=(set id:smart)])
+        ^-  (map @ux [updates=(list on-chain-update:d) votes=(set id:smart)])
         %-  %~  gas  by
-          *(map @ux [update=on-chain-update:d votes=(set id:smart)])
+          *(map @ux [updates=(list on-chain-update:d) votes=(set id:smart)])
         :~  :+  0xde0  ::  for test-vote-valid-proposal-non-final-vote
+              :_  ~
               :-  %add-member
               :^  megacorp-dao-id
                   (~(put in *(set role:d)) %pleb)
@@ -288,6 +305,7 @@
             ~
         ::
             :+  0xde1  ::  for test-execute-final-vote-add-member
+              :_  ~
               :-  %add-member
               :^    megacorp-dao-id
                   (~(put in *(set role:d)) %pleb)
@@ -296,12 +314,14 @@
             make-cmo-vote-set
         ::
             :+  0xde2  ::  for test-execute-final-vote-remove-member
+              :_  ~
               :-  %remove-member
               :-  megacorp-dao-id
               megacorp-pleb-id
             make-cmo-vote-set
         ::
             :+  0xde3  ::  for test-execute-final-vote-add-permissions
+              :_  ~
               :-  %add-permissions
               :^    megacorp-dao-id
                   %host
@@ -310,6 +330,7 @@
             make-cmo-vote-set
         ::
             :+  0xde4  ::  for test-execute-final-vote-remove-permissions
+              :_  ~
               :-  %remove-permissions
               :^  megacorp-dao-id
                   %write
@@ -318,18 +339,21 @@
             make-cmo-vote-set
         ::
             :+  0xde5  ::  for test-execute-final-vote-add-subdao
+              :_  ~
               :-  %add-subdao
               :-  megacorp-dao-id
               startup-dao-id
             make-cmo-vote-set
         ::
             :+  0xde6  ::  for test-execute-final-vote-remove-subdao
+              :_  ~
               :-  %remove-subdao
               :-  megacorp-dao-id
               marketing-dao-id
             make-cmo-vote-set
         ::
             :+  0xde7  ::  for test-execute-final-vote-add-roles
+              :_  ~
               :-  %add-roles
               :+  megacorp-dao-id
                 (~(put in *(set role:d)) %owner)
@@ -337,15 +361,21 @@
             make-cmo-vote-set
         ::
             :+  0xde8  ::  for test-execute-final-vote-remove-roles
+              :_  ~
               :-  %remove-roles
               :+  megacorp-dao-id
                 (~(put in *(set role:d)) %owner)
               megacorp-cmo-id
             make-cmo-vote-set
         ::
-            :+  (mug make-add-jannie-read-permission-update)
+            :+  (mug (jam ~[make-add-jannie-read-permission-update]))
+              :_  ~
               make-add-jannie-read-permission-update
             ~
+        ::
+            :+  (mug (jam make-add-comms-host-permissions-and-role-updates))
+              make-add-comms-host-permissions-and-role-updates
+            make-cmo-vote-set
         ::
         ==
       ::
@@ -360,11 +390,9 @@
 |%
 ++  test-matches-type
   =+  [is-success chick]=(mule |.(;;(contract:smart cont)))
-  ;:  weld
-    %+  expect-eq
-      !>  %.y
-      !>  is-success
-  ==
+  %+  expect-eq
+    !>  %.y
+    !>  is-success
 ::
 ::  tests for %add-dao
 ::
@@ -374,14 +402,13 @@
   =/  =cart:smart                 make-test-cart
   =/  =zygote:smart               make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  new-dao-salt
     0xda.0da0
@@ -430,7 +457,7 @@
 ::
 :: ++  test-add-dao-unchangeable
 ::   ::  TODO: contract should fail to create an unchangeable DAO
-:: ::
+::
 ::  tests for %vote
 ::
 ++  test-vote-valid-proposal-non-final-vote
@@ -439,14 +466,13 @@
   =/  =cart:smart                 make-test-cart
   =/  =zygote:smart               make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-expected-chick
     ^-  chick:smart
@@ -457,8 +483,8 @@
             proposals
           %+  %~  jab  by  proposals.dao
             0xde0
-          |=  [=on-chain-update:d votes=(set id:smart)]
-          :-  on-chain-update
+          |=  [updates=(list on-chain-update:d) votes=(set id:smart)]
+          :-  updates
           (~(put in votes) megacorp-ceo-id)
         ==
       ~
@@ -482,11 +508,9 @@
   =/  =cart:smart    make-test-cart
   =/  =zygote:smart  make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
-    %+  expect-eq
-      !>  %.n
-      !>  is-success
-  ==
+  %+  expect-eq
+    !>  %.n
+    !>  is-success
   ::
   ++  make-test-cart
     ^-  cart:smart
@@ -506,11 +530,9 @@
   =/  =cart:smart    make-test-cart
   =/  =zygote:smart  make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
-    %+  expect-eq
-      !>  %.n
-      !>  is-success
-  ==
+  %+  expect-eq
+    !>  %.n
+    !>  is-success
   ::
   ++  make-test-cart
     ^-  cart:smart
@@ -531,11 +553,9 @@
   =/  =cart:smart    make-test-cart
   =/  =zygote:smart  make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
-    %+  expect-eq
-      !>  %.n
-      !>  is-success
-  ==
+  %+  expect-eq
+    !>  %.n
+    !>  is-success
   ::
   ++  make-test-cart
     ^-  cart:smart
@@ -551,35 +571,35 @@
   --
 ::
 :: ++  test-vote-non-existent-dao
-:: ::
-:: ::  tests for %propose
-:: ::
+::
+::  tests for %propose
+::
 ++  test-propose-valid-proposal
   |^
   =/  expected-chick=chick:smart  make-expected-chick
   =/  =cart:smart                 make-test-cart
   =/  =zygote:smart               make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-expected-chick
     ^-  chick:smart
     =/  =dao:d  megacorp-dao
-    =/  =on-chain-update:d  make-on-chain-update
+    =/  updates=(list on-chain-update:d)
+      ~[make-on-chain-update]
     :-  %&
     :+  %+  make-id-grain-map  megacorp-dao-salt
         %=  dao
             proposals
           %+  %~  put  by  proposals.dao
-            (mug on-chain-update)
-          [update=on-chain-update votes=~]
+            (mug (jam updates))
+          [updates=updates votes=~]
         ==
       ~
     ~
@@ -595,7 +615,7 @@
       :^    ~
           %propose
         dao-id=megacorp-dao-id
-      on-chain-update=make-on-chain-update
+      updates=~[make-on-chain-update]
     ::
     :+  caller=[id=megacorp-ceo-id nonce=0 zigs=0xd0.11a5]
       args=args
@@ -611,16 +631,35 @@
   ::
   --
 ::
-++  test-propose-existing-proposal
+++  test-propose-valid-proposal-multiple-updates
   |^
+  =/  expected-chick=chick:smart  make-expected-chick
   =/  =cart:smart                 make-test-cart
   =/  =zygote:smart               make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
-      !>  %.n
+      !>  %.y
       !>  is-success
-  ==
+    %+  expect-eq
+      !>  expected-chick
+      !>  chick
+  ::
+  ++  make-expected-chick
+    ^-  chick:smart
+    =/  =dao:d  megacorp-dao
+    =/  updates=(list on-chain-update:d)
+      make-on-chain-updates
+    :-  %&
+    :+  %+  make-id-grain-map  megacorp-dao-salt
+        %=  dao
+            proposals
+          %+  %~  put  by  proposals.dao
+            (mug (jam updates))
+          [updates=updates votes=~]
+        ==
+      ~
+    ~
   ::
   ++  make-test-cart
     ^-  cart:smart
@@ -633,7 +672,51 @@
       :^    ~
           %propose
         dao-id=megacorp-dao-id
-      on-chain-update=make-add-jannie-read-permission-update
+      updates=make-on-chain-updates
+    ::
+    :+  caller=[id=megacorp-ceo-id nonce=0 zigs=0xd0.11a5]
+      args=args
+    grains=~
+  ::
+  ++  make-on-chain-updates
+    ^-  (list on-chain-update:d)
+    :^    :-  %add-roles
+          :+  megacorp-dao-id
+            (~(put in *(set role:d)) %owner)
+          megacorp-pleb-id
+        :-  %add-roles
+        :+  megacorp-dao-id
+          (~(put in *(set role:d)) %pleb)
+        megacorp-cmo-id
+      :-  %remove-roles
+      :+  megacorp-dao-id
+        (~(put in *(set role:d)) %owner)
+      megacorp-cmo-id
+    ~
+  ::
+  --
+::
+++  test-propose-existing-proposal
+  |^
+  =/  =cart:smart                 make-test-cart
+  =/  =zygote:smart               make-zygote
+  =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
+  %+  expect-eq
+    !>  %.n
+    !>  is-success
+  ::
+  ++  make-test-cart
+    ^-  cart:smart
+    %-  make-cart
+    (make-id-grain-map megacorp-dao-salt megacorp-dao)
+  ::
+  ++  make-zygote
+    ^-  zygote:smart
+    =/  args
+      :^    ~
+          %propose
+        dao-id=megacorp-dao-id
+      updates=~[make-add-jannie-read-permission-update]
     ::
     :+  caller=[id=megacorp-ceo-id nonce=0 zigs=0xd0.11a5]
       args=args
@@ -646,11 +729,9 @@
   =/  =cart:smart                 make-test-cart
   =/  =zygote:smart               make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
-    %+  expect-eq
-      !>  %.n
-      !>  is-success
-  ==
+  %+  expect-eq
+    !>  %.n
+    !>  is-success
   ::
   ++  make-test-cart
     ^-  cart:smart
@@ -663,7 +744,7 @@
       :^    ~
           %propose
         dao-id=megacorp-dao-id
-      on-chain-update=make-on-chain-update
+      updates=~[make-on-chain-update]
     ::
     :+  caller=[id=megacorp-pleb-id nonce=0 zigs=0xd0.11a5]
       args=args
@@ -679,22 +760,48 @@
   ::
   --
 ::
+++  test-propose-length-zero-update
+  |^
+  =/  =cart:smart                 make-test-cart
+  =/  =zygote:smart               make-zygote
+  =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
+  %+  expect-eq
+    !>  %.n
+    !>  is-success
+  ::
+  ++  make-test-cart
+    ^-  cart:smart
+    %-  make-cart
+    (make-id-grain-map megacorp-dao-salt megacorp-dao)
+  ::
+  ++  make-zygote
+    ^-  zygote:smart
+    =/  args
+      :^    ~
+          %propose
+        dao-id=megacorp-dao-id
+      updates=~
+    ::
+    :+  caller=[id=megacorp-ceo-id nonce=0 zigs=0xd0.11a5]
+      args=args
+    grains=~
+  ::
+  --
+::
 :: ++  test-propose-wrong-dao
 :: ::
 :: ++  test-propose-non-existent-dao
-:: ::
-:: ::  tests for %execute
-:: ::
+::
+::  tests for %execute
+::
 ++  test-execute-user-cant-call
   |^
   =/  =cart:smart                 make-test-cart
   =/  =zygote:smart               make-zygote
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
-    %+  expect-eq
-      !>  %.n
-      !>  is-success
-  ==
+  %+  expect-eq
+    !>  %.n
+    !>  is-success
   ::
   ++  make-test-cart
     ^-  cart:smart
@@ -707,7 +814,7 @@
       :^    ~
           %execute
         dao-id=megacorp-dao-id
-      on-chain-update=make-on-chain-update
+      updates=~[make-on-chain-update]
     ::
     :+  caller=[id=megacorp-ceo-id nonce=0 zigs=0xd0.11a5]
       args=args
@@ -730,14 +837,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -782,14 +888,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -834,14 +939,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -880,14 +984,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -927,14 +1030,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -971,14 +1073,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -1015,14 +1116,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -1059,14 +1159,13 @@
   =/  =zygote:smart
     (make-megacorp-ceo-vote-zygote make-proposal-id)
   =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
-  ;:  weld
+  %+  weld
     %+  expect-eq
       !>  %.y
       !>  is-success
     %+  expect-eq
       !>  expected-chick
       !>  chick
-  ==
   ::
   ++  make-proposal-id
     ^-  id:smart
@@ -1081,6 +1180,57 @@
             members
           %+  %~  del  ju  members.dao
           megacorp-cmo-id  %owner
+        ::
+            proposals
+          (~(del by proposals.dao) make-proposal-id)
+        ::
+        ==
+      ~
+    ~
+  ::
+  ++  make-test-cart
+    ^-  cart:smart
+    %-  make-cart
+    (make-id-grain-map megacorp-dao-salt megacorp-dao)
+  ::
+  --
+::
+++  test-execute-final-vote-multiple-updates
+  |^
+  =/  expected-chick=chick:smart  make-expected-chick
+  =/  =cart:smart                 make-test-cart
+  =/  =zygote:smart
+    (make-megacorp-ceo-vote-zygote make-proposal-id)
+  =+  [is-success chick]=(mule |.((~(write cont cart) zygote)))
+  %+  weld
+    %+  expect-eq
+      !>  %.y
+      !>  is-success
+    %+  expect-eq
+      !>  expected-chick
+      !>  chick
+  ::
+  ++  make-proposal-id
+    ^-  id:smart
+    %-  mug
+    %-  jam
+    make-add-comms-host-permissions-and-role-updates
+  ::
+  ++  make-expected-chick
+    ^-  chick:smart
+    =/  =dao:d  megacorp-dao
+    :-  %&
+    :+  %+  make-id-grain-map  megacorp-dao-salt
+        %=  dao
+            members
+          %+  %~  put  ju  members.dao
+          megacorp-ceo-id  %comms-host
+        ::
+            permissions
+          %+  %~  put  by  permissions.dao
+            name=%host
+          %+  %~  put  ju  *(jug address:d role:d)
+          make-placeholder-dao-comms-rid  %comms-host
         ::
             proposals
           (~(del by proposals.dao) make-proposal-id)
