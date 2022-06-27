@@ -7,8 +7,9 @@
 ++  fry-contract
   |=  [lord=id town-id=id bat=*]
   ^-  id
+  ^-  @ux
   =+  (jam bat)
-  `@ux`(sham (cat 3 lord (cat 3 town-id -)))
+  (shax (cat 3 lord (cat 3 town-id -)))
 ::
 ++  fry-rice
   |=  [holder=id lord=id town-id=id salt=@]
@@ -16,8 +17,8 @@
   ^-  id
   ^-  @ux
   %^  cat  3
-    (end [3 8] (sham holder))
-  (end [3 8] (sham (cat 3 town-id (cat 3 lord salt))))
+    (sham holder)
+  (sham (cat 3 town-id (cat 3 lord salt)))
 ::
 ::  +pin: get ID from caller
 ::
@@ -74,7 +75,7 @@
 ::
 +$  cart
   $:  me=id
-      from=id
+      from=[=id nonce=@ud]
       now=@da
       town-id=id
       owns=(map id grain)

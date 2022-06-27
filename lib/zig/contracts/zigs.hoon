@@ -42,7 +42,7 @@
     =/  giv=grain  (~(got by owns.cart) from-account.act)
     ?>  ?=(%& -.germ.giv)
     =/  giver=account  ;;(account data.p.germ.giv)
-    =/  allowance=@ud  (~(got by allowances.giver) from.cart)
+    =/  allowance=@ud  (~(got by allowances.giver) id.from.cart)
     ?>  (gte balance.giver amount.act)
     ?>  (gte allowance amount.act)
     ?~  account.act
@@ -59,7 +59,7 @@
         data.p.germ.giv
       %=  giver
         balance  (sub balance.giver amount.act)
-        allowances  (~(jab by allowances.giver) from.cart |=(old=@ud (sub old amount.act)))
+        allowances  (~(jab by allowances.giver) id.from.cart |=(old=@ud (sub old amount.act)))
       ==
     ==
     (result ~[giv rec] ~ ~)

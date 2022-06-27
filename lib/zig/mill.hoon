@@ -202,11 +202,14 @@
       |=  [=egg hits=(list hints)]
       ^-  [hits=(list hints) diff=(unit ^granary) =crow rem=@ud =errorcode]
       |^
-      =/  =embryo  (fertilize (pin from.p.egg) q.egg)
+      =/  from=[=id nonce=@ud]
+        ?:  ?=(@ux from.p.egg)  [from.p.egg 0]
+        [id.from.p.egg nonce.from.p.egg]
+      =/  =embryo  (fertilize id.from q.egg)
       ?~  stalk=(germinate to.p.egg cont-grains.q.egg)
         ~&  >>>  "mill: failed to germinate"
         [~ ~ ~ budget.p.egg %5]
-      (grow u.stalk embryo egg hits)
+      (grow from u.stalk embryo egg hits)
       ::  +fertilize: take yolk (contract arguments) and populate with granary data
       ++  fertilize
         |=  [from=id =yolk]
@@ -240,7 +243,7 @@
       --
     ::  +grow: recursively apply any calls stemming from egg, return on rooster or failure
     ++  grow
-      |=  [=crop =embryo =egg hits=(list hints)]
+      |=  [from=[=id nonce=@ud] =crop =embryo =egg hits=(list hints)]
       ^-  [(list hints) diff=(unit ^granary) =crow rem=@ud =errorcode]
       |^
       =+  [hit chick rem err]=(weed to.p.egg budget.p.egg)
@@ -287,7 +290,7 @@
         |=  [to=id budget=@ud]
         ^-  [hints (unit chick) rem=@ud =errorcode]
         ~>  %bout
-        =/  =cart  [to (pin from.p.egg) now town-id owns.crop]
+        =/  =cart  [to from now town-id owns.crop]
         =/  payload   .*(q.library pay.cont.crop)
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]
