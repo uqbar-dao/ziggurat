@@ -23,6 +23,8 @@
       ::  ~littel-wolfur's
       ~harden-ripped-littel-wolfur
       ~mipber
+      ::  ~roslug-fampet's testing moons
+      ~hosdex-hodsud-roslug-fampet
   ==
 ::  Potential future gating function:
 ::
