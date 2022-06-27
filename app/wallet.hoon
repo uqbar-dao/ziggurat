@@ -197,7 +197,7 @@
       =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
       =/  =caller:smart  :+  from.act  +(nonce)
                          (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
-      =/  =yolk:smart    [caller `q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
+      =/  =yolk:smart    [`q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
       =/  keypair        (~(got by keys.state) from.act)
       =/  =egg:smart
         :_  yolk
@@ -290,7 +290,7 @@
           %custom  !!
         ==
       =/  keypair       (~(got by keys.state) from.act)
-      =/  =yolk:smart   [caller args.formatted our-grains.formatted cont-grains.formatted]
+      =/  =yolk:smart   [args.formatted our-grains.formatted cont-grains.formatted]
       =/  sig           ?~  priv.keypair
                           [0 0 0]
                         (ecdsa-raw-sign:secp256k1:secp:crypto (sham (jam yolk)) u.priv.keypair)

@@ -71,11 +71,10 @@
 ::
 ++  test-give-known-receiver  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xdead `0x1.dead 30 10]
+    :-  `[%give 0xdead `0x1.dead 30 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-2 account-2]])]
   =/  updated-1=grain
     :*  0x1.beef
         `@ux`'zigs'
@@ -98,11 +97,10 @@
 ::
 ++  test-give-unknown-receiver  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xffff ~ 30 10]
+    :-  `[%give 0xffff ~ 30 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 ~]
+    [`@ux`'zigs' 0xbeef init-now 0x1 ~]
   =/  new-id  (fry-rice 0xffff `@ux`'zigs' 0x1 `@`'zigs')
   =/  new=grain
     :*  new-id
@@ -115,37 +113,35 @@
     (~(write cont cart) embryo)
   =/  correct=chick
     :+  %|
+      :_  ~
       :+  me.cart  town-id.cart
-      [owner-1 `[%give 0xffff `new-id 30 10] (silt ~[0x1.beef]) (silt ~[new-id])]
+      [`[%give 0xffff `new-id 30 10] (silt ~[0x1.beef]) (silt ~[new-id])]
     [~ (malt ~[[new-id new]]) ~]
   (expect-eq !>(correct) !>(res))
 ::
 ++  test-give-not-enough  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xdead `0x1.dead 51 10]
+    :-  `[%give 0xdead `0x1.dead 51 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-give-high-budget  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xdead `0x1.dead 20 31]
+    :-  `[%give 0xdead `0x1.dead 20 31]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-give-exact-budget  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xdead `0x1.dead 20 30]
+    :-  `[%give 0xdead `0x1.dead 20 30]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -162,7 +158,7 @@
         [%& `@`'zigs' [50 (malt ~[[0xbeef 10]]) `@ux`'zigs']]
     ==
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-2 account-2]])]
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
@@ -171,11 +167,10 @@
 ::
 ++  test-give-metadata-mismatch  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xface `0x1.face 10 10]
+    :-  `[%give 0xface `0x1.face 10 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-4 account-4]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-4 account-4]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
@@ -189,44 +184,40 @@
         [%& `@`'zigs' [50 ~ `@ux`'zigs']]
     ==
   =/  =embryo
-    :+  owner-1
-      `[%give 0xface `0x1.face 10 10]
+    :-  `[%give 0xface `0x1.face 10 10]
     (malt ~[[id:account-1 bad-account]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-4 account-4]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-4 account-4]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-give-wrong-giver-grain-2  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xface `0x1.face 10 10]
+    :-  `[%give 0xface `0x1.face 10 10]
     (malt ~[[id:metadata-1 metadata-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-4 account-4]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-4 account-4]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-give-wrong-receiver-grain  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xdead `0x1.dead 10 10]
+    :-  `[%give 0xdead `0x1.dead 10 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-3 account-3]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-3 account-3]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-give-wrong-receiver-grain-2  ^-  tang
   =/  =embryo
-    :+  owner-1
-      `[%give 0xdead `0x1.cafe 10 10]
+    :-  `[%give 0xdead `0x1.cafe 10 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-3 account-3]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-3 account-3]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
@@ -235,11 +226,10 @@
 ::
 ++  test-take-simple
   =/  =embryo
-    :+  owner-1
-      `[%take 0xbeef `0x1.beef 0x1.dead 10]
+    :-  `[%take 0xbeef `0x1.beef 0x1.dead 10]
     ~
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
   =/  updated-1=grain
     :*  0x1.beef
         `@ux`'zigs'
@@ -262,11 +252,10 @@
 ::
 ++  test-take-send-third
   =/  =embryo
-    :+  owner-1
-      `[%take 0xcafe `0x1.cafe 0x1.dead 10]
+    :-  `[%take 0xcafe `0x1.cafe 0x1.dead 10]
     ~
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
   =/  updated-3=grain
     :*  0x1.cafe
         `@ux`'zigs'
@@ -289,22 +278,20 @@
 ::
 ++  test-take-send-mismatching-account
   =/  =embryo
-    :+  owner-1
-      `[%take 0xbeef `0x1.cafe 0x1.dead 10]
+    :-  `[%take 0xbeef `0x1.cafe 0x1.dead 10]
     ~
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
+    [`@ux`'zigs' 0xcafe init-now 0x1 (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-take-send-new-account
   =/  =embryo
-    :+  owner-1
-      `[%take 0xffff ~ 0x1.dead 10]
+    :-  `[%take 0xffff ~ 0x1.dead 10]
     ~
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-2 account-2]])]
   =/  new-id  (fry-rice 0xffff `@ux`'zigs' 0x1 `@`'zigs')
   =/  new=grain
     :*  new-id
@@ -324,40 +311,38 @@
     (~(write cont cart) embryo)
   =/  correct=chick
     :+  %|
+      :_  ~
       :+  me.cart  town-id.cart
-      [owner-1 `[%take 0xffff `new-id 0x1.dead 10] ~ (silt ~[new-id 0x1.dead])]
+      [`[%take 0xffff `new-id 0x1.dead 10] ~ (silt ~[new-id 0x1.dead])]
     [~ (malt ~[[new-id new]]) ~]
   (expect-eq !>(res) !>(correct))
 ::
 ++  test-take-over-allowance
   =/  =embryo
-    :+  owner-1
-      `[%take 0xbeef `0x1.beef 0x1.dead 20]
+    :-  `[%take 0xbeef `0x1.beef 0x1.dead 20]
     ~
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-take-over-balance
   =/  =embryo
-    :+  owner-2
-      `[%take 0xdead `0x1.dead 0x1.beef 60]
+    :-  `[%take 0xdead `0x1.dead 0x1.beef 60]
     ~
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
 ++  test-take-no-allowance
   =/  =embryo
-    :+  owner-3
-      `[%take 0xdead `0x1.dead 0x1.beef 60]
+    :-  `[%take 0xdead `0x1.dead 0x1.beef 60]
     ~
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
+    [`@ux`'zigs' 0xbeef init-now 0x1 (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
@@ -366,8 +351,7 @@
 ::
 ++  test-set-allowance-simple
   =/  =embryo
-    :+  owner-1
-      `[%set-allowance 0xcafe 100]
+    :-  `[%set-allowance 0xcafe 100]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -377,7 +361,7 @@
         [%& `@`'zigs' [50 (malt ~[[0xdead 1.000] [0xcafe 100]]) `@ux`'zigs']]
     ==
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 ~]
+    [`@ux`'zigs' 0xbeef init-now 0x1 ~]
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
@@ -386,8 +370,7 @@
 ::
 ++  test-set-allowance-again
   =/  =embryo
-    :+  owner-1
-      `[%set-allowance 0xdead 100]
+    :-  `[%set-allowance 0xdead 100]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -397,7 +380,7 @@
         [%& `@`'zigs' [50 (malt ~[[0xdead 100]]) `@ux`'zigs']]
     ==
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 ~]
+    [`@ux`'zigs' 0xbeef init-now 0x1 ~]
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
@@ -406,8 +389,7 @@
 ::
 ++  test-set-allowance-zero
   =/  =embryo
-    :+  owner-1
-      `[%set-allowance 0xdead 0]
+    :-  `[%set-allowance 0xdead 0]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -417,7 +399,7 @@
         [%& `@`'zigs' [50 (malt ~[[0xdead 0]]) `@ux`'zigs']]
     ==
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 ~]
+    [`@ux`'zigs' 0xbeef init-now 0x1 ~]
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
@@ -426,11 +408,10 @@
 ::
 ++  test-set-allowance-self
   =/  =embryo
-    :+  owner-1
-      `[%set-allowance 0xbeef 100]
+    :-  `[%set-allowance 0xbeef 100]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
-    [`@ux`'zigs' init-now 0x1 ~]
+    [`@ux`'zigs' 0xbeef init-now 0x1 ~]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))

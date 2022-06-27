@@ -202,25 +202,23 @@
       |=  [=egg hits=(list hints)]
       ^-  [hits=(list hints) diff=(unit ^granary) =crow rem=@ud =errorcode]
       |^
-      =/  args  (fertilize q.egg)
+      =/  =embryo  (fertilize (pin from.p.egg) q.egg)
       ?~  stalk=(germinate to.p.egg cont-grains.q.egg)
         ~&  >>>  "mill: failed to germinate"
         [~ ~ ~ budget.p.egg %5]
-      (grow u.stalk args egg hits)
+      (grow u.stalk embryo egg hits)
       ::  +fertilize: take yolk (contract arguments) and populate with granary data
       ++  fertilize
-        |=  =yolk
+        |=  [from=id =yolk]
         ^-  embryo
-        ?.  ?=(account caller.yolk)  !!
-        :+  caller.yolk
-          args.yolk
+        :-  action.yolk
         %-  ~(gas by *(map id grain))
         %+  murn  ~(tap in my-grains.yolk)
         |=  =id
-        ?~  res=(~(get by granary) id)      ~
-        ?.  ?=(%& -.germ.u.res)             ~
-        ?.  =(holder.u.res id.caller.yolk)  ~
-        ?.  =(town-id.u.res town-id)        ~
+        ?~  res=(~(get by granary) id)  ~
+        ?.  ?=(%& -.germ.u.res)         ~
+        ?.  =(holder.u.res from)        ~
+        ?.  =(town-id.u.res town-id)    ~
         `[id u.res]
       ::  +germinate: take contract-owned grains in egg and populate with granary data
       ++  germinate
@@ -257,7 +255,7 @@
       =|  all-diffs=^granary
       =*  next  next.p.u.chick
       =.  hits  hit^hits
-      =/  last-diff  (harvest roost.p.u.chick to.p.egg from.p.egg)
+      =/  last-diff  (harvest rooster.p.u.chick to.p.egg from.p.egg)
       |-
       ?~  last-diff
         ::  diff from last call failed validation
@@ -266,12 +264,12 @@
       ?~  next
         ::  all continuations complete
         ::
-        [hits `all-diffs (weld crows crow.roost.p.u.chick) rem %0]
+        [hits `all-diffs (weld crows crow.rooster.p.u.chick) rem %0]
       ::  continue continuing
       ::
       =/  inter
         %+  ~(incubate farm (~(uni by granary) all-diffs))
-          egg(from.p to.p.egg, to.p to.i.next, budget.p rem, q args.i.next)
+          egg(from.p to.p.egg, to.p to.i.next, budget.p rem, q yolk.i.next)
         hits
       ?.  =(%0 errorcode.inter)
         [(weld hits.inter hits) ~ ~ rem.inter errorcode.inter]
@@ -289,7 +287,7 @@
         |=  [to=id budget=@ud]
         ^-  [hints (unit chick) rem=@ud =errorcode]
         ~>  %bout
-        =/  =cart  [to now town-id owns.crop]
+        =/  =cart  [to (pin from.p.egg) now town-id owns.crop]
         =/  payload   .*(q.library pay.cont.crop)
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]

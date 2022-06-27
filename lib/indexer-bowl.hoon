@@ -171,18 +171,16 @@
   ++  yolk
     |=  [=shell:smart =yolk:smart]
     ^-  json
-    ?>  ?=(account:smart caller.yolk)
-    =/  args=json
-      ?~  args.yolk  ~
+    =/  action=json
+      ?~  action.yolk  ~
       %:  scry-contract-read-arm
           our.bowl
           to.shell
           %egg-args
-          (scot %ud (jam u.args.yolk))
+          (scot %ud (jam u.action.yolk))
       ==
     %-  pairs
-    :~  [%caller (account caller.yolk)]
-        [%args args]
+    :~  [%action action]
         [%my-grains (ids my-grains.yolk)]
         [%cont-grains (ids cont-grains.yolk)]
     ==
@@ -434,11 +432,7 @@
   ++  yolk
     |=  jon=json
     ^-  yolk:smart
-    :+  %.  jon
-        %-  ot
-        :-  [%caller account]  :: always account?
-        ~
-      ~    :: TODO: rewrite when can mold args
+    :-  ~    :: TODO: rewrite when can mold args
     %.  jon
     %-  ot
     :+  [%my-grains ids]

@@ -6,14 +6,14 @@
 ::  because %give must include their gas budget, in order for
 ::  zig spends to be guaranteed not to underflow.
 ::
-::  /+  *zig-sys-smart
+/+  *zig-sys-smart
 |_  =cart
 ++  write
   |=  inp=embryo
   ^-  chick
   |^
-  ?~  args.inp  !!
-  (process ;;(arguments u.args.inp) (pin caller.inp))
+  ?~  action.inp  !!
+  (process ;;(action u.action.inp))
   ::
   +$  token-metadata
     ::  will be automatically inserted into town state
@@ -35,83 +35,79 @@
         metadata=id
     ==
   ::
-  +$  arguments
+  +$  action
     $%  [%give to=id account=(unit id) amount=@ud budget=@ud]
         [%take to=id account=(unit id) from-account=id amount=@ud]
         [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
     ==
   ::
   ++  process
-    |=  [args=arguments caller-id=id]
-    ?-    -.args
+    |=  act=action
+    ?-    -.act
         %give
       =/  giv=grain  -:~(val by grains.inp)
       ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
       =/  giver=account  ;;(account data.p.germ.giv)
-      ?>  (gte balance.giver (add amount.args budget.args))
-      ?~  account.args
+      ?>  (gte balance.giver (add amount.act budget.act))
+      ?~  account.act
         ::  if receiver doesn't have an account, must produce one for them
-        =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
-        =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
-        :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%give to.args `id.new amount.args budget.args] (silt ~[id.giv]) (silt ~[id.new])]
-        [~ (malt ~[[id.new new]]) ~]
+        =+  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
+        =/  new=grain  [- me.cart to.act town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
+        =/  =action    [%give to.act `id.new amount.act budget.act]
+        =/  give-call  (call me.cart town-id.cart action ~[id.giv] ~[id.new])
+        (continuation ~[give-call] (result ~ ~[new] ~))
       ::  otherwise, add to the existing account for that pubkey
-      =/  rec=grain  (~(got by owns.cart) u.account.args)
-      ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
+      =/  rec=grain  (~(got by owns.cart) u.account.act)
+      ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
       =/  receiver=account  ;;(account data.p.germ.rec)
       ?>  =(metadata.receiver metadata.giver)
-      =:  data.p.germ.giv  giver(balance (sub balance.giver amount.args))
-          data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
+      =:  data.p.germ.giv  giver(balance (sub balance.giver amount.act))
+          data.p.germ.rec  receiver(balance (add balance.receiver amount.act))
       ==
-      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
+      (result ~[giv rec] ~ ~)
     ::
         %take
-      =/  giv=grain  (~(got by owns.cart) from-account.args)
+      =/  giv=grain  (~(got by owns.cart) from-account.act)
       ?>  ?=(%& -.germ.giv)
       =/  giver=account  ;;(account data.p.germ.giv)
-      =/  allowance=@ud  (~(got by allowances.giver) caller-id)
-      ?>  (gte balance.giver amount.args)
-      ?>  (gte allowance amount.args)
-      ?~  account.args
-        =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
-        =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
-        :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%take to.args `id.new id.giv amount.args] ~ (silt ~[id.giv id.new])]
-        [~ (malt ~[[id.new new]]) ~]
-      =/  rec=grain  (~(got by owns.cart) u.account.args)
-      ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
+      =/  allowance=@ud  (~(got by allowances.giver) from.cart)
+      ?>  (gte balance.giver amount.act)
+      ?>  (gte allowance amount.act)
+      ?~  account.act
+        =+  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
+        =/  new=grain  [- me.cart to.act town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
+        =/  =action    [%take to.act `id.new id.giv amount.act]
+        =/  give-call  (call me.cart town-id.cart action ~ ~[id.giv id.new])
+        (continuation ~[give-call] (result ~ ~[new] ~))
+      =/  rec=grain  (~(got by owns.cart) u.account.act)
+      ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
       =/  receiver=account  ;;(account data.p.germ.rec)
       ?>  =(metadata.receiver metadata.giver)
-      =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
+      =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.act))
           data.p.germ.giv
         %=  giver
-          balance  (sub balance.giver amount.args)
-          allowances  (~(jab by allowances.giver) caller-id |=(old=@ud (sub old amount.args)))
+          balance  (sub balance.giver amount.act)
+          allowances  (~(jab by allowances.giver) from.cart |=(old=@ud (sub old amount.act)))
         ==
       ==
-      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
+      (result ~[giv rec] ~ ~)
     ::
         %set-allowance
       =/  acc=grain  -:~(val by grains.inp)
-      ?>  !=(who.args holder.acc)
+      ?>  !=(who.act holder.acc)
       ?>  &(=(lord.acc me.cart) ?=(%& -.germ.acc))
       =/  =account  ;;(account data.p.germ.acc)
       =.  data.p.germ.acc
-        account(allowances (~(put by allowances.account) who.args amount.args))
-      [%& (malt ~[[id.acc acc]]) ~ ~]
+        account(allowances (~(put by allowances.account) who.act amount.act))
+      (result ~[acc] ~ ~)
     ==
   --
 ::
 ++  read
-  |_  args=path
+  |_  act=path
   ++  json
     |^  ^-  ^json
-    ?+    args  !!
+    ?+    act  !!
         [%rice-data ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
@@ -120,9 +116,9 @@
         (enjs-account ;;(account data.p.germ.g))
       (enjs-token-metadata ;;(token-metadata data.p.germ.g))
     ::
-        [%egg-args @ ~]
-      %-  enjs-arguments
-      ;;(arguments (cue (slav %ud i.t.args)))
+        [%egg-act @ ~]
+      %-  enjs-actions
+      ;;(action (cue (slav %ud i.t.act)))
     ==
     ::
     ++  enjs-account
@@ -178,9 +174,9 @@
         [%s (scot %ux i)]
       --
     ::
-    ++  enjs-arguments
+    ++  enjs-actions
       =,  enjs:format
-      |=  a=arguments
+      |=  a=action
       ^-  ^json
       %+  frond  -.a
       ?-    -.a
@@ -228,7 +224,7 @@
           metadata=id
       ==
     ::
-    +$  arguments
+    +$  action
       $%  [%give to=id account=(unit id) amount=@ud budget=@ud]
           [%take to=id account=(unit id) from-account=id amount=@ud]
           [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)

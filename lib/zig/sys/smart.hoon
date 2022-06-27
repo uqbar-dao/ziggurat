@@ -26,6 +26,28 @@
   ^-  id
   ?:(?=(@ux caller) caller id.caller)
 ::
+++  call
+  |=  [to=id town-id=id action=* my=(list id) cont=(list id)]
+  ^-  [id id yolk]
+  :+  to  town-id
+  :+  `action
+    (~(gas in *(set id)) my)
+  (~(gas in *(set id)) cont)
+::
+++  result
+  |=  [changed=(list grain) issued=(list grain) =crow]
+  ^-  chick
+  :-  %&
+  :+  (~(gas by *(map id grain)) (turn changed |=(=grain [id.grain grain])))
+    (~(gas by *(map id grain)) (turn issued |=(=grain [id.grain grain])))
+  crow
+::
+++  continuation
+  |=  [next=(list [to=id town-id=id args=yolk]) rooster=chick]
+  ^-  chick
+  ?>  ?=(%& -.rooster)
+  [%| next p.rooster]
+::
 ::  smart contract types
 ::
 +$  id       @ux            ::  pubkey
@@ -52,6 +74,7 @@
 ::
 +$  cart
   $:  me=id
+      from=id
       now=@da
       town-id=id
       owns=(map id grain)
@@ -109,15 +132,13 @@
       status=@ud  ::  error code
   ==
 +$  yolk
-  $:  =caller  ::  TODO remove, redundant
-      args=(unit *)
+  $:  action=(unit *)
       my-grains=(set id)
       cont-grains=(set id)
   ==
 ::  yolk that's been "fertilized" with data by execution engine
 +$  embryo
-  $:  =caller
-      args=(unit *)
+  $:  action=(unit *)
       grains=(map id grain)
   ==
 ::
@@ -125,7 +146,7 @@
 +$  crow     (list [@tas json])
 ::
 +$  rooster  [changed=(map id grain) issued=(map id grain) =crow]
-+$  hen      [next=(list [to=id town-id=id args=yolk]) roost=rooster]
++$  hen      [next=(list [to=id town-id=id =yolk]) =rooster]
 ::
 ::  JSON, from lull.hoon and zuse.hoon
 ::  allows read arm of contracts to perform enjs operations
