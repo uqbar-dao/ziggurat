@@ -40,7 +40,7 @@
         %sub
       =*  amount           amount.action
       ?>  (gte number.value amount.action)  :: prevent subtraction underflow from causing a crash
-      =.  number.value     (sub amount.action number.value)
+      =.  number.value     (sub number.value amount.action)
       =.  data.p.germ.val  value
       [%& changed=(malt ~[[id.val val]]) ~ ~]
     ::

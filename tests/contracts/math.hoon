@@ -43,6 +43,7 @@
       ==
     ++  math-grain-1  ^-(grain ((make-grain id:owner-1) [number=100]))
     ++  math-grain-2  ^-(grain ((make-grain id:owner-1) [number=120]))
+    ++  math-grain-3  ^-(grain ((make-grain id:owner-1) [number=110]))
     --
 |%
 ++  test-contract-typechecks  ^-  tang
@@ -76,6 +77,22 @@
   =/  res=chick  (~(write cont cart) embryo)
   ::
   =*  expected-grain  math-grain-2
+  =/  grain  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
+  (expect-eq !>(expected-grain) !>(grain))
+++  test-sub-value
+  ^-  tang
+  ::  setting up the tx to propose
+  ::  creating the execution context by hand
+  =/  =embryo
+    :*  caller=owner-1
+        args=`[%sub 10]
+        grains=~
+    ==
+  =/  =cart  (make-cart (grainz ~[math-grain-2]))
+  ::  executing the contract call with the context
+  =/  res=chick  (~(write cont cart) embryo)
+  ::
+  =*  expected-grain  math-grain-3
   =/  grain  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
   (expect-eq !>(expected-grain) !>(grain))
 --
