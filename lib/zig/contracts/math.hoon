@@ -22,7 +22,7 @@
     ?:  ?=(%make-value -.action)
       =/  salt=@           `@`'math'
       =/  value-germ=germ  [%& salt [number=initial.action]]
-      =/  value-id=id      0x1
+      =/  value-id=id      (fry-rice caller-id me.cart town-id.cart salt)
       =/  val=grain  
         [value-id lord=me.cart holder=caller-id town-id.cart value-germ]
       [%& changed=~ issued=(malt ~[[id.val val]]) crow=~]
