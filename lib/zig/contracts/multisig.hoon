@@ -1,4 +1,4 @@
-::  multisig.hoon  [uqbar-dao]
+::  multisig.hoon  [UQ| DAO]
 ::
 ::  Smart contract to manage a simple multisig wallet.
 ::  New multisigs can be generated through the %create
@@ -28,19 +28,18 @@
       ?>  (lte init-thresh.args member-count)
       ?>  (gth init-thresh.args 0)  :: threshold of 0 is disallowed
       =/  salt=@
-        (sham (cat 3 block.cart (cat 3 caller-id (sham-ids members.args))))
-      =/  lord               me.cart  
+        (sham (cat 3 `@ud`now.cart (cat 3 caller-id (sham-ids members.args))))
+      =/  lord               me.cart
       =/  holder             me.cart  ::  TODO should holder be me.cart or caller-id
       =/  new-sig-germ=germ  [%& salt [members.args init-thresh.args ~]]
       =/  new-sig-id=id      (fry-rice holder lord town-id.cart salt)
       =/  new-sig=grain      [new-sig-id lord holder town-id.cart new-sig-germ]
       [%& changed=~ issued=(malt ~[[new-sig-id new-sig]]) crow=~]
     =/  my-grain=grain  -:~(val by owns.cart)
-    ?>  =(lord.my-grain me.cart)
     ?>  ?=(%& -.germ.my-grain)
     =/  state=multisig-state  ;;(multisig-state data.p.germ.my-grain)
     ::  ?>  ?=(multisig-state data.p.germ.my-grain)  :: doesn't work due to fish-loop
-    ::  N.B. because no type assert has been made, 
+    ::  N.B. because no type assert has been made,
     ::  data.p.germ.my-grain is basically * and thus has no type checking done on its modification
     ::  therefore, we explicitly modify `state` to retain typechecking then modify `data`
     ::
@@ -75,7 +74,7 @@
       ::  TODO we should overwrite [sig eth-hash]:p.egg and caller-id.q.egg
       ::  to always be from this contract (signing it ourselves etc.)
       =.  from.p.egg.args       me.cart
-      =/  egg-hash              (sham-egg egg.args caller block.cart)
+      =/  egg-hash              (sham-egg egg.args caller `@ud`now.cart)
       =.  pending.state         (~(put by pending.state) egg-hash [egg.args *(set id)])
       =.  data.p.germ.my-grain  state
       [%& (malt ~[[id.my-grain my-grain]]) ~ ~]

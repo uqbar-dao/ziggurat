@@ -5,6 +5,7 @@
 /+  *test, cont=zig-contracts-publish, *zig-sys-smart
 =>  ::  test data
     |%
+    ++  init-now  *@da
     ++  owner-1  ^-  account
       [0xbeef 0 0x1234.5678]
     ++  trivial-nok  ^-  *
@@ -24,13 +25,13 @@
   =/  =embryo
     [owner-1 `[%deploy %.y [trivial-nok ~] ~] ~]
   =/  =cart
-    [`@ux`'publish' 0 1 ~]
-  =/  new-id  (fry-contract 0xbeef 1 trivial-nok)
+    [`@ux`'publish' init-now 0x1 ~]
+  =/  new-id  (fry-contract `@ux`'publish' 0x1 trivial-nok)
   =/  new-grain  ^-  grain
     :*  new-id
+        `@ux`'publish'
         0xbeef
-        0xbeef
-        1
+        0x1
         [%| `[trivial-nok ~] ~]
     ==
   =/  res=chick
@@ -41,5 +42,28 @@
 ::
 ::  tests for %upgrade
 ::
-
+++  test-trivial-upgrade  ^-  tang
+  =/  cont-grain  ^-  grain
+    :*  0xabcd
+        `@ux`'publish'
+        0xbeef
+        0x1
+        [%| `[trivial-nok ~] ~]
+    ==
+  =/  =embryo
+    [owner-1 `[%upgrade 0xabcd [trivial-nok-upgrade ~]] ~]
+  =/  =cart
+    [`@ux`'publish' init-now 0x1 (malt ~[[id.cont-grain cont-grain]])]
+  =/  new-grain  ^-  grain
+    :*  0xabcd
+        `@ux`'publish'
+        0xbeef
+        0x1
+        [%| `[trivial-nok-upgrade ~] ~]
+    ==
+  =/  res=chick
+    (~(write cont cart) embryo)
+  =/  correct=chick
+    [%& (malt ~[[id.new-grain new-grain]]) ~ ~]
+  (expect-eq !>(correct) !>(res))
 --

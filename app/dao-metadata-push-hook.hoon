@@ -1,4 +1,4 @@
-::  dao-metadata-push-hook [uqbar-dao]:
+::  dao-metadata-push-hook [UQ| DAO]:
 ::
 /-  *group, *invite-store, store=metadata-store, group-store,
     d=dao
@@ -44,7 +44,7 @@
     met       ~(. mdl bowl)
     gra       ~(. gral bowl)
     io        ~(. agentio bowl)
-    hc        ~(. hook-core bowl) 
+    hc        ~(. hook-core bowl)
     dao-lib   ~(. daol bowl)
     pass      pass:io
 ::

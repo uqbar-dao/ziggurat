@@ -14,9 +14,7 @@
       ^-  id:smart
       0xda0
     ::
-    ++  town-id
-      ^-  @ud
-      1
+    ++  town-id  0x1
     ::
     ++  make-placeholder-dao-comms-rid
       ^-  resource:r
@@ -62,7 +60,7 @@
       |=  owns=(map id:smart grain:smart)
       ^-  cart:smart
       :*  me=dao-contract-id
-          block=0
+          *@da
           town-id=town-id
           owns=owns
       ==

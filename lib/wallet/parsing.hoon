@@ -11,7 +11,7 @@
   :~  ['id' [%s (scot %ux id.grain)]]
       ['lord' [%s (scot %ux lord.grain)]]
       ['holder' [%s (scot %ux holder.grain)]]
-      ['town' (numb town-id.grain)]
+      ['town' [%s (scot %ux town-id.grain)]]
       ['token_type' [%s (scot %tas token-type)]]
       :-  'data'
       %-  pairs
@@ -52,7 +52,7 @@
       ['to' [%s (scot %ux to.p.t)]]
       ['rate' (numb rate.p.t)]
       ['budget' (numb budget.p.t)]
-      ['town' (numb town-id.p.t)]
+      ['town' [%s (scot %ux town-id.p.t)]]
       ['status' (numb status.p.t)]
       ?~  args  ['args' [%s 'received']]
       :-  'args'
@@ -70,12 +70,6 @@
             ['to' [%s (scot %ux to.u.args)]]
             ['item-id' (numb item-id.u.args)]
         ==
-      ::
-          ?(%become-validator %stop-validating)
-        ~[['signature' [%s (scot %p q.signature.u.args)]]]
-      ::
-          ?(%init %join %exit)
-        ~[['signature' [%s (scot %p q.signature.u.args)]] ['town' (numb town.u.args)]]
       ::
           %custom
         ~[['args' [%s args.u.args]]]

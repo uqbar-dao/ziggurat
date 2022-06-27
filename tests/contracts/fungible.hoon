@@ -5,11 +5,12 @@
 /+  *test, cont=zig-contracts-fungible, *zig-sys-smart
 =>  ::  test data
     |%
+    ++  init-now  *@da
     ++  metadata-1  ^-  grain
       :*  `@ux`'simple'
           `@ux`'fungible'
           `@ux`'holder'
-          1  ::  town-id
+          town-id=0x1
           :+  %&  `@`'salt'
           :*  name='Simple Token'
               symbol='ST'
@@ -26,7 +27,7 @@
       :*  0x1.beef
           `@ux`'fungible'
           0xbeef
-          1
+          0x1
           [%& `@`'salt' [50 ~ `@ux`'simple']]
       ==
     ++  owner-1  ^-  account
@@ -36,7 +37,7 @@
       :*  0x1.dead
           `@ux`'fungible'
           0xdead
-          1
+          0x1
           [%& `@`'salt' [30 ~ `@ux`'simple']]
       ==
     ++  owner-2  ^-  account
@@ -46,7 +47,7 @@
       :*  0x1.cafe
           `@ux`'fungible'
           0xcafe
-          1
+          0x1
           [%& `@`'salt' [20 ~ `@ux`'simple']]
       ==
     ++  owner-3  ^-  account
@@ -56,7 +57,7 @@
       :*  0x1.face
           `@ux`'fungible'
           0xface
-          1
+          0x1
           [%& `@`'diff' [20 ~ `@ux`'different!']]
       ==
     --
@@ -74,25 +75,25 @@
       `[%give 0xdead `0x1.dead 30]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
-    [`@ux`'fungible' 0 1 (malt ~[[id:`grain`account-2 account-2]])]
-  =/  updated-1
+    [`@ux`'fungible' init-now 0x1 (malt ~[[id:`grain`account-2 account-2]])]
+  =/  updated-1=grain
     :*  0x1.beef
         `@ux`'fungible'
         0xbeef
-        1
+        0x1
         [%& `@`'salt' [20 ~ `@ux`'simple']]
     ==
-  =/  updated-2
+  =/  updated-2=grain
     :*  0x1.dead
         `@ux`'fungible'
         0xdead
-        1
+        0x1
         [%& `@`'salt' [60 ~ `@ux`'simple']]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
-    [%& (malt ~[[id:`grain`updated-1 updated-1] [id:`grain`updated-2 updated-2]]) ~ ~]
+    [%& (malt ~[[id:updated-1 updated-1] [id:updated-2 updated-2]]) ~ ~]
   (expect-eq !>(res) !>(correct))
 ::
 ++  test-give-unknown-receiver  ^-  tang
@@ -101,13 +102,13 @@
       `[%give 0xffff ~ 30]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
-    [`@ux`'fungible' 0 1 ~]
-  =/  new-id  (fry-rice 0xffff `@ux`'fungible' 1 `@`'salt')
-  =/  new
+    [`@ux`'fungible' init-now 0x1 ~]
+  =/  new-id  (fry-rice 0xffff `@ux`'fungible' 0x1 `@`'salt')
+  =/  new=grain
     :*  new-id
         `@ux`'fungible'
         0xffff
-        1
+        0x1
         [%& `@`'salt' [0 ~ `@ux`'simple']]
     ==
   =/  res=chick
@@ -125,7 +126,7 @@
       `[%give 0xdead `0x1.dead 51]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
-    [`@ux`'fungible' 0 1 (malt ~[[id:`grain`account-2 account-2]])]
+    [`@ux`'fungible' init-now 0x1 (malt ~[[id:`grain`account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
@@ -136,7 +137,7 @@
       `[%give 0xface `0x1.face 10]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
-    [`@ux`'fungible' 0 1 (malt ~[[id:`grain`account-4 account-4]])]
+    [`@ux`'fungible' init-now 0x1 (malt ~[[id:`grain`account-4 account-4]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))

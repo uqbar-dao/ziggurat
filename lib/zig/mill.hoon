@@ -1,7 +1,18 @@
-/+  *zink-zink, smart=zig-sys-smart, ethereum
-/*  zink-cax   %noun  /lib/zig/compiled/hash-cache/noun
-=,  smart
-|_  library=vase
+/-  *sequencer
+/+  *zink-zink, *zig-sys-smart, ethereum
+|_  [library=vase zink-cax=(map * @)]
+::
+++  verify-sig
+  |=  [=address hash=@ =sig eth=?]
+  ^-  ?
+  =?  v.sig  (gte v.sig 27)  (sub v.sig 27)
+  =+  %+  ecdsa-raw-recover:secp256k1:secp:crypto
+      hash  sig
+  .=  address
+  ?.  eth
+    (compress-point:secp256k1:secp:crypto -)
+  %-  address-from-pub:key:ethereum
+  (serialize-point:secp256k1:secp:crypto -)
 ::
 ++  shut                                               ::  slam a door
   |=  [dor=vase arm=@tas dor-sam=vase arm-sam=vase]
@@ -37,69 +48,68 @@
   !<(typ [-:!>(*typ) val])
 ::
 ++  mill
-  |_  [miller=account town-id=@ud blocknum=@ud]
+  |_  [miller=account town-id=id now=@da]
   ::
   ::  +mill-all: mills all eggs in basket
   ::
   ++  mill-all
-    |=  [=town basket=(list egg)]
+    |=  [=land basket=(list egg)]
+    ^-  state-transition
     =/  pending
       %+  sort  basket
       |=  [a=egg b=egg]
       (gth rate.p.a rate.p.b)
     =|  [processed=(list [@ux egg]) reward=@ud]
+    =|  lis-hits=(list (list hints))
+    =|  crows=(list crow)
     |-
-    ^-  [(list [@ux egg]) ^town]  ::  TODO add 'crow's to chunk -- list of announcements
+    ::  TODO add 'crow's to chunk -- list of events
+    ::  TODO add diff granary, burn granary
     ?~  pending
-      [processed town(p (~(pay tax p.town) reward))]
-    =+  [res fee err]=(mill town i.pending)
+      :*  land(p (~(pay tax p.land) reward))
+          processed
+          (flop lis-hits)
+          diff=*granary
+          crows
+          burns=*granary
+      ==
+    =+  [res fee err hits cro]=(mill land i.pending)
     =+  i.pending(status.p err)
     %_  $
       pending    t.pending
       processed  [[`@ux`(shax (jam -)) -] processed]
-      town       res
+      land       res
       reward     (add reward fee)
+      lis-hits   [hits lis-hits]
+      crows      [cro crows]
     ==
   ::
-  ::  +mill: processes a single egg and returns updated town
+  ::  +mill: processes a single egg and returns updated land
   ::
   ++  mill
-    |=  [=town =egg]
-    ^-  [^town fee=@ud =errorcode]
-    ?.  ?=(account from.p.egg)  [town 0 %1]
+    |=  [=land =egg]
+    ^-  [^land fee=@ud =errorcode hits=(list hints) =crow]
+    ?.  ?=(account from.p.egg)  [land 0 %1 ~ ~]
     ::  validate transaction signature
-    ::  using ecdsa-raw-sign in wallet, TODO review this
-    ::  comment this out if testing mill
-    ::  TODO figure out how to guarantee raw-recover non-crashing
-    =?  v.sig.p.egg  (gte v.sig.p.egg 27)  (sub v.sig.p.egg 27)
-    =/  recovered
-      %+  ecdsa-raw-recover:secp256k1:secp:crypto
-        ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
-      sig.p.egg
-    =/  caller-address
-      ?~  eth-hash.p.egg
-        %-  compress-point:secp256k1:secp:crypto
-        recovered
-      %-  address-from-pub:key:ethereum
-      %-  serialize-point:secp256k1:secp:crypto
-      recovered
-    ?.  =(id.from.p.egg caller-address)
-    ~&  >>>  "mill: signature mismatch: expected {<id.from.p.egg>}, got {<`@ux`caller-address>}"
-      [town 0 %2]  ::  signed tx doesn't match account
+    =+  ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
+    ::  all addresses should be ETH-style, but might not be signed ETH-style.
+    ?.  (verify-sig id.from.p.egg - sig.p.egg %.y)
+      ~&  >>>  "mill: signature mismatch"
+      [land 0 %2 ~ ~]  ::  signed tx doesn't match account
     ::
-    ?.  =(nonce.from.p.egg +((~(gut by q.town) id.from.p.egg 0)))
-      ~&  >>>  "tx rejected; bad nonce"
-      [town 0 %3]  ::  bad nonce
+    ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
+      ~&  >>>  "mill: tx rejected; bad nonce"
+      [land 0 %3 ~ ~]  ::  bad nonce
     ::
-    ?.  (~(audit tax p.town) egg)
-      ~&  >>>  "tx rejected; not enough budget"
-      [town 0 %4]  ::  can't afford gas
+    ?.  (~(audit tax p.land) egg)
+      ~&  >>>  "mill: tx rejected; not enough budget"
+      [land 0 %4 ~ ~]  ::  can't afford gas
     ::
-    =+  [gan rem err]=(~(work farm p.town) egg)
+    =+  [hits cro gan rem err]=(~(work farm p.land) egg)
     =/  fee=@ud   (sub budget.p.egg rem)
-    :_  [fee err]
-    :-  (~(charge tax ?~(gan p.town u.gan)) from.p.egg fee)
-    (~(put by q.town) id.from.p.egg nonce.from.p.egg)
+    :_  [fee err hits cro]
+    :-  (~(charge tax ?~(gan p.land u.gan)) from.p.egg fee)
+    (~(put by q.land) id.from.p.egg nonce.from.p.egg)
   ::
   ::  +tax: manage payment for egg in zigs
   ::
@@ -107,8 +117,8 @@
     |_  =granary
     +$  token-account
       $:  balance=@ud
-          allowances=(map sender=id:smart @ud)
-          metadata=id:smart
+          allowances=(map sender=id @ud)
+          metadata=id
       ==
     ::  +audit: evaluate whether a caller can afford gas
     ++  audit
@@ -134,7 +144,15 @@
     ++  pay
       |=  total=@ud
       ^-  ^granary
-      ?~  zigs=(~(get by granary) zigs.miller)  granary
+      ?~  zigs=(~(get by granary) zigs.miller)
+        ::  create a new account rice for the sequencer
+        ::
+        =/  =token-account  [total ~ `@ux`'zigs-metadata']
+        =/  =id  (fry-rice id.miller zigs-wheat-id town-id `@`'zigs')
+        %+  ~(put by granary)  id
+        [id zigs-wheat-id id.miller town-id [%& `@`'zigs' token-account]]
+      ::  use existing account
+      ::
       ?.  ?=(%& -.germ.u.zigs)                  granary
       =/  acc  (hole token-account data.p.germ.u.zigs)
       ?.  =(`@ux`'zigs-metadata' metadata.acc)  granary
@@ -150,22 +168,25 @@
     ::  +work: take egg and return updated granary, remaining budget, and errorcode (0=success)
     ++  work
       |=  =egg
-      ^-  [(unit ^granary) rem=@ud =errorcode]
+      ^-  [(list hints) =crow (unit ^granary) rem=@ud =errorcode]
       =/  hatchling
-        (incubate egg(budget.p (div budget.p.egg rate.p.egg)))
+        (incubate egg(budget.p (div budget.p.egg rate.p.egg)) ~)
+      :-  (flop hits.hatchling)
       ?~  final.hatchling
-        [~ rem.hatchling errorcode.hatchling]
-      +.hatchling
+        [~ ~ rem.hatchling errorcode.hatchling]
+      ?~  roost.hatchling
+        [~ ~ rem.hatchling errorcode.hatchling]
+      [crow.u.roost.hatchling +>.hatchling]
     ::  +incubate: fertilize and germinate, then grow
     ++  incubate
-      |=  =egg
-      ^-  [(unit rooster) final=(unit ^granary) rem=@ud =errorcode]
+      |=  [=egg hits=(list hints)]
+      ^-  [hits=(list hints) roost=(unit rooster) final=(unit ^granary) rem=@ud =errorcode]
       |^
       =/  args  (fertilize q.egg)
       ?~  stalk=(germinate to.p.egg cont-grains.q.egg)
         ~&  >>>  "mill: failed to germinate"
-        [~ ~ budget.p.egg %5]
-      (grow u.stalk args egg)
+        [~ ~ ~ budget.p.egg %5]
+      (grow u.stalk args egg hits)
       ::  +fertilize: take yolk (contract arguments) and populate with granary data
       ++  fertilize
         |=  =yolk
@@ -198,68 +219,63 @@
         ?.  =(lord.u.res find)          ~
         ?.  =(town-id.u.res town-id)    ~
         `[id u.res]
-      ::  ++  telescope
-      ::    |=  =wheat
-      ::    cons together the library nocks against q.q.smart-lib
       --
     ::  +grow: recursively apply any calls stemming from egg, return on rooster or failure
     ++  grow
-      |=  [=crop =embryo =egg]
-      ^-  [(unit rooster) final=(unit ^granary) rem=@ud =errorcode]
+      |=  [=crop =embryo =egg hits=(list hints)]
+      ^-  [(list hints) (unit rooster) final=(unit ^granary) rem=@ud =errorcode]
       |^
-      =+  [chick rem err]=(weed to.p.egg budget.p.egg)
-      ?~  chick  [~ ~ rem err]
+      =+  [hit chick rem err]=(weed to.p.egg budget.p.egg)
+      ?~  chick  [hit^hits ~ ~ rem err]
       ?:  ?=(%& -.u.chick)
         ::  rooster result, finished growing
         ?~  gan=(harvest p.u.chick to.p.egg from.p.egg)
-          [~ ~ rem %7]
-        [`p.u.chick gan rem err]
+          [hit^hits ~ ~ rem %7]
+        [hit^hits `p.u.chick gan rem err]
       ::  hen result, continuation
       =*  next  next.p.u.chick
       ::  continuation calls can alter grains
       ?~  gan=(harvest roost.p.u.chick to.p.egg from.p.egg)
-        [~ ~ rem %7]
-      %-  ~(incubate farm u.gan)
-      egg(from.p to.p.egg, to.p to.next, budget.p rem, q args.next)
+        [hit^hits ~ ~ rem %7]
+      %+  ~(incubate farm u.gan)
+        egg(from.p to.p.egg, to.p to.next, budget.p rem, q args.next)
+      hit^hits
       ::
       ::  +weed: run contract formula with arguments and memory, bounded by bud
       ::
       ++  weed
         |=  [to=id budget=@ud]
-        ^-  [(unit chick) rem=@ud =errorcode]
+        ^-  [hints (unit chick) rem=@ud =errorcode]
         ~>  %bout
-        =/  =cart  [to blocknum town-id owns.crop]
-        =/  payload  .*(q.library pay.cont.crop)
-        =/  battery  .*([q.library payload] bat.cont.crop)
-        =/  dor      [-:!>(*contract) battery]
-        ::  ~&  >>>  cart
-        ::  ~&  >>  embryo
-        ::  this simply SHUTs
+        =/  =cart  [to now town-id owns.crop]
+        =/  payload   .*(q.library pay.cont.crop)
+        =/  battery   .*([q.library payload] bat.cont.crop)
+        =/  dor=vase  [-:!>(*contract) battery]
+        ::  ZEBRA
         ::
-        =/  res
-          (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))^(sub budget 7)
-        ?:  ?=(%| -.-.res)
+        =/  gun
+          (ajar dor %write !>(cart) !>(embryo))
+        =/  =book
+          (zebra budget zink-cax gun)
+        ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
+        :-  hit.q.book
+        ?:  ?=(%| -.p.book)
           ::  error in contract execution
-          [~ budget %6]
+          ~&  p.book
+          [~ bud.q.book %6]
+        ::  chick result
+        ?~  p.p.book
+          ~&  >>>  "mill: ran out of gas"
+          [~ 0 %8]
+        [(hole (unit chick) p.p.book) bud.q.book %0]
+        ::  MULE
         ::
-        [`p.-.res budget %0]
-        ::  this uses ZINK
-        ::  
-        ::  ~&  >  %contract-compiled
-        ::  =/  cax=(map * phash)  ;;(cache (cue q.q.zink-cax))
-        ::  ~&  >  %cax-compiled
-        ::  =/  gun
-        ::    (ajar dor %write !>(cart) !>(embryo))
-        ::  =/  =book
-        ::    (zebra budget cax gun)
-        ::  ~&  >>  chick+(hole (unit chick) p.p.book)
-        ::  ?:  ?=(%| -.p.book)
+        ::  =/  res
+        ::    (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))^(sub budget 7)
+        ::  ?:  ?=(%| -.-.res)
         ::    ::  error in contract execution
-        ::    [~ budget %6]
-        ::  ::  chick result
-        ::  ?~  p.p.book
-        ::    [~ 0 %0]
-        ::  [`(hole chick u.p.p.book) bud.q.book %0]
+        ::    [~ ~ +.res %6]
+        ::  [~ `p.-.res +.res %0]
       --
     ::
     ::  +harvest: take a completed execution and validate all changes and additions to granary state
@@ -301,7 +317,7 @@
               !(~(has by granary) id.grain)
               ?:  ?=(%& -.germ.grain)
                 =(id (fry-rice holder.grain lord.grain town-id.grain salt.p.germ.grain))
-              =(id (fry-contract lord.grain town-id.grain cont.p.germ.grain))
+              =(id (fry-contract lord.grain town-id.grain bat:(need cont.p.germ.grain)))
       ==  ==
     --
   --
