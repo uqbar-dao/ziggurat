@@ -77,10 +77,49 @@
     (result [home spent] ~ ~)
   ::
       %give-set
-    !!
+    =/  giv=grain  +.-:grains.inp
+    ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
+    =/  giver=account  ;;(account data.p.germ.giv)
+    ::  produce list of tickets
+    =/  make  ~(tap in tickets.act)
+    =|  made=(list grain)
+    |-
+    ?~  make  (result ~[giv(data.p.germ giver)] made ~)
+    =/  =ticket    [amount.i.make %.n metadata.giver]
+    =/  salt=@ux   (shax (cat 3 salt.p.germ.giv (cat 3 from.cart)))
+    =/  =id        (fry-rice id.i.make me.cart town-id.cart -)
+    =/  new=grain  [id me.cart id.i.make town-id.cart [%& salt ticket]]
+    %=  $
+      make  t.make
+      made  [new made]
+      balance.giver  (sub balance.giver amount.i.make)
+    ==
   ::
       %take-set
-    !!
+    =/  giv=grain  +.-:grains.inp
+    ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
+    =/  giver=account  ;;(account data.p.germ.giv)
+    =/  allowance=@ud  (~(got by allowances.giver) id.from.cart)
+    ::  produce list of tickets
+    =/  make  ~(tap in tickets.act)
+    =|  made=(list grain)
+    |-
+    ?~  make  (result ~[giv(data.p.germ giver)] made ~)
+    =/  =ticket    [amount.i.make %.n metadata.giver]
+    =/  salt=@ux   (shax (cat 3 salt.p.germ.giv (cat 3 from.cart)))
+    =/  =id        (fry-rice id.i.make me.cart town-id.cart -)
+    =/  new=grain  [id me.cart id.i.make town-id.cart [%& salt ticket]]
+    %=  $
+      make  t.make
+      made  [new made]
+      balance.giver  (sub balance.giver amount.i.make)
+    ::
+        allowances.giver
+      %+  ~(jab by allowances.giver)
+        id.from.cart
+      |=  old=@ud
+      (sub old amount.i.make)
+    ==
   ::
       %set-allowance
     =/  acc=grain  -:~(val by grains.inp)
