@@ -7,101 +7,72 @@
 ::  zig spends to be guaranteed not to underflow.
 ::
 /+  *zig-sys-smart
+/=  sur  /lib/zig/contracts/lib/zigs
+=,  sur
 |_  =cart
 ++  write
   |=  inp=embryo
   ^-  chick
-  |^
   ?~  action.inp  !!
-  (process ;;(action u.action.inp))
-  ::
-  +$  token-metadata
-    ::  will be automatically inserted into town state
-    ::  at instantiation, along with this contract
-    $:  name=@t
-        symbol=@t
-        decimals=@ud
-        supply=@ud
-        cap=(unit @ud)
-        mintable=?  ::  will be unmintable, with zigs instead generated in mill
-        minters=(set id)
-        deployer=id  ::  will be 0x0
-        salt=@  ::  'zigs'
+  =/  act  ;;(action u.action.inp)
+  ?-    -.act
+      %give
+    =/  giv=grain  +.-:grains.inp
+    ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
+    =/  giver=account  ;;(account data.p.germ.giv)
+    ?>  (gte balance.giver (add amount.act budget.act))
+    ?~  account.act
+      ::  if receiver doesn't have an account, must produce one for them
+      =+  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
+      =/  new=grain  [- me.cart to.act town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
+      =/  =action    [%give to.act `id.new amount.act budget.act]
+      =/  give-call  (call me.cart town-id.cart action ~[id.giv] ~[id.new])
+      (continuation ~[give-call] (result ~ ~[new] ~))
+    ::  otherwise, add to the existing account for that pubkey
+    =/  rec=grain  (~(got by owns.cart) u.account.act)
+    ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
+    =/  receiver=account  ;;(account data.p.germ.rec)
+    ?>  =(metadata.receiver metadata.giver)
+    =:  data.p.germ.giv  giver(balance (sub balance.giver amount.act))
+        data.p.germ.rec  receiver(balance (add balance.receiver amount.act))
     ==
+    (result ~[giv rec] ~ ~)
   ::
-  +$  account
-    $:  balance=@ud
-        allowances=(map sender=id @ud)
-        metadata=id
-    ==
-  ::
-  +$  action
-    $%  [%give to=id account=(unit id) amount=@ud budget=@ud]
-        [%take to=id account=(unit id) from-account=id amount=@ud]
-        [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
-    ==
-  ::
-  ++  process
-    |=  act=action
-    ?-    -.act
-        %give
-      =/  giv=grain  -:~(val by grains.inp)
-      ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
-      =/  giver=account  ;;(account data.p.germ.giv)
-      ?>  (gte balance.giver (add amount.act budget.act))
-      ?~  account.act
-        ::  if receiver doesn't have an account, must produce one for them
-        =+  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
-        =/  new=grain  [- me.cart to.act town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
-        =/  =action    [%give to.act `id.new amount.act budget.act]
-        =/  give-call  (call me.cart town-id.cart action ~[id.giv] ~[id.new])
-        (continuation ~[give-call] (result ~ ~[new] ~))
-      ::  otherwise, add to the existing account for that pubkey
-      =/  rec=grain  (~(got by owns.cart) u.account.act)
-      ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
-      =/  receiver=account  ;;(account data.p.germ.rec)
-      ?>  =(metadata.receiver metadata.giver)
-      =:  data.p.germ.giv  giver(balance (sub balance.giver amount.act))
-          data.p.germ.rec  receiver(balance (add balance.receiver amount.act))
+      %take
+    =/  giv=grain  (~(got by owns.cart) from-account.act)
+    ?>  ?=(%& -.germ.giv)
+    =/  giver=account  ;;(account data.p.germ.giv)
+    =/  allowance=@ud  (~(got by allowances.giver) from.cart)
+    ?>  (gte balance.giver amount.act)
+    ?>  (gte allowance amount.act)
+    ?~  account.act
+      =+  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
+      =/  new=grain  [- me.cart to.act town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
+      =/  =action    [%take to.act `id.new id.giv amount.act]
+      =/  give-call  (call me.cart town-id.cart action ~ ~[id.giv id.new])
+      (continuation ~[give-call] (result ~ ~[new] ~))
+    =/  rec=grain  (~(got by owns.cart) u.account.act)
+    ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
+    =/  receiver=account  ;;(account data.p.germ.rec)
+    ?>  =(metadata.receiver metadata.giver)
+    =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.act))
+        data.p.germ.giv
+      %=  giver
+        balance  (sub balance.giver amount.act)
+        allowances  (~(jab by allowances.giver) from.cart |=(old=@ud (sub old amount.act)))
       ==
-      (result ~[giv rec] ~ ~)
-    ::
-        %take
-      =/  giv=grain  (~(got by owns.cart) from-account.act)
-      ?>  ?=(%& -.germ.giv)
-      =/  giver=account  ;;(account data.p.germ.giv)
-      =/  allowance=@ud  (~(got by allowances.giver) from.cart)
-      ?>  (gte balance.giver amount.act)
-      ?>  (gte allowance amount.act)
-      ?~  account.act
-        =+  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
-        =/  new=grain  [- me.cart to.act town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
-        =/  =action    [%take to.act `id.new id.giv amount.act]
-        =/  give-call  (call me.cart town-id.cart action ~ ~[id.giv id.new])
-        (continuation ~[give-call] (result ~ ~[new] ~))
-      =/  rec=grain  (~(got by owns.cart) u.account.act)
-      ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
-      =/  receiver=account  ;;(account data.p.germ.rec)
-      ?>  =(metadata.receiver metadata.giver)
-      =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.act))
-          data.p.germ.giv
-        %=  giver
-          balance  (sub balance.giver amount.act)
-          allowances  (~(jab by allowances.giver) from.cart |=(old=@ud (sub old amount.act)))
-        ==
-      ==
-      (result ~[giv rec] ~ ~)
-    ::
-        %set-allowance
-      =/  acc=grain  -:~(val by grains.inp)
-      ?>  !=(who.act holder.acc)
-      ?>  &(=(lord.acc me.cart) ?=(%& -.germ.acc))
-      =/  =account  ;;(account data.p.germ.acc)
-      =.  data.p.germ.acc
-        account(allowances (~(put by allowances.account) who.act amount.act))
-      (result ~[acc] ~ ~)
     ==
-  --
+    (result ~[giv rec] ~ ~)
+  ::
+      %set-allowance
+    =/  acc=grain  -:~(val by grains.inp)
+    ?>  !=(who.act holder.acc)
+    ?>  &(=(lord.acc me.cart) ?=(%& -.germ.acc))
+    =/  =account  ;;(account data.p.germ.acc)
+    =.  data.p.germ.acc
+      account(allowances (~(put by allowances.account) who.act amount.act))
+    (result ~[acc] ~ ~)
+  ==
 ::
 ++  read
   |_  act=path
@@ -202,32 +173,6 @@
         :+  [%who %s (scot %ux who.a)]
           [%amount (numb amount.a)]
         ~
-      ==
-    ::
-    +$  token-metadata
-      ::  will be automatically inserted into town state
-      ::  at instantiation, along with this contract
-      $:  name=@t
-          symbol=@t
-          decimals=@ud
-          supply=@ud
-          cap=(unit @ud)
-          mintable=?  ::  will be unmintable, with zigs instead generated in mill
-          minters=(set id)
-          deployer=id  ::  will be 0x0
-          salt=@  ::  'zigs'
-      ==
-    ::
-    +$  account
-      $:  balance=@ud
-          allowances=(map sender=id @ud)
-          metadata=id
-      ==
-    ::
-    +$  action
-      $%  [%give to=id account=(unit id) amount=@ud budget=@ud]
-          [%take to=id account=(unit id) from-account=id amount=@ud]
-          [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
       ==
     --
   ++  noun
