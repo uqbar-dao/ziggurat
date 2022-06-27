@@ -36,7 +36,6 @@
       =/  new-sig=grain      [new-sig-id lord holder town-id.cart new-sig-germ]
       [%& changed=~ issued=(malt ~[[new-sig-id new-sig]]) crow=~]
     =/  my-grain=grain  -:~(val by owns.cart)
-    ?>  =(lord.my-grain me.cart)
     ?>  ?=(%& -.germ.my-grain)
     =/  state=multisig-state  ;;(multisig-state data.p.germ.my-grain)
     ::  ?>  ?=(multisig-state data.p.germ.my-grain)  :: doesn't work due to fish-loop
