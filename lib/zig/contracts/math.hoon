@@ -1,5 +1,4 @@
 /+  *zig-sys-smart
-!:
 |_  =cart
 ++  write
   |=  inp=embryo
@@ -27,7 +26,8 @@
         [value-id lord=me.cart holder=caller-id town-id.cart value-germ]
       [%& changed=~ issued=(malt ~[[id.val val]]) crow=~]
     =/  val=grain  (snag 0 ~(val by owns.cart))
-    ?>  =(caller-id holder.val)  :: only the holder of the grain can modify it
+    ::  only the holder of the grain or this contract can modify it
+    ?>  ?|(=(caller-id holder.val) =(caller-id me.cart))
     ?>  ?=(%& -.germ.val)
     =/  value  ;;(number=@ud data.p.germ.val)
     ?-    -.action
