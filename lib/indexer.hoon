@@ -138,7 +138,7 @@
     %-  pairs
     :^    [%id %s (scot %ux id.account)]
         [%nonce (numb nonce.account)]
-      [%zigs (numb zigs.account)]
+      [%zigs %s (scot %ux zigs.account)]
     ~
   ::
   :: ++  signature

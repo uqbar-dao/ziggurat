@@ -4,7 +4,7 @@
 ++  transition-state
   |=  [old=(unit town) proposed=[=basket =land diff-hash=@ux root=@ux]]
   ^-  (unit town)
-  ?~  old       old
+  ?~  old  old
   :-  ~
   %=  u.old
     land  land.proposed
@@ -56,19 +56,18 @@
   =/  battery  .*([q.library payload] bat.cont)
   =/  dor      [-:!>(*contract:smart) battery]
   ?+  read-type  [~ ~]
-    %noun  ``noun+!>(`q:(shut:mill dor %read !>(cart) !>(arg)))
-    :: %json  ``json+!>(`;;(json q:(shut:mill dor %read !>(cart) !>(arg))))
-    %json  ``json+!>(;;(json q:(json-read-shut dor %read !>(cart) !>(arg))))
+    %noun  ``noun+!>(`q:(read-shut dor %read !>(cart) !>(arg) %noun))
+    %json  ``json+!>(;;(json q:(read-shut dor %read !>(cart) !>(arg) %json)))
   ==
   ::
-  ++  json-read-shut                                               ::  slam a door
-    |=  [dor=vase arm=@tas dor-sam=vase arm-sam=vase]
+  ++  read-shut                                               ::  slam a door
+    |=  [dor=vase arm=@tas dor-sam=vase arm-sam=vase arm-arm=?(%noun %json)]
     ^-  vase
     %+  slap
       (slop dor (slop dor-sam arm-sam))
     ^-  hoon
     :-  %cnsg
-    :^    [%json ~]
+    :^    [arm-arm ~]
         [%cnsg [arm ~] [%$ 2] [%$ 6] ~]  ::  replace sample
       [%$ 7]
     ~
