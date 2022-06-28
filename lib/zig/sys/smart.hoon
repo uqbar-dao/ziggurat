@@ -28,10 +28,11 @@
 ::
 ::  smart contract types
 ::
-+$  id       @ux            ::  pubkey
-+$  address  @ux            ::  42-char hex address, ETH compatible
-+$  sig      [v=@ r=@ s=@]  ::  ETH compatible ECDSA signature
-++  zigs-wheat-id  `@ux`'zigs-contract'  ::  hardcoded "native" token contract
++$  id             @ux                          ::  pubkey
++$  address        @ux                          ::  42-char hex address, ETH compatible
++$  sig            [v=@ r=@ s=@]                ::  ETH compatible ECDSA signature
++$  typed-message  [domain=* type=* message=*]  ::  Similar to EIP-712 typed messages
+++  zigs-wheat-id  `@ux`'zigs-contract'         ::  hardcoded "native" token contract
 ::
 +$  account    [=id nonce=@ud zigs=id]
 +$  caller     $@(id account)

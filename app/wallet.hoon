@@ -13,6 +13,7 @@
       seed=[mnem=@t pass=@t address-index=@ud]
       keys=(map pub=@ux [priv=(unit @ux) nick=@t])  ::  keys created from master seed
       nonces=(map pub=@ux (map town=@ux nonce=@ud))
+      signatures=(list [=typed-message:smart =sig:smart])
       tokens=(map pub=@ux =book)
       =transaction-store
       pending=(unit [yolk-hash=@ =egg:smart args=supported-args])
@@ -30,7 +31,7 @@
 +*  this  .
     def   ~(. (default-agent this %|) bowl)
 ::
-++  on-init  `this(state [%0 ['' '' 0] ~ ~ ~ ~ ~ ~])
+++  on-init  `this(state [%0 ['' '' 0] ~ ~ ~ ~ ~ ~ ~])
 ::
 ++  on-save  !>(state)
 ++  on-load
@@ -142,6 +143,17 @@
         %edit-nickname
       =+  -:(~(got by keys.state) address.act)
       `state(keys (~(put by keys) address.act [- nick.act]))
+    ::
+        %sign-typed-message
+      =/  keypair  (~(got by keys.state) from.act)
+      =/  hash     (sham (jam typed-message.act))
+      =/  signature
+        ?~  priv.keypair
+          [0 0 0]
+        %+  ecdsa-raw-sign:secp256k1:secp:crypto
+          hash
+        u.priv.keypair
+      `state(signatures [[typed-message.act signature] signatures])
     ::
         %set-nonce  ::  for testing/debugging
       =+  acc=(~(got by nonces.state) address.act)
@@ -509,6 +521,9 @@
     %+  turn  ~(tap by received.our-txs)
     |=  [hash=@ux t=egg:smart]
     (parse-transaction:wallet-parsing hash t ~)
+  ::
+      [%signatures ~]
+    ``noun+!>(signatures.state)
   ::
       [%pending ~]
     ?~  pending.state  [~ ~]
