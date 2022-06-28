@@ -12,7 +12,6 @@
     $%  [%make-value initial=@ud]
         [%add amount=@ud]
         [%sub amount=@ud]
-        [%mul multiplier=@ud]
         [%giv who=id]
     ==
   ++  process
@@ -37,32 +36,16 @@
       =.  data.p.germ.val  value  
       [%& changed=(malt ~[[id.val val]]) ~ ~]
     ::
+        %giv
+      [%& changed=(malt ~[[id.val val(holder who.action)]]) ~ ~]
+    ::
         %sub
+      ::  TODO recursive addition
       =*  amount           amount.action
       ?>  (gte number.value amount.action)  :: prevent subtraction underflow from causing a crash
       =.  number.value     (sub number.value amount.action)
       =.  data.p.germ.val  value
       [%& changed=(malt ~[[id.val val]]) ~ ~]
-    ::
-        %giv
-      [%& changed=(malt ~[[id.val val(holder who.action)]]) ~ ~]
-    ::
-        %mul
-      =*  mult   multiplier.action
-      ?:  =(0 mult)
-        =.  data.p.germ.val  value(number 0)
-        [%& changed=(malt ~[[id.val val]]) ~ ~]
-      ?:  =(1 mult)
-        [%& ~ ~ ~]
-      =.  number.value     (add number.value number.value)
-      =.  data.p.germ.val  value
-      =/  =yolk
-        :*  me.cart 
-            `[%mul (dec mult)]
-            my-grains=~
-            cont-grains=(silt ~[id.val])
-        ==
-      [%| next=[to=me.cart town-id.cart yolk] roost=[changed=(malt ~[[id.val val]]) ~ ~]]
     ==
   --
 ++  read

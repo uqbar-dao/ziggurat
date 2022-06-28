@@ -8,7 +8,6 @@
       $%  [%make-value initial=@ud]
           [%add amount=@ud]
           [%sub amount=@ud]
-          [%mul multiplier=@ud]
           [%giv who=id]
       ==
     ::
@@ -54,22 +53,6 @@
           holder=id:owner-2
           town-id:math-grain-3
           germ:math-grain-3
-      ==
-    ++  math-grain-5
-      ^-  grain
-      :*  id:math-grain-4
-          lord:math-grain-4
-          holder:math-grain-4
-          town-id:math-grain-4
-          [%& [math-salt number=(mul 2 110)]]
-      ==
-    ++  math-grain-6
-      ^-  grain
-      :*  id:math-grain-5
-          lord:math-grain-5
-          holder:math-grain-5
-          town-id:math-grain-5
-          [%& [math-salt number=0]]
       ==
     --
 |%
@@ -136,52 +119,6 @@
   =/  res=chick  (~(write cont cart) embryo)
   ::
   =*  expected-grain  math-grain-4
-  =/  grain  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
-  (expect-eq !>(expected-grain) !>(grain))
-++  test-mul-value
-  ^-  tang
-  ::  setting up the tx to propose
-  ::  creating the execution context by hand
-  =/  =embryo
-    :*  caller=owner-2
-        args=`[%mul 2]
-        grains=~
-    ==
-  =/  =cart  (make-cart (grainz ~[math-grain-4]))
-  ::  executing the contract call with the context
-  =/  res=chick  (~(write cont cart) embryo)
-  ::
-  =*  expected-grain  math-grain-5
-  =/  [=grain next=_next:*hen]
-    ?>  ?=(%.n -.res)
-    [(snag 0 ~(val by changed.roost.p.res)) next.p.res]
-  =/  act  ;;(action (need args.args.next))
-  (expect-eq !>(expected-grain) !>(grain))
-++  test-mul-one
-  ^-  tang
-  ::  setting up the tx to propose
-  ::  creating the execution context by hand
-  =/  =embryo
-    :*  caller=owner-2
-        args=`[%mul 1]
-        grains=~
-    ==
-  =/  =cart  (make-cart (grainz ~[math-grain-5]))
-  ::  executing the contract call with the context
-  =/  res=chick  (~(write cont cart) embryo)
-  (expect-eq !>([%& ~ ~ ~]) !>(res))
-++  test-mul-zero
-  ^-  tang
-  ::  setting up the tx to propose
-  ::  creating the execution context by hand
-  =/  =embryo
-    :*  caller=owner-2
-        args=`[%mul 0]
-        grains=~
-    ==
-  =/  =cart  (make-cart (grainz ~[math-grain-5]))
-  =/  res=chick  (~(write cont cart) embryo)
-  =*  expected-grain  math-grain-6
   =/  grain  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
   (expect-eq !>(expected-grain) !>(grain))
 --
