@@ -43,9 +43,17 @@
       ::  TODO recursive addition
       =*  amount           amount.action
       ?>  (gte number.value amount.action)  :: prevent subtraction underflow from causing a crash
-      =.  number.value     (sub number.value amount.action)
+      ?:  =(0 amount)
+        [%& ~ ~ ~]
+      =/  =yolk
+        :*  me.cart 
+            `[%sub (dec amount)]
+            my-grains=~
+            cont-grains=(silt ~[id.val])
+        ==
+      =.  number.value     (dec number.value)
       =.  data.p.germ.val  value
-      [%& changed=(malt ~[[id.val val]]) ~ ~]
+      [%| next=[to=me.cart town-id.cart yolk] roost=[changed=(malt ~[[id.val val]]) ~ ~]]
     ==
   --
 ++  read
