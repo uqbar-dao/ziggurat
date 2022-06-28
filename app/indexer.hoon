@@ -212,7 +212,7 @@
       :_  ~
       %-  fact:io
       :_  ~
-      :-  %rollup-update
+      :-  %sequencer-rollup-update
       !>(`capitol-update:seq`[%new-capitol capitol])
     ::
         [%id @ ~]
@@ -450,7 +450,7 @@
         :_  state(capitol capitol.update)
         :_  ~
         %+  fact:io
-          [%rollup-update !>(`capitol-update:seq`update)]
+          [%sequencer-rollup-update !>(`capitol-update:seq`update)]
         ~[rollup-capitol-path]
       ::
           %new-peer-root
