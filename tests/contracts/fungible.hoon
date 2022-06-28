@@ -146,6 +146,15 @@
 ::
 
 ::
+::  tests for %take-with-sig
+::
+++  test-take-with-sig-known-reciever  ^-  tang
+  ~
+::
+++  test-take-with-sig-unknown-reciever  ^-  tang
+  ~
+
+::
 ::  tests for %set-allowance
 ::
 

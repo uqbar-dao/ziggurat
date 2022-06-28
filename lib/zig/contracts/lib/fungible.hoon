@@ -22,6 +22,7 @@
     $:  balance=@ud                     ::  the amount of tokens someone has
         allowances=(map sender=id @ud)  ::  a map of pubkeys they've permitted to spend their tokens and how much
         metadata=id                     ::  address of the rice holding this token's metadata
+        ::  nonce=@ud maybe?
     ==
   ::
   ::  patterns of arguments supported by this contract
@@ -33,6 +34,7 @@
         ::
         [%give to=id account=(unit id) amount=@ud]
         [%take to=id account=(unit id) from-rice=id amount=@ud]
+        [%take-with-sig to=id account=(unit id) from-rice=id amount=@ud nonce=@ud deadline=@da =sig]
         [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
         ::  token management actions
         ::
@@ -103,6 +105,14 @@
         (give-or-mint +.a)
       ::
           %take
+        %-  pairs
+        :~  [%to %s (scot %ux to.a)]
+            [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]
+            [%from-rice %s (scot %ux from-rice.a)]
+            [%amount (numb amount.a)]
+        ==
+      ::
+          %take-with-sig  ::  placeholder, not finished
         %-  pairs
         :~  [%to %s (scot %ux to.a)]
             [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]

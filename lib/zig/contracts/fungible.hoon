@@ -114,6 +114,31 @@
       ==
       [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
     ::
+        %take-with-sig
+      =/  giv=grain  (~(got by owns.cart) from-rice.args)
+      =/  giver  holder.giv
+      ::  TEMPORARY: first need to reconstruct the signed hash
+      =/  domain  0           ::  get from the metadata rice
+      =/  type  0             ::  can hardcode the typehash into the contract or just grab it. Maybe calculate it in on-init
+      =/  data                ::  get from args
+        :*  giver          :: from
+            to.args        :: to
+            amount.args    :: amount
+            nonce.args     :: nonce
+            deadline.args  :: deadline
+        ==
+      =/  signed-hash  (sham (jam [domain type data]))
+      =/  recovered-address
+        %+  ecdsa-raw-recover:secp256k1:secp:crypto
+          signed-hash
+        sig.args
+
+      ?>  =(recovered-address giver)    ::  assert that the signature is valid
+      ?>  (gte deadline.args now.cart)  ::  assert that the deadline is valid
+      ::  from here down basically just copy the rest of the %take arm
+      ::  from here down you can just do the take as normal
+      [%& (malt ~[[id.giv giv]]) ~ ~] :: should also have [id.rec rec] for receiver
+    ::
         %set-allowance
       ::  let some pubkey spend tokens on your behalf
       ::  note that you can arbitrarily allow as much spend as you want,
