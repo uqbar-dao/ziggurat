@@ -219,7 +219,6 @@
         %+  murn  ~(tap in my-grains.yolk)
         |=  =id
         ?~  res=(~(get by granary) id)  ~
-        ?.  ?=(%& -.germ.u.res)         ~
         ?.  =(holder.u.res from)        ~
         ?.  =(town-id.u.res town-id)    ~
         `[id u.res]
@@ -236,7 +235,6 @@
         %+  murn  ~(tap in grains)
         |=  =id
         ?~  res=(~(get by granary) id)  ~
-        ?.  ?=(%& -.germ.u.res)         ~
         ?.  =(lord.u.res find)          ~
         ?.  =(town-id.u.res town-id)    ~
         `[id u.res]
