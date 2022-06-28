@@ -235,7 +235,8 @@
       ?>  ?=(%& -.germ.g)
       ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
         (account:enjs:lib ;;(account:sur data.p.germ.g))
-      (collection-metadata:enjs:lib ;;(collection-metadata:sur data.p.germ.g))
+      %-  collection-metadata:enjs:lib
+      ;;(collection-metadata:sur data.p.germ.g)
     ::
         [%rice-data @ ~]
       =/  data  (cue (slav %ud i.t.args))
@@ -250,6 +251,26 @@
     ==
   ::
   ++  noun
-    ~
+    ?+    args  !!
+        [%rice-data ~]
+      ?>  =(1 ~(wyt by owns.cart))
+      =/  g=grain  -:~(val by owns.cart)
+      ?>  ?=(%& -.germ.g)
+      ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
+        `account:sur`;;(account:sur data.p.germ.g)
+      ^-  collection-metadata:sur
+      ;;(collection-metadata:sur data.p.germ.g)
+    ::
+        [%rice-data @ ~]
+      =/  data  (cue (slav %ud i.t.args))
+      ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+        `account:sur`;;(account:sur data)
+      ^-  collection-metadata:sur
+      ;;(collection-metadata:sur data)
+    ::
+        [%egg-args @ ~]
+      ^-  arguments:sur
+      ;;(arguments:sur (cue (slav %ud i.t.args)))
+    ==
   --
 --

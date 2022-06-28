@@ -141,6 +141,19 @@
     ==
   ::
   ++  noun
-    ~
+    ?+    args  !!
+        [%rice-data ~]
+      ?>  =(1 ~(wyt by owns.cart))
+      =/  g=grain  -:~(val by owns.cart)
+      ?>  ?=(%& -.germ.g)
+      `dao:sur`;;(dao:sur data.p.germ.g)
+    ::
+        [%rice-data @ ~]
+      `dao:sur`;;(dao:sur (cue (slav %ud i.t.args)))
+    ::
+        [%egg-args @ ~]
+      ^-  arguments:sur
+      ;;(arguments:sur (cue (slav %ud i.t.args)))
+    ==
   --
 --

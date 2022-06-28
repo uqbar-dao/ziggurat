@@ -108,6 +108,25 @@
     ==
   ::
   ++  noun
-    ~
+    ?+    args  !!
+        [%rice-data ~]
+      ?>  =(1 ~(wyt by owns.cart))
+      =/  g=grain  -:~(val by owns.cart)
+      ?>  ?=(%& -.germ.g)
+      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
+        `account:sur`;;(account:sur data.p.germ.g)
+      ^-  token-metadata:sur
+      ;;(token-metadata:sur data.p.germ.g)
+    ::
+        [%rice-data @ ~]
+      =/  data  (cue (slav %ud i.t.args))
+      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+        `account:sur`;;(account:sur data)
+      `token-metadata:sur`;;(token-metadata:sur data)
+    ::
+        [%egg-args @ ~]
+      ^-  arguments:sur
+      ;;(arguments:sur (cue (slav %ud i.t.args)))
+    ==
   --
 --
