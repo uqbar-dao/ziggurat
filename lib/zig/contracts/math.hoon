@@ -7,9 +7,9 @@
   ?~  args.inp  !!
   (process ;;(action u.args.inp) (pin caller.inp))
   ::
-  +$  value  number=@ud
+  +$  variable  number=@ud
   +$  action
-    $%  [%make-value initial=@ud]
+    $%  [%make-variable initial=@ud]
         [%add amount=@ud]
         [%sub amount=@ud]
         [%giv who=id]
@@ -17,43 +17,42 @@
   ++  process
     |=  [=action caller-id=id]
     ^-  chick
-    ?:  ?=(%make-value -.action)
+    ?:  ?=(%make-variable -.action)
       =/  salt=@           `@`'math'
-      =/  value-germ=germ  [%& salt [number=initial.action]]
-      =/  value-id=id      (fry-rice caller-id me.cart town-id.cart salt)
-      =/  val=grain  
-        [value-id lord=me.cart holder=caller-id town-id.cart value-germ]
-      [%& changed=~ issued=(malt ~[[id.val val]]) crow=~]
-    =/  val=grain  (snag 0 ~(val by owns.cart))
+      =/  variable-germ=germ  [%& salt [number=initial.action]]
+      =/  variable-id=id      (fry-rice caller-id me.cart town-id.cart salt)
+      =/  var=grain  
+        [variable-id lord=me.cart holder=caller-id town-id.cart variable-germ]
+      [%& changed=~ issued=(malt ~[[id.var var]]) crow=~]
+    =/  var=grain  (snag 0 ~(val by owns.cart))
     ::  only the holder of the grain or this contract can modify it
-    ?>  ?|(=(caller-id holder.val) =(caller-id me.cart))
-    ?>  ?=(%& -.germ.val)
-    =/  value  ;;(number=@ud data.p.germ.val)
+    ?>  ?|(=(caller-id holder.var) =(caller-id me.cart))
+    ?>  ?=(%& -.germ.var)
+    =/  variable  ;;(number=@ud data.p.germ.var)
     ?-    -.action
         %add
       =*  amount           amount.action
-      =.  number.value     (add amount number.value)
-      =.  data.p.germ.val  value  
-      [%& changed=(malt ~[[id.val val]]) ~ ~]
+      =.  number.variable     (add amount number.variable)
+      =.  data.p.germ.var  variable  
+      [%& changed=(malt ~[[id.var var]]) ~ ~]
     ::
         %giv
-      [%& changed=(malt ~[[id.val val(holder who.action)]]) ~ ~]
+      [%& changed=(malt ~[[id.var var(holder who.action)]]) ~ ~]
     ::
         %sub
-      ::  TODO recursive addition
       =*  amount           amount.action
-      ?>  (gte number.value amount.action)  :: prevent subtraction underflow from causing a crash
+      ?>  (gte number.variable amount.action)  :: prevent subtraction underflow from causing a crash
       ?:  =(0 amount)
         [%& ~ ~ ~]
       =/  =yolk
         :*  me.cart 
             `[%sub (dec amount)]
             my-grains=~
-            cont-grains=(silt ~[id.val])
+            cont-grains=(silt ~[id.var])
         ==
-      =.  number.value     (dec number.value)
-      =.  data.p.germ.val  value
-      [%| next=[to=me.cart town-id.cart yolk] roost=[changed=(malt ~[[id.val val]]) ~ ~]]
+      =.  number.variable     (dec number.variable)
+      =.  data.p.germ.var  variable
+      [%| next=[to=me.cart town-id.cart yolk] roost=[changed=(malt ~[[id.var var]]) ~ ~]]
     ==
   --
 ++  read
@@ -64,9 +63,9 @@
     ?+    path  !!
         [%is-odd ~]
       ^-  ?
-      =/  val=grain   (snag 0 ~(val by owns.cart))
-      =/  value  ;;(number=@ud ?>(?=(%& -.germ.val) data.p.germ.val))
-      =(1 (mod number.value 2))
+      =/  var=grain   (snag 0 ~(val by owns.cart))
+      =/  variable  ;;(number=@ud ?>(?=(%& -.germ.var) data.p.germ.var))
+      =(1 (mod number.variable 2))
     ==
   --
 --
