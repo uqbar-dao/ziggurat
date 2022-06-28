@@ -51,7 +51,7 @@
     |=  [=id:smart =hall:sequencer]
     ^-  card
     =-  [%give %fact ~ -]
-    [%sequencer-rollup-update !>(`town-update`[%new-peer-root id (rear roots.hall)])]
+    [%sequencer-rollup-update !>(`town-update`[%new-peer-root id (rear roots.hall) now.bowl])]
   ==
 ::
 ++  on-poke
@@ -79,7 +79,7 @@
       ::  assets from other towns
       =+  (~(put by capitol) town-id.hall.act hall.act)
       :_  state(capitol -)
-      :~  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update !>(`town-update`[%new-peer-root town-id.hall.act (rear roots.hall.act)])]
+      :~  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update !>(`town-update`[%new-peer-root town-id.hall.act (rear roots.hall.act) now.bowl])]
           [%give %fact ~[/capitol-updates] %sequencer-rollup-update !>(`capitol-update`[%new-capitol -])]
       ==
     ::
@@ -126,7 +126,7 @@
           ==
       =+  (~(put by capitol) town-id.act -)
       :_  state(capitol -)
-      :~  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update !>(`town-update`[%new-peer-root town-id.act new-root.act])]
+      :~  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update !>(`town-update`[%new-peer-root town-id.act new-root.act now.bowl])]
           [%give %fact ~[/capitol-updates] %sequencer-rollup-update !>(`capitol-update`[%new-capitol -])]
       ==
     ==

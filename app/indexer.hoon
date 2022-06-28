@@ -212,7 +212,7 @@
       :_  ~
       %-  fact:io
       :_  ~
-      :-  %sequencer-rollup-update
+      :-  %sequencer-capitol-update
       !>(`capitol-update:seq`[%new-capitol capitol])
     ::
         [%id @ ~]
@@ -450,7 +450,7 @@
         :_  state(capitol capitol.update)
         :_  ~
         %+  fact:io
-          [%sequencer-rollup-update !>(`capitol-update:seq`update)]
+          [%sequencer-capitol-update !>(`capitol-update:seq`update)]
         ~[rollup-capitol-path]
       ::
           %new-peer-root
@@ -459,19 +459,31 @@
           :-  ~
           %=  state
               town-update-queue
-            (~(put ju town-update-queue) town-id root.update)
+            %+  ~(put by town-update-queue)  town-id
+            %+  %~  put  by
+              ?~  inner-queue=(~(get by town-update-queue) town-id)
+                *(map batch-id=@ux timestamp=@da)
+              u.inner-queue
+            root.update  timestamp.update
           ==
         ?~  indexer-update=(~(get by u.town-q) root.update)
           :-  ~
           %=  state
               town-update-queue
-            (~(put ju town-update-queue) town-id root.update)
+            %+  ~(put by town-update-queue)  town-id
+            %+  %~  put  by
+              ?~  inner-queue=(~(get by town-update-queue) town-id)
+                *(map batch-id=@ux timestamp=@da)
+              u.inner-queue
+            root.update  timestamp.update
           ==
         =^  cards  state
-          %^    consume-batch
+          %:  consume-batch
               root.update
-            eggs.u.indexer-update
-          town.u.indexer-update
+              eggs.u.indexer-update
+              town.u.indexer-update
+              timestamp.update
+          ==
         :-  cards
         %=  state
             sequencer-update-queue
@@ -508,29 +520,36 @@
       ::
           %update
         =*  town-id  town-id.hall.town.update
-        ?:  %.  root.update
-            %~  has  in
-            (~(get ju town-update-queue) town-id)
-          =^  cards  state
-            %^    consume-batch
-                root.update
-              eggs.update
-            town.update
-          :-  cards
+        =/  town-queue=(unit (map @ux @da))
+          (~(get by town-update-queue) town-id)
+        =/  timestamp=(unit @da)
+          ?~  town-queue  ~
+          (~(get by u.town-queue) root.update)
+        ?~  timestamp
+          :-  ~
           %=  state
-              town-update-queue
-            (~(del ju town-update-queue) town-id root.update)
+              sequencer-update-queue
+            %+  ~(put by sequencer-update-queue)  town-id
+            %+  %~  put  by
+                ?~  town-q=(~(get by sequencer-update-queue) town-id)
+                  *(map @ux [(list [@ux egg:smart]) town:seq])
+                u.town-q
+              root.update
+            [eggs.update town.update]
           ==
-        :-  ~
+        =^  cards  state
+          %:  consume-batch
+              root.update
+              eggs.update
+              town.update
+              u.timestamp
+          ==
+        :-  cards
         %=  state
-            sequencer-update-queue
-          %+  ~(put by sequencer-update-queue)  town-id
-          %+  %~  put  by
-              ?~  town-q=(~(get by sequencer-update-queue) town-id)
-                *(map @ux [(list [@ux egg:smart]) town:seq])
-              u.town-q
-            root.update
-          [eggs.update town.update]
+            town-update-queue
+          %+  ~(put by town-update-queue)  town-id
+          %.  root.update
+          ~(del by (~(got by town-update-queue) town-id))
         ==
         :: (consume-batch root.update eggs.update town.update)
       ::
@@ -603,7 +622,11 @@
       ==
     ::
     ++  consume-batch
-      |=  [root=@ux eggs=(list [@ux egg:smart]) =town:seq]
+      |=  $:  root=@ux
+              eggs=(list [@ux egg:smart])
+              =town:seq
+              timestamp=@da
+          ==
       ^-  (quip card _state)
       =*  town-id  town-id.hall.town
       =+  ^=  [egg from grain grain-eggs holder lord to]
@@ -625,9 +648,9 @@
         %+  ~(put by batches-by-town)  town-id
         ?~  b=(~(get by batches-by-town) town-id)
           :_  ~[root]
-          (malt ~[[root [now.bowl eggs town]]])  ::  TODO: improve timestamping
+          (malt ~[[root [timestamp eggs town]]])
         :_  [root batch-order.u.b]
-        (~(put by batches.u.b) root [now.bowl eggs town])
+        (~(put by batches.u.b) root [timestamp eggs town])
       ==
       |^
       [make-all-sub-cards state]

@@ -70,7 +70,7 @@
   ==
 +$  capitol-update  [%new-capitol =capitol]
 +$  town-update
-  $%  [%new-peer-root town-id=id:smart root=@ux]
+  $%  [%new-peer-root town-id=id:smart root=@ux timestamp=@da]
       [%new-sequencer town-id=id:smart who=ship]
   ==
 ::
