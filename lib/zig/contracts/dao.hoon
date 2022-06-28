@@ -131,6 +131,10 @@
       ?>  ?=(%& -.germ.g)
       (dao:enjs:lib ;;(dao:sur data.p.germ.g))
     ::
+        [%rice-data @ ~]
+      %-  dao:enjs:lib
+      ;;(dao:sur (cue (slav %ud i.t.args)))
+    ::
         [%egg-args @ ~]
       %-  arguments:enjs:lib
       ;;(arguments:sur (cue (slav %ud i.t.args)))

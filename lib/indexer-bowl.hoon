@@ -8,15 +8,14 @@
           to=id:smart
           query-type=?(%egg-args %rice-data)  ::  TODO: generalize to @tas?
           query-arg=@ta
+          rice-id=@ta
       ==
   .^  json
       %gx
       %-  zing
       :^    /(scot %p scry-host)/sequencer
           /(scot %da now.bowl)/read/(scot %ux to)/json
-        ?:  ?=(%egg-args query-type)
-          /egg-args/[query-arg]/~/noun
-        /rice-data/~/[query-arg]/noun
+        /[query-type]/[query-arg]/[rice-id]/noun
       ~
   ==
 ::
@@ -149,6 +148,7 @@
           to.shell
           %egg-args
           (scot %ud (jam u.args.yolk))
+          '~'
       ==
     %-  pairs
     :~  [%caller (account caller.yolk)]
@@ -225,6 +225,7 @@
             our.bowl
             wheat-id
             %rice-data
+            (scot %ud (jam data.p.germ))
             (scot %ux rice-id)
         ==
       %-  pairs

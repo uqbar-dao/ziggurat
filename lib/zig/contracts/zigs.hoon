@@ -96,6 +96,12 @@
         (account:enjs:lib ;;(account:sur data.p.germ.g))
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
+        [%rice-data @ ~]
+      =/  data  (cue (slav %ud i.t.args))
+      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+        (account:enjs:lib ;;(account:sur data))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data))
+    ::
         [%egg-args @ ~]
       %-  arguments:enjs:lib
       ;;(arguments:sur (cue (slav %ud i.t.args)))
