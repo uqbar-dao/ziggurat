@@ -117,24 +117,26 @@
         %take-with-sig
       =/  giv=grain  (~(got by owns.cart) from-rice.args)
       =/  giver  holder.giv
-      ::  TEMPORARY: first need to reconstruct the signed hash
-      =/  domain  0           ::  get from the metadata rice
-      =/  type  0             ::  can hardcode the typehash into the contract or just grab it. Maybe calculate it in on-init
-      =/  data                ::  get from args
-        :*  giver          :: from
-            to.args        :: to
-            amount.args    :: amount
-            nonce.args     :: nonce
-            deadline.args  :: deadline
+      =/  typed-message
+        :+  (domain from-rice me.cart town-id.cart)                           ::  domain
+            (sham (jam $:(from=id to=id amount=@ud nonce=@ud deadline=@da)))  ::  type-hash                                     ::  TODO: type-hash
+          :*  giver                                                         :: from
+              to.args                                                       :: to
+              amount.args                                                   :: amount
+              nonce.args                                                    :: nonce
+              deadline.args                                                 :: deadline
+          ==
         ==
-      =/  signed-hash  (sham (jam [domain type data]))
+      =/  signed-hash  (sham (jam typed-message))
       =/  recovered-address
         %+  ecdsa-raw-recover:secp256k1:secp:crypto
           signed-hash
         sig.args
 
-      ?>  =(recovered-address giver)    ::  assert that the signature is valid
-      ?>  (gte deadline.args now.cart)  ::  assert that the deadline is valid
+      ?>  =(recovered-address giver)       ::  assert that the signature is valid
+      ?>  (gte deadline.args now.cart)     ::  assert that the deadline is valid
+      :: ?>  (gte balance.giver amount.args)  ::  assert the giver has enough to cover the spend
+
       ::  from here down basically just copy the rest of the %take arm
       ::  from here down you can just do the take as normal
       [%& (malt ~[[id.giv giv]]) ~ ~] :: should also have [id.rec rec] for receiver

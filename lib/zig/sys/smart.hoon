@@ -19,6 +19,14 @@
     (end [3 8] (sham holder))
   (end [3 8] (sham (cat 3 town-id (cat 3 lord salt))))
 ::
+++  domain
+  |=  [rice=id wheat=id town-id=id salt=@]  :: I thinky ou have to use ids here not like entire wheat and rice
+  :: basically a hash that specifies signatures to "you can change this rice with this wheat on this town"
+  ^-  @
+  :: ?>  ?=(rice ryce)    ::  assert rice is a rice
+  :: ?>  ?=(wheat wheet)  ::  assert wheat is a wheat
+  (sham (jam [id.rice id.grain town-id salt]))
+::
 ::  +pin: get ID from caller
 ::
 ++  pin
