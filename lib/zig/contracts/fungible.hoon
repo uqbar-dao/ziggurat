@@ -38,6 +38,16 @@
   |^
   ?~  args.inp  !!
   (process ;;(arguments:sur u.args.inp) (pin caller.inp))
+  
+  ::
+  ::  used for validating gasless approvals
+  ::
+  +$  approve  $:  from=id
+                    to=id
+                    amount=@ud
+                    nonce=@ud 
+                    deadline=@da
+                ==
   ::
   ::  the actual execution arm. branches on argument type and returns final result
   ::  note that many of these lines will crash with bad input. this is good,
@@ -118,15 +128,8 @@
       =/  giv=grain  (~(got by owns.cart) from-rice.args)
       =/  giver  holder.giv
       =/  typed-message
-        :+  (domain from-rice me.cart town-id.cart)                           ::  domain
-            (sham (jam $:(from=id to=id amount=@ud nonce=@ud deadline=@da)))  ::  type-hash                                     ::  TODO: type-hash
-          :*  giver                                                         :: from
-              to.args                                                       :: to
-              amount.args                                                   :: amount
-              nonce.args                                                    :: nonce
-              deadline.args                                                 :: deadline
-          ==
-        ==
+        :-  (fry-rice giver me.card town-id.cart 0)  ::  domain == rice-id, TODO: get salt somehow
+          ;;(approve giver to.args amount.args nonce.args deadline.args)
       =/  signed-hash  (sham (jam typed-message))
       =/  recovered-address
         %+  ecdsa-raw-recover:secp256k1:secp:crypto

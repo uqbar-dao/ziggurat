@@ -19,14 +19,6 @@
     (end [3 8] (sham holder))
   (end [3 8] (sham (cat 3 town-id (cat 3 lord salt))))
 ::
-++  domain
-  |=  [rice=id wheat=id town-id=id salt=@]  :: I thinky ou have to use ids here not like entire wheat and rice
-  :: basically a hash that specifies signatures to "you can change this rice with this wheat on this town"
-  ^-  @
-  :: ?>  ?=(rice ryce)    ::  assert rice is a rice
-  :: ?>  ?=(wheat wheet)  ::  assert wheat is a wheat
-  (sham (jam [id.rice id.grain town-id salt]))
-::
 ::  +pin: get ID from caller
 ::
 ++  pin
@@ -36,11 +28,11 @@
 ::
 ::  smart contract types
 ::
-+$  id             @ux                          ::  pubkey
-+$  address        @ux                          ::  42-char hex address, ETH compatible
-+$  sig            [v=@ r=@ s=@]                ::  ETH compatible ECDSA signature
-+$  typed-message  [domain=* type=* message=*]  ::  Similar to EIP-712 typed messages
-++  zigs-wheat-id  `@ux`'zigs-contract'         ::  hardcoded "native" token contract
++$  id             @ux                    ::  pubkey
++$  address        @ux                    ::  42-char hex address, ETH compatible
++$  sig            [v=@ r=@ s=@]          ::  ETH compatible ECDSA signature
++$  typed-message  [domain=id message=*]  ::  message should be typed according to some mold specified by the wheat. Do we include the mold in the hash here or not?
+++  zigs-wheat-id  `@ux`'zigs-contract'   ::  hardcoded "native" token contract
 ::
 +$  account    [=id nonce=@ud zigs=id]
 +$  caller     $@(id account)
