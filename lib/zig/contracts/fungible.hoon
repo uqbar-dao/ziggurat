@@ -66,7 +66,7 @@
         ::  create new rice for reciever and add it to state
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
+          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver 0]]]
         ::  continuation call: %give to rice we issued
         :+  %|
           :+  me.cart  town-id.cart
@@ -100,7 +100,7 @@
         ::  create new rice for reciever and add it to state
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver]]]
+          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]
         ::  continuation call: %take to rice found in book
         :+  %|
           :+  me.cart  town-id.cart
@@ -202,7 +202,7 @@
         ::  need to issue
         =+  (fry-rice to.i.mints me.cart town-id.cart salt.meta)
         =/  new=grain
-          [- me.cart to.i.mints town-id.cart [%& salt.meta [0 ~ token.args]]]
+          [- me.cart to.i.mints town-id.cart [%& salt.meta [0 ~ token.args 0]]]
         %=  $
           mints        t.mints
           issued-rice  (~(put by issued-rice) id.new new)
@@ -259,7 +259,7 @@
         |=  [=id bal=@ud]
         =+  (fry-rice id me.cart town-id.cart salt)
         :-  -
-        [- me.cart id town-id.cart [%& salt [bal ~ id.metadata-grain]]]
+        [- me.cart id town-id.cart [%& salt [bal ~ id.metadata-grain 0]]]
       ::  big ol issued map
       [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~]
     ==

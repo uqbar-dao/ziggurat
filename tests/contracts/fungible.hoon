@@ -28,7 +28,7 @@
           `@ux`'fungible'
           0xbeef
           0x1
-          [%& `@`'salt' [50 ~ `@ux`'simple']]
+          [%& `@`'salt' [50 ~ `@ux`'simple' 0]]
       ==
     ++  owner-1  ^-  account
       [0xbeef 0 0x1234.5678]
@@ -38,7 +38,7 @@
           `@ux`'fungible'
           0xdead
           0x1
-          [%& `@`'salt' [30 ~ `@ux`'simple']]
+          [%& `@`'salt' [30 ~ `@ux`'simple' 0]]
       ==
     ++  owner-2  ^-  account
       [0xdead 0 0x1234.5678]
@@ -48,7 +48,7 @@
           `@ux`'fungible'
           0xcafe
           0x1
-          [%& `@`'salt' [20 ~ `@ux`'simple']]
+          [%& `@`'salt' [20 ~ `@ux`'simple' 0]]
       ==
     ++  owner-3  ^-  account
       [0xcafe 0 0x1234.5678]
@@ -58,7 +58,7 @@
           `@ux`'fungible'
           0xface
           0x1
-          [%& `@`'diff' [20 ~ `@ux`'different!']]
+          [%& `@`'diff' [20 ~ `@ux`'different!' 0]]
       ==
     --
 ::  testing arms
@@ -81,14 +81,14 @@
         `@ux`'fungible'
         0xbeef
         0x1
-        [%& `@`'salt' [20 ~ `@ux`'simple']]
+        [%& `@`'salt' [20 ~ `@ux`'simple' 0]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         `@ux`'fungible'
         0xdead
         0x1
-        [%& `@`'salt' [60 ~ `@ux`'simple']]
+        [%& `@`'salt' [60 ~ `@ux`'simple' 0]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
@@ -109,7 +109,7 @@
         `@ux`'fungible'
         0xffff
         0x1
-        [%& `@`'salt' [0 ~ `@ux`'simple']]
+        [%& `@`'salt' [0 ~ `@ux`'simple' 0]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)

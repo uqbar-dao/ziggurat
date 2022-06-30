@@ -22,7 +22,7 @@
     $:  balance=@ud                     ::  the amount of tokens someone has
         allowances=(map sender=id @ud)  ::  a map of pubkeys they've permitted to spend their tokens and how much
         metadata=id                     ::  address of the rice holding this token's metadata
-        ::  nonce=@ud maybe?
+        nonce=@ud                       ::  used in signature approves
     ==
   ::
   ::  patterns of arguments supported by this contract
@@ -61,10 +61,12 @@
       |=  =account:sur
       ^-  json
       %-  pairs
-      :^    [%balance (numb balance.account)]
+      :*  [%balance (numb balance.account)]
           [%allowances (allowances allowances.account)]
-        [%metadata (metadata metadata.account)]
-      ~
+          [%metadata (metadata metadata.account)]
+          [%nonce (numb nonce.account)]
+          ~
+      ==
       ::
       ++  allowances
         |=  allowances=(map id @ud)
