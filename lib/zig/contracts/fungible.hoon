@@ -127,15 +127,18 @@
         %take-with-sig
       =/  giv=grain  (~(got by owns.cart) from-rice.args)
       =/  giver  holder.giv
-      =/  typed-message
+      =/  =typed-message
         :-  (fry-rice giver me.cart town-id.cart 0)  ::  domain == rice-id, TODO: get salt somehow
           ;;(approve [holder.giv to.args amount.args nonce.args deadline.args])
       =/  signed-hash  (sham (jam typed-message))
-      =/  recovered-address
+      =/  recovered-point
         %+  ecdsa-raw-recover:secp256k1:secp:crypto
-          signed-hash
-        sig.args
-
+          signed-hash  sig.args
+      =/  recovered-address
+        %-  serialize-point:secp256k1:secp:crypto  recovered-point
+      ~&  >  typed-message
+      ~&  >  giver
+      ~&  >  `@ux`recovered-address
       ?>  =(recovered-address giver)       ::  assert that the signature is valid
       ?>  (gte deadline.args now.cart)     ::  assert that the deadline is valid
       :: ?>  (gte balance.giver amount.args)  ::  assert the giver has enough to cover the spend

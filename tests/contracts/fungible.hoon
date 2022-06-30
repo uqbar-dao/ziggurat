@@ -2,7 +2,7 @@
 ::  to test, make sure to add library import at top of contract
 ::  (remove again before compiling for deployment)
 ::
-/+  *test, cont=zig-contracts-fungible, *zig-sys-smart
+/+  *test, cont=zig-contracts-fungible, *zig-sys-smart, ethereum
 =>  ::  test data
     |%
     ++  init-now  *@da
@@ -23,35 +23,41 @@
               salt=`@`'salt'
       ==  ==
     ::
+    ++  priv-1  0xbeef.beef.beef.beef.beef.beef.beef.beef.beef.beef
+    ++  pub-1  (address-from-prv:key:ethereum priv-1)
+    ++  owner-1  ^-  account
+      [pub-1 0 0x1234.5678]
     ++  account-1  ^-  grain
-      :*  0x1.beef
-          `@ux`'fungible'
-          0xbeef
-          0x1
+      :*  0x1.beef         ::  id
+          `@ux`'fungible'  ::  lord
+          pub-1            ::  holder
+          0x1              ::  town
           [%& `@`'salt' [50 ~ `@ux`'simple' 0]]
       ==
-    ++  owner-1  ^-  account
-      [0xbeef 0 0x1234.5678]
     ::
+    ++  priv-2  0xdead.dead.dead.dead.dead.dead.dead.dead.dead.dead
+    ++  pub-2  (address-from-prv:key:ethereum priv-2)
+    ++  owner-2  ^-  account
+      [pub-2 0 0x1234.5678]
     ++  account-2  ^-  grain
       :*  0x1.dead
           `@ux`'fungible'
-          0xdead
+          pub-2
           0x1
           [%& `@`'salt' [30 ~ `@ux`'simple' 0]]
       ==
-    ++  owner-2  ^-  account
-      [0xdead 0 0x1234.5678]
     ::
+    ++  priv-3  0xcafe.cafe.cafe.cafe.cafe.cafe.cafe.cafe.cafe.cafe
+    ++  pub-3  (address-from-prv:key:ethereum priv-3)
+    ++  owner-3  ^-  account
+      [pub-3 0 0x1234.5678]
     ++  account-3  ^-  grain
       :*  0x1.cafe
           `@ux`'fungible'
-          0xcafe
+          pub-3
           0x1
           [%& `@`'salt' [20 ~ `@ux`'simple' 0]]
       ==
-    ++  owner-3  ^-  account
-      [0xcafe 0 0x1234.5678]
     ::
     ++  account-4  ^-  grain
       :*  0x1.face
@@ -60,6 +66,15 @@
           0x1
           [%& `@`'diff' [20 ~ `@ux`'different!' 0]]
       ==
+    ::
+    ::  for signatures
+    ::
+    +$  approve  $:  from=id
+                     to=id
+                     amount=@ud
+                     nonce=@ud
+                     deadline=@da
+                 ==
     --
 ::  testing arms
 |%
@@ -79,14 +94,14 @@
   =/  updated-1=grain
     :*  0x1.beef
         `@ux`'fungible'
-        0xbeef
+        pub-1
         0x1
         [%& `@`'salt' [20 ~ `@ux`'simple' 0]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         `@ux`'fungible'
-        0xdead
+        pub-2
         0x1
         [%& `@`'salt' [60 ~ `@ux`'simple' 0]]
     ==
@@ -149,20 +164,21 @@
 ::  tests for %take-with-sig
 ::
 ++  test-take-with-sig-known-reciever  ^-  tang
-  =/  to  0xdead
+  ::  send from 2 (dead) to 1 (beef)
+  =/  to  pub-1
   =/  account  `0x1.beef
-  =/  from-rice  0x1.dead :: id.account-1
+  =/  from-rice  0x1.dead
   =/  amount  30
   =/  nonce  0
   =/  deadline  (add *@da 1)
-  :: =/  =typed-message  :-  `@ux`'fungible'
-  ::                       :*  
-  ::                       ==
-  :: =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
-  ::            typed-message
-  ::          0
+  =/  =typed-message  :-  (fry-rice pub-2 `@ux`'fungible' 0x1 0)
+                        ;;(approve [pub-2 to amount nonce deadline])
+  ~&  >>  typed-message
+  =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
+             (sham (jam typed-message))
+           priv-2
   
-  =/  sig  [v=0 r=25.248.332.491.586.708.363.601.973.388.309.628.628.733.012.561.401.931.610.399.476.835.572.499.426.335 s=27.365.559.960.048.330.724.580.333.546.865.253.643.265.405.962.229.511.435.455.789.175.130.621.227.585]
+  :: =/  sig  [v=0 r=25.248.332.491.586.708.363.601.973.388.309.628.628.733.012.561.401.931.610.399.476.835.572.499.426.335 s=27.365.559.960.048.330.724.580.333.546.865.253.643.265.405.962.229.511.435.455.789.175.130.621.227.585]
   =/  =embryo
     :+  owner-1
       `[%take-with-sig to account from-rice amount nonce deadline sig]
