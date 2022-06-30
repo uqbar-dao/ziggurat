@@ -43,10 +43,10 @@
   ::  used for validating gasless approvals
   ::
   +$  approve  $:  from=id
-                    to=id
-                    amount=@ud
-                    nonce=@ud 
-                    deadline=@da
+                   to=id
+                   amount=@ud
+                   nonce=@ud
+                   deadline=@da
                 ==
   ::
   ::  the actual execution arm. branches on argument type and returns final result
@@ -128,8 +128,8 @@
       =/  giv=grain  (~(got by owns.cart) from-rice.args)
       =/  giver  holder.giv
       =/  typed-message
-        :-  (fry-rice giver me.card town-id.cart 0)  ::  domain == rice-id, TODO: get salt somehow
-          ;;(approve giver to.args amount.args nonce.args deadline.args)
+        :-  (fry-rice giver me.cart town-id.cart 0)  ::  domain == rice-id, TODO: get salt somehow
+          ;;(approve [holder.giv to.args amount.args nonce.args deadline.args])
       =/  signed-hash  (sham (jam typed-message))
       =/  recovered-address
         %+  ecdsa-raw-recover:secp256k1:secp:crypto
