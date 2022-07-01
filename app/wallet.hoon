@@ -149,7 +149,7 @@
       =/  hash     (sham (jam typed-message.act))
       =/  signature
         ?~  priv.keypair
-          [0 0 0]
+          !!  ::  put it into some temporary thing for cold storage. Make it pending
         %+  ecdsa-raw-sign:secp256k1:secp:crypto
           hash
         u.priv.keypair
