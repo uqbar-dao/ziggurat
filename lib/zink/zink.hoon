@@ -123,7 +123,7 @@
         %2
       ?~  hit    %.n
       ?~  t.hit  %.n
-      ?&  (ver-s-hash sh.u.hin i.t.hit)
+      ?&  (ver-s-hash p1h.u.hin i.t.hit)
           (ver-f-hash p2h.u.hin i.t.hit)
       ==
     ==
