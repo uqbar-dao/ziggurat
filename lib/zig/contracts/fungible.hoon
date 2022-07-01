@@ -47,18 +47,12 @@
                    amount=@ud
                    nonce=@ud
                    deadline=@da
-                ==
+               ==
   ::
   ::  the actual execution arm. branches on argument type and returns final result
   ::  note that many of these lines will crash with bad input. this is good,
   ::  because we don't want failing transactions to waste more gas than required
   ::
-  ++  address-from-pub
-    =,  keccak:crypto
-    |=  pub=@
-    %+  end  [3 20]
-    %+  keccak-256  64
-    (rev 3 64 pub)
   ++  process
     |=  [args=arguments:sur caller-id=id]
     ?-    -.args

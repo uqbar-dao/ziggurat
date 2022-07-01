@@ -185,4 +185,13 @@
       [%a (turn (wash [0 80] a) tape)]
     --  ::enjs
   --
+::
+::::  copy pasted from lib/ethereum/hoon
+::
+++  address-from-pub
+  =,  keccak:crypto
+  |=  pub=@
+  %+  end  [3 20]
+  %+  keccak-256  64
+  (rev 3 64 pub)
 --
