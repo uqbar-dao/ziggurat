@@ -147,16 +147,16 @@
       ?>  =(recovered-address holder.giv)       ::  assert that the signature is valid
       ?>  (gte deadline.args now.cart)     ::  assert that the deadline is valid
       ?>  (gte balance.giver amount.args)  ::  assert the giver has enough to cover the spend
-      ?~  account.args  !!
-      ::   ::  create new rice for reciever and add it to state
-      ::   =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
-      ::   =/  new=grain
-      ::     [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]
-      ::   ::  continuation call: %take to rice found in book
-      ::   :+  %|
-      ::     :+  me.cart  town-id.cart
-      ::     [caller.inp `[%take to.args `id.new id.giv amount.args] ~ (silt ~[id.giv id.new])]
-      ::   [~ (malt ~[[id.new new]]) ~]
+      ?~  account.args
+      :: ::   ::  create new rice for reciever and add it to state
+        =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
+        =/  new=grain
+          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]
+        ::  continuation call: %take to rice found in book
+        :+  %|
+          :+  me.cart  town-id.cart
+          [caller.inp `[%take-with-sig to.args `id.new id.giv amount.args nonce.args deadline.args sig.args] ~ (silt ~[id.giv id.new])]
+        [~ (malt ~[[id.new new]]) ~]
       ::  direct send
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  ?=(%& -.germ.rec)

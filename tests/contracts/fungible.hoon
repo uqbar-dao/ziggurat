@@ -164,20 +164,20 @@
 ::  tests for %take-with-sig
 ::
 ++  test-take-with-sig-known-reciever  ^-  tang
-  ::  send from 2 (dead) to 1 (beef)
-  =/  to  pub-1
-  =/  account  `0x1.beef
-  =/  from-rice  0x1.dead
+  ::  owner-1 is giving owner-2 the ability to take 30
+  =/  to  pub-2
+  =/  account  `0x1.dead  :: a rice of account-2
+  =/  from-rice  0x1.beef  :: from account-1's rice
   =/  amount  30
   =/  nonce  0
   =/  deadline  (add *@da 1)
-  =/  =typed-message  :-  (fry-rice pub-2 `@ux`'fungible' 0x1 0)
-                        (sham ;;(approve [pub-2 to amount nonce deadline]))
+  =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 0)
+                        (sham ;;(approve [pub-1 to amount nonce deadline]))
   =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
              (sham typed-message)
-           priv-2
+           priv-1
   =/  =embryo
-    :+  owner-1
+    :+  owner-2  ::  is calling take-with-sig
       `[%take-with-sig to account from-rice amount nonce deadline sig]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
@@ -187,14 +187,14 @@
         `@ux`'fungible'
         pub-1
         0x1
-        [%& `@`'salt' [80 ~ `@ux`'simple' 0]]
+        [%& `@`'salt' [20 ~ `@ux`'simple' 1]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         `@ux`'fungible'
         pub-2
         0x1
-        [%& `@`'salt' [0 ~ `@ux`'simple' 1]]
+        [%& `@`'salt' [60 ~ `@ux`'simple' 0]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
@@ -203,7 +203,47 @@
   (expect-eq !>(res) !>(correct))
 ::
 ++  test-take-with-sig-unknown-reciever  ^-  tang
-  ~
+  ::  owner-1 is giving owner-2 the ability to take 30
+  =/  to  pub-2
+  =/  account  ~  :: unkown account this time
+  =/  from-rice  0x1.beef
+  =/  amount  30
+  =/  nonce  0
+  =/  deadline  (add *@da 1)
+  =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 0)
+                        (sham ;;(approve [pub-1 to amount nonce deadline]))
+  =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
+             (sham typed-message)
+           priv-1
+  =/  =embryo
+    :+  owner-2  ::  is calling take-with-sig
+      `[%take-with-sig to account from-rice amount nonce deadline sig]
+    (malt ~[[id:`grain`account-1 account-1]])
+  =/  =cart
+    [`@ux`'fungible' init-now 0x1 (malt ~[[id:`grain`account-1 account-1]])] :: cart no longer knows account-2' rice
+  =/  updated-1=grain
+    :*  0x1.beef
+        `@ux`'fungible'
+        pub-1
+        0x1
+        [%& `@`'salt' [20 ~ `@ux`'simple' 1]]
+    ==
+  =/  new-id  (fry-rice pub-2 `@ux`'fungible' 0x1 `@`'salt')
+  =/  new=grain
+    :*  new-id
+        `@ux`'fungible'
+        pub-2
+        0x1
+        [%& `@`'salt' [30 ~ `@ux`'simple' 0]]
+    ==
+  =/  res=chick
+    (~(write cont cart) embryo)
+  =/  correct=chick
+    :+  %|
+      :+  me.cart  town-id.cart
+      [owner-2 `[%take-with-sig pub-2 `new-id 0x1.beef amount nonce deadline sig] ~ (silt ~[0x1.beef new-id])]
+    [~ (malt ~[[new-id new]]) ~]
+  (expect-eq !>(res) !>(correct))
 
 ::
 ::  tests for %set-allowance
