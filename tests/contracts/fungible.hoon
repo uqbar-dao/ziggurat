@@ -172,13 +172,10 @@
   =/  nonce  0
   =/  deadline  (add *@da 1)
   =/  =typed-message  :-  (fry-rice pub-2 `@ux`'fungible' 0x1 0)
-                        ;;(approve [pub-2 to amount nonce deadline])
-  ~&  >>  typed-message
+                        (sham ;;(approve [pub-2 to amount nonce deadline]))
   =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
-             (sham (jam typed-message))
+             (sham typed-message)
            priv-2
-  
-  :: =/  sig  [v=0 r=25.248.332.491.586.708.363.601.973.388.309.628.628.733.012.561.401.931.610.399.476.835.572.499.426.335 s=27.365.559.960.048.330.724.580.333.546.865.253.643.265.405.962.229.511.435.455.789.175.130.621.227.585]
   =/  =embryo
     :+  owner-1
       `[%take-with-sig to account from-rice amount nonce deadline sig]
@@ -195,14 +192,14 @@
   =/  updated-2=grain
     :*  0x1.dead
         `@ux`'fungible'
-        0xdead
+        pub-2
         0x1
         [%& `@`'salt' [60 ~ `@ux`'simple' 1]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
-    [%& (malt ~[[id:updated-1 updated-1] [id:updated-2 updated-2]]) ~ ~]
+    [%& (malt ~[[id:updated-2 updated-2]]) ~ ~] :: [id:updated-1 updated-1]
   (expect-eq !>(res) !>(correct))
 ::
 ++  test-take-with-sig-unknown-reciever  ^-  tang

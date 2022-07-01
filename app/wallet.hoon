@@ -146,7 +146,7 @@
     ::
         %sign-typed-message
       =/  keypair  (~(got by keys.state) from.act)
-      =/  hash     (sham (jam typed-message.act))
+      =/  hash     (sham typed-message.act)
       =/  signature
         ?~  priv.keypair
           !!  ::  put it into some temporary thing for cold storage. Make it pending

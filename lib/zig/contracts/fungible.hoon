@@ -53,6 +53,12 @@
   ::  note that many of these lines will crash with bad input. this is good,
   ::  because we don't want failing transactions to waste more gas than required
   ::
+  ++  address-from-pub
+    =,  keccak:crypto
+    |=  pub=@
+    %+  end  [3 20]
+    %+  keccak-256  64
+    (rev 3 64 pub)
   ++  process
     |=  [args=arguments:sur caller-id=id]
     ?-    -.args
@@ -129,13 +135,12 @@
       =/  giver  holder.giv
       =/  =typed-message
         :-  (fry-rice giver me.cart town-id.cart 0)  ::  domain == rice-id, TODO: get salt somehow
-          ;;(approve [holder.giv to.args amount.args nonce.args deadline.args])
-      =/  signed-hash  (sham (jam typed-message))
-      =/  recovered-point
-        %+  ecdsa-raw-recover:secp256k1:secp:crypto
-          signed-hash  sig.args
-      =/  recovered-address
-        %-  serialize-point:secp256k1:secp:crypto  recovered-point
+          (sham ;;(approve [holder.giv to.args amount.args nonce.args deadline.args]))
+      =/  signed-hash  (sham typed-message)
+      =,  secp256k1:secp:crypto
+      =/  recovered-address  %-  address-from-pub
+                               %-  serialize-point
+                             (ecdsa-raw-recover signed-hash sig.args)
       ~&  >  typed-message
       ~&  >  giver
       ~&  >  `@ux`recovered-address
