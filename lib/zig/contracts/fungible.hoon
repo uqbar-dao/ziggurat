@@ -38,16 +38,6 @@
   |^
   ?~  args.inp  !!
   (process ;;(arguments:sur u.args.inp) (pin caller.inp))
-  
-  ::
-  ::  used for validating gasless approvals
-  ::
-  +$  approve  $:  from=id
-                   to=id
-                   amount=@ud
-                   nonce=@ud
-                   deadline=@da
-               ==
   ::
   ::  the actual execution arm. branches on argument type and returns final result
   ::  note that many of these lines will crash with bad input. this is good,
@@ -125,24 +115,29 @@
       [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
     ::
         %take-with-sig
+      ::  %take-with-sig allows for gasless approvals for transferring tokens
+      ::  the giver must sign the from-rice id and the typed +$approve struct above
+      ::  and the taker will pass in the signature to take the tokens
       =/  giv=grain  (~(got by owns.cart) from-rice.args)
       ?>  ?=(%& -.germ.giv)
       =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
+      ::  reconstruct the typed message and hash
       =/  =typed-message
-        :-  (fry-rice holder.giv me.cart town-id.cart 0)  ::  domain == rice-id, TODO: get salt somehow
-        (sham ;;(approve [holder.giv to.args amount.args nonce.args deadline.args]))
+        :-  (fry-rice holder.giv me.cart town-id.cart 0)  ::  get salt somehow
+        (sham ;;(approve:sur [holder.giv to.args amount.args nonce.args deadline.args]))
       =/  signed-hash  (sham typed-message)
-      =,  secp256k1:secp:crypto :: will fail when deployed to rollup because crypto library isn't there
+      =,  secp256k1:secp:crypto
+      ::  recoer the address from the message and signature
       =/  recovered-address
         %-  address-from-pub
         %-  serialize-point
         (ecdsa-raw-recover signed-hash sig.args)
-
-      ?>  =(recovered-address holder.giv)       ::  assert that the signature is valid
-      ?>  (gte deadline.args now.cart)     ::  assert that the deadline is valid
-      ?>  (gte balance.giver amount.args)  ::  assert the giver has enough to cover the spend
+      ::  assert the signature is valid
+      ?>  =(recovered-address holder.giv)
+      ?>  (gte deadline.args now.cart)
+      ?>  (gte balance.giver amount.args)
       ?~  account.args
-      :: ::   ::  create new rice for reciever and add it to state
+      ::  create new rice for reciever and add it to state
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]

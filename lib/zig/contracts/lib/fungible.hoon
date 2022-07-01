@@ -22,7 +22,15 @@
     $:  balance=@ud                     ::  the amount of tokens someone has
         allowances=(map sender=id @ud)  ::  a map of pubkeys they've permitted to spend their tokens and how much
         metadata=id                     ::  address of the rice holding this token's metadata
-        nonce=@ud                       ::  used in signature approves
+        nonce=@ud                       ::  necessary for gasless approves
+    ==
+  ::
+  +$  approve
+    $:  from=id       ::  pubkey giving
+        to=id         ::  pubkey permitted to take
+        amount=@ud    ::  how many tokens the taker can take
+        nonce=@ud     ::  current nonce of the giver
+        deadline=@da  ::  how long this approve is valid
     ==
   ::
   ::  patterns of arguments supported by this contract

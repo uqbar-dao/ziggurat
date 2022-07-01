@@ -2,7 +2,7 @@
 ::  to test, make sure to add library import at top of contract
 ::  (remove again before compiling for deployment)
 ::
-/+  *test, cont=zig-contracts-fungible, *zig-sys-smart, ethereum
+/+  *test, cont=zig-contracts-fungible, cont-lib=zig-contracts-lib-fungible, *zig-sys-smart, ethereum
 =>  ::  test data
     |%
     ++  init-now  *@da
@@ -66,15 +66,6 @@
           0x1
           [%& `@`'diff' [20 ~ `@ux`'different!' 0]]
       ==
-    ::
-    ::  for signatures
-    ::
-    +$  approve  $:  from=id
-                     to=id
-                     amount=@ud
-                     nonce=@ud
-                     deadline=@da
-                 ==
     --
 ::  testing arms
 |%
@@ -172,7 +163,7 @@
   =/  nonce  0
   =/  deadline  (add *@da 1)
   =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 0)
-                        (sham ;;(approve [pub-1 to amount nonce deadline]))
+                        (sham ;;(approve:sur:cont-lib [pub-1 to amount nonce deadline]))
   =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
              (sham typed-message)
            priv-1
@@ -211,7 +202,7 @@
   =/  nonce  0
   =/  deadline  (add *@da 1)
   =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 0)
-                        (sham ;;(approve [pub-1 to amount nonce deadline]))
+                        (sham ;;(approve:sur:cont-lib [pub-1 to amount nonce deadline]))
   =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
              (sham typed-message)
            priv-1
