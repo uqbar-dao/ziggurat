@@ -162,7 +162,7 @@
   =/  amount  30
   =/  nonce  0
   =/  deadline  (add *@da 1)
-  =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 0)
+  =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 `@`'salt')
                         (sham ;;(approve:sur:cont-lib [pub-1 to amount nonce deadline]))
   =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
              (sham typed-message)
@@ -201,8 +201,8 @@
   =/  amount  30
   =/  nonce  0
   =/  deadline  (add *@da 1)
-  =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 0)
-                        (sham ;;(approve:sur:cont-lib [pub-1 to amount nonce deadline]))
+  =/  =typed-message  :-  (fry-rice pub-1 `@ux`'fungible' 0x1 `@`'salt')
+                      (sham ;;(approve:sur:cont-lib [pub-1 to amount nonce deadline]))
   =/  sig  %+  ecdsa-raw-sign:secp256k1:secp:crypto
              (sham typed-message)
            priv-1

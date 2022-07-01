@@ -123,7 +123,7 @@
       =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
       ::  reconstruct the typed message and hash
       =/  =typed-message
-        :-  (fry-rice holder.giv me.cart town-id.cart 0)  ::  TODO: get salt somehow
+        :-  (fry-rice holder.giv me.cart town-id.cart salt.p.germ.giv)
         (sham ;;(approve:sur [holder.giv to.args amount.args nonce.args deadline.args]))
       =/  signed-hash  (sham typed-message)
       =,  secp256k1:secp:crypto
