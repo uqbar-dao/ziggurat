@@ -157,7 +157,7 @@
 ++  test-take-with-sig-known-reciever  ^-  tang
   ::  owner-1 is giving owner-2 the ability to take 30
   =/  to  pub-2
-  =/  account  `0x1.dead  :: a rice of account-2
+  =/  account  `0x1.dead  :: a rice of account-2  :: TODO: something is really fishy here. the account rice should have to be signed but this is fucked
   =/  from-rice  0x1.beef  :: from account-1's rice
   =/  amount  30
   =/  nonce  0
