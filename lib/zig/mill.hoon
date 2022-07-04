@@ -117,10 +117,11 @@
     ^-  [^land fee=@ud =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [land 0 %1 ~ ~]
     ::  validate transaction signature
-    ::  =+  ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
-    ::  ?.  (verify-sig id.from.p.egg - sig.p.egg ?=(^ eth-hash.p.egg))
-    ::  ~&  >>>  "mill: signature mismatch"
-    ::    [land 0 %2 ~ ~]  ::  signed tx doesn't match account
+    =+  ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
+    ::  all addresses should be ETH-style, but might not be signed ETH-style.
+    ?.  (verify-sig id.from.p.egg - sig.p.egg %.y)
+      ~&  >>>  "mill: signature mismatch"
+      [land 0 %2 ~ ~]  ::  signed tx doesn't match account
     ::
     ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
       ~&  >>>  "mill: tx rejected; bad nonce"
@@ -293,31 +294,21 @@
         =/  payload   .*(q.library pay.cont.crop)
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]
-        ::  MULE
-        ::
-        =/  res
-          (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))^(sub budget 7)
-        ?:  ?=(%| -.-.res)
+        =/  gun
+          (ajar dor %write !>(cart) !>(embryo))
+        =/  =book
+          (zebra budget zink-cax gun)
+        ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
+        :-  hit.q.book
+        ?:  ?=(%| -.p.book)
           ::  error in contract execution
-          [~ ~ +.res %6]
-        [~ `p.-.res +.res %0]
-        ::  ZEBRA
-        ::
-        ::  =/  gun
-        ::    (ajar dor %write !>(cart) !>(embryo))
-        ::  =/  =book
-        ::    (zebra budget zink-cax gun)
-        ::  ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
-        ::  :-  hit.q.book
-        ::  ?:  ?=(%| -.p.book)
-        ::    ::  error in contract execution
-        ::    ~&  p.book
-        ::    [~ bud.q.book %6]
-        ::  ::  chick result
-        ::  ?~  p.p.book
-        ::    ~&  >>>  "mill: ran out of gas"
-        ::    [~ 0 %8]
-        ::  [(hole (unit chick) p.p.book) bud.q.book %0]
+          ~&  p.book
+          [~ bud.q.book %6]
+        ::  chick result
+        ?~  p.p.book
+          ~&  >>>  "mill: ran out of gas"
+          [~ 0 %8]
+        [(hole (unit chick) p.p.book) bud.q.book %0]
       --
     ::
     ::  +harvest: take a completed execution and validate all changes and additions to granary state

@@ -1,45 +1,22 @@
 /-  ui=indexer,
-    zig=ziggurat,
     seq=sequencer
 /+  smart=zig-sys-smart
 ::
 |_  =bowl:gall
-++  scry-contract-read-arm-agent
-  |=  $:  scry-dock=[host=@p agent=?(%sequencer %ziggurat)]
-          to=id:smart
-          query-type=?(%egg-args %rice-data)  ::  TODO: generalize to @tas?
-          query-arg=@ta
-      ==
-  .^  json
-      %gx
-      %-  zing
-      :^    /(scot %p host.scry-dock)/[agent.scry-dock]
-          /(scot %da now.bowl)/wheat/(scot %ux to)/json
-        ?:  ?=(%egg-args query-type)
-          /egg-args/[query-arg]/~/noun
-        /rice-data/~/[query-arg]/noun
-      ~
-  ==
 ++  scry-contract-read-arm
   |=  $:  scry-host=@p
           to=id:smart
           query-type=?(%egg-args %rice-data)  ::  TODO: generalize to @tas?
           query-arg=@ta
+          rice-id=@ta
       ==
-  =/  from-sequencer=json
-    %:  scry-contract-read-arm-agent
-        [scry-host %sequencer]
-        to
-        query-type
-        query-arg
-    ==
-  ?.  ?=(~ from-sequencer)
-    from-sequencer
-  %:  scry-contract-read-arm-agent
-      [scry-host %ziggurat]
-      to
-      query-type
-      query-arg
+  .^  json
+      %gx
+      %-  zing
+      :^    /(scot %p scry-host)/sequencer
+          /(scot %da now.bowl)/read/(scot %ux to)/json
+        /[query-type]/[query-arg]/[rice-id]/noun
+      ~
   ==
 ::
 ++  enjs
@@ -50,14 +27,8 @@
     ^-  json
     ?~  update  ~
     ?-    -.update
-    ::
-        %chunk
-      %+  frond  %chunk
-      %-  pairs
-      :^    [%timestamp (time timestamp.update)]
-          [%location (town-location location.update)]
-        [%chunk (chunk chunk.update)]
-      ~
+        %batch
+      (frond %batch (batches batches.update))
     ::
         %egg
       (frond %egg (eggs eggs.update))
@@ -68,57 +39,55 @@
         %hash
       %+  frond  %hash
       %-  pairs
-      :^    [%eggs (eggs eggs.update)]
-          [%grains (grains grains.update)]
-        [%slots (slots slots.update)]
+      :^    [%batches (batches batches.update)]
+          [%eggs (eggs eggs.update)]
+        [%grains (grains grains.update)]
       ~
-    ::
-        %slot
-      (frond %slots (slots slots.update))
-    ::
     ==
-  ::
-  ++  block-location
-    |=  =block-location:ui
-    ^-  json
-    %-  pairs
-    :+  [%epoch-num (numb epoch-num.block-location)]
-      [%block-num (numb block-num.block-location)]
-    ~
   ::
   ++  town-location
     |=  =town-location:ui
     ^-  json
     %-  pairs
-    :^    [%epoch-num (numb epoch-num.town-location)]
-        [%block-num (numb block-num.town-location)]
-      [%town-id (numb town-id.town-location)]
+    :-  [%town-id %s (scot %ux town-location)]
+    ~
+  ::
+  ++  batch-location
+    |=  =batch-location:ui
+    ^-  json
+    %-  pairs
+    :+  [%town-id %s (scot %ux town-id.batch-location)]
+      [%batch-root %s (scot %ux batch-root.batch-location)]
     ~
   ::
   ++  egg-location
     |=  =egg-location:ui
     ^-  json
     %-  pairs
-    :~  [%epoch-num (numb epoch-num.egg-location)]
-        [%block-num (numb block-num.egg-location)]
-        [%town-id (numb town-id.egg-location)]
-        [%egg-num (numb egg-num.egg-location)]
-    ==
+    :^    [%town-id %s (scot %ux town-id.egg-location)]
+        [%batch-root %s (scot %ux batch-root.egg-location)]
+      [%egg-num (numb egg-num.egg-location)]
+    ~
   ::
-  ++  chunks
-    |=  =chunks:zig
+  ++  batches
+    |=  batches=(map batch-id=id:smart [@da town-location:ui batch:ui])
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by chunks)
-    |=  [town-id=@ud c=chunk:zig]
-    [(scot %ud town-id) (chunk c)]
+    %+  turn  ~(tap by batches)
+    |=  [=id:smart timestamp=@da location=town-location:ui b=batch:ui]
+    :-  (scot %ux id)
+    %-  pairs
+    :^    [%timestamp (time timestamp)]
+        [%location (town-location location)]
+      [%batch (batch b)]
+    ~
   ::
-  ++  chunk
-    |=  =chunk:zig
+  ++  batch
+    |=  =batch:ui
     ^-  json
     %-  pairs
-    :+  [%transactions (transactions -.chunk)]
-      [%town (town +.chunk)]
+    :+  [%transactions (transactions transactions.batch)]
+      [%town (town +.batch)]
     ~
   ::
   ++  transactions
@@ -159,12 +128,12 @@
     ?>  ?=(account:smart from.shell)
     %-  pairs
     :~  [%from (account from.shell)]
-        [%sig (signature sig.shell)]
+        [%sig (sig sig.shell)]
         [%eth-hash (eth-hash eth-hash.shell)]
         [%to %s (scot %ux to.shell)]
         [%rate (numb rate.shell)]
         [%budget (numb budget.shell)]
-        [%town-id (numb town-id.shell)]
+        [%town-id %s (scot %ux town-id.shell)]
         [%status (numb status.shell)]
     ==
   ::
@@ -179,6 +148,7 @@
           to.shell
           %egg-args
           (scot %ud (jam u.args.yolk))
+          '~'
       ==
     %-  pairs
     :~  [%caller (account caller.yolk)]
@@ -193,17 +163,17 @@
     %-  pairs
     :^    [%id %s (scot %ux id.account)]
         [%nonce (numb nonce.account)]
-      [%zigs (numb zigs.account)]
+      [%zigs %s (scot %ux zigs.account)]
     ~
   ::
-  ++  signature  ::  TODO: use signature:zig or signature:smart?
-    |=  =signature:zig
-    ^-  json
-    %-  pairs
-    :^    [%hash %s (scot %ux p.signature)]
-        [%ship %s (scot %p q.signature)]
-      [%life (numb r.signature)]
-    ~
+  :: ++  signature
+  ::   |=  =signature:zig
+  ::   ^-  json
+  ::   %-  pairs
+  ::   :^    [%hash %s (scot %ux p.signature)]
+  ::       [%ship %s (scot %p q.signature)]
+  ::     [%life (numb r.signature)]
+  ::   ~
   ::
   ++  eth-hash
     |=  eth-hash=(unit @ud)
@@ -220,15 +190,18 @@
     [%s (scot %ux id)]
   ::
   ++  grains
-    |=  grains=(map grain-id=id:smart [@da location=town-location:ui =grain:smart])
+    |=  grains=(jar grain-id=id:smart [@da location=batch-location:ui =grain:smart])
     ^-  json
     %-  pairs
     %+  turn  ~(tap by grains)
-    |=  [=id:smart timestamp=@da location=town-location:ui g=grain:smart]
-    :-  (scot %ux id)
+    |=  [=id:smart gs=(list [@da batch-location:ui grain:smart])]
+    :+  (scot %ux id)
+      %a
+    %+  turn  gs
+    |=  [timestamp=@da location=batch-location:ui g=grain:smart]
     %-  pairs
     :^    [%timestamp (time timestamp)]
-        [%location (town-location location)]
+        [%location (batch-location location)]
       [%grain (grain g)]
     ~
   ::
@@ -239,7 +212,7 @@
     :~  [%id %s (scot %ux id.grain)]
         [%lord %s (scot %ux lord.grain)]
         [%holder %s (scot %ux holder.grain)]
-        [%town-id (numb town-id.grain)]
+        [%town-id %s (scot %ux town-id.grain)]
         [%germ (germ germ.grain lord.grain id.grain)]
     ==
   ::
@@ -252,6 +225,7 @@
             our.bowl
             wheat-id
             %rice-data
+            (scot %ud (jam data.p.germ))
             (scot %ux rice-id)
         ==
       %-  pairs
@@ -266,48 +240,15 @@
       [%owns (ids owns.p.germ)]
     ~
   ::
-  ++  slots
-    |=  slots=(map slot-id=id:smart [@da location=block-location:ui =slot:zig])
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by slots)
-    |=  [=id:smart timestamp=@da location=block-location:ui s=slot:zig]
-    :-  (scot %ux id)
-    %-  pairs
-    :^    [%timestamp (time timestamp)]
-        [%location (block-location location)]
-      [%slot (slot s)]
-    ~
-  ::
-  ++  slot
-    |=  =slot:zig
-    ^-  json
-    %-  pairs
-    :+  [%header (block-header p.slot)]
-      [%block (block q.slot)]
-    ~
-  ::
-  ++  block-header
-    |=  =block-header:zig
-    ^-  json
-    %-  pairs
-    :^    [%num (numb num.block-header)]
-        :+  %prev-header-hash  %s
-        (scot %ux prev-header-hash.block-header)
-      [%data-hash %s (scot %ux data-hash.block-header)]
-    ~
-  ::
-  ++  block
-    |=  block=(unit block:zig)
-    ^-  json
-    ?~  block  ~
-    %-  pairs
-    :^    [%height (numb height.u.block)]
-        [%signature (signature signature.u.block)]
-      [%chunks (chunks chunks.u.block)]
-    ~
-  ::
   ++  town
+    |=  =town:seq
+    ^-  json
+    %-  pairs
+    :+  [%land (land land.town)]
+      [%hall (hall hall.town)]
+    ~
+  ::
+  ++  land
     |=  =land:seq
     ^-  json
     %-  pairs
@@ -331,240 +272,80 @@
     |=  [=id:smart nonce=@ud]
     [(scot %ux id) (numb nonce)]
   ::
-  ++  headers
-    |=  headers=(list [epoch-num=@ud bh=block-header:zig])
+  ++  hall
+    |=  =hall:seq
+    ^-  json
+    %-  pairs
+    :~  [%town-id %s (scot %ux town-id.hall)]
+        [%sequencer (sequencer sequencer.hall)]
+        [%mode (mode mode.hall)]
+        [%latest-diff-hash %s (scot %ux latest-diff-hash.hall)]
+        [%roots (roots roots.hall)]
+    ==
+  ::
+  ++  sequencer
+    |=  =sequencer:seq
+    ^-  json
+    %-  pairs
+    :+  [%address %s (scot %ux p.sequencer)]
+      [%ship %s (scot %p q.sequencer)]
+    ~
+  ::
+  ++  mode
+    |=  mode=availability-method:seq
+    ^-  json
+    ?-    -.mode
+        %full-publish
+      [%s %full-publish]
+    ::
+        %committee
+      (frond %committee (committee members.mode))
+    ==
+  ::
+  ++  roots
+    |=  roots=(list @ux)
+    ^-  json
+    :-  %a
+    %+  turn  roots
+    |=  root=@ux
+    [%s (scot %ux root)]
+  ::
+  ++  committee
+    |=  committee-members=(map @ux [@p (unit sig:smart)])
+    ^-  json
+    (frond %members (members committee-members))
+  ::
+  ++  members
+    |=  members=(map @ux [@p (unit sig:smart)])
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by members)
+    |=  [address=@ux s=@p signature=(unit sig:smart)]
+    :-  (scot %ux address)
+    %-  pairs
+    :+  [%ship %s (scot %p s)]
+      [%sig ?~(signature ~ (sig u.signature))]
+    ~
+  ::
+  ++  sig
+    |=  =sig:smart
+    ^-  json
+    %-  pairs
+    :^    [%v (numb v.sig)]
+        [%r (numb r.sig)]
+      [%s (numb s.sig)]
+    ~
+  ::
+  ++  batch-order
+    |=  =batch-order:ui
     ^-  json
     %-  pairs
     :_  ~
-    :-  %headers
+    :-  %batch-order
     :-  %a
-    %+  turn  headers
-    |=  [epoch-num=@ud bh=block-header:zig]
-    %-  pairs
-    :+  [%epoch-num (numb epoch-num)]
-      [%block-header (block-header bh)]
-    ~
-  ::
+    %+  turn  batch-order
+    |=  batch-root=id:smart
+    [%s (scot %ux batch-root)]
   --
-++  dejs
-  =,  dejs:format
-  |%
-  ++  update
-    |=  jon=json
-    ^-  update:ui
-    ?~  jon  ~
-    %.  jon
-    %-  of
-    :~  [%chunk (ot ~[[%timestamp di] [%location town-location] [%chunk chunk]])]
-        [%egg eggs]
-        [%grain grains]
-        [%hash (ot ~[[%eggs eggs] [%grains grains] [%slots slots]])]
-        [%slot slots]
-    ==
-  ::
-  ++  block-location
-    ^-  $-(json block-location:ui)
-    %-  ot
-    :+  [%epoch-num ni]
-      [%block-num ni]
-    ~
-  ::
-  ++  town-location
-    ^-  $-(json town-location:ui)
-    %-  ot
-    :^    [%epoch-num ni]
-        [%block-num ni]
-      [%town-id ni]
-    ~
-  ::
-  ++  egg-location
-    ^-  $-(json egg-location:ui)
-    %-  ot
-    :~  [%epoch-num ni]
-        [%block-num ni]
-        [%town-id ni]
-        [%egg-num ni]
-    ==
-  ::
-  ++  chunks
-    ^-  $-(json chunks:zig)
-    (op dem chunk)
-  ::
-  ++  chunk
-    ^-  $-(json chunk:zig)
-    %-  ot
-    :+  [%transactions transactions]
-      [%town town]
-    ~
-  ::
-  ++  transactions
-    ^-  $-(json (list [@ux egg:smart]))
-    %-  ar
-    (at ~[nu egg])
-  ::
-  ++  eggs
-    ^-  $-(json (map egg-id=id:smart [@da location=egg-location:ui =egg:smart]))
-    %+  op  hex
-    %-  ot
-    :^    [%timestamp di]
-        [%location egg-location]
-      [%egg egg]
-    ~
-  ::
-  ++  egg
-    ^-  $-(json egg:smart)
-    %-  ot
-    :+  [%shell shell]
-      [%yolk yolk]
-    ~
-  ::
-  ++  shell
-    ^-  $-(json shell:smart)
-    %-  ot
-    :~  [%from account]  :: always account?
-        [%sig signature]
-        [%eth-hash eth-hash]
-        [%to nu]
-        [%rate ni]
-        [%budget ni]
-        [%town-id ni]
-        [%status ni]
-    ==
-  ::
-  ++  yolk
-    |=  jon=json
-    ^-  yolk:smart
-    :+  %.  jon
-        %-  ot
-        :-  [%caller account]  :: always account?
-        ~
-      ~    :: TODO: rewrite when can mold args
-    %.  jon
-    %-  ot
-    :+  [%my-grains ids]
-      [%cont-grains ids]
-    ~
-  ::
-  ++  account
-    ^-  $-(json account:smart)
-    %-  ot
-    :^    [%id nu]
-        [%nonce ni]
-      [%zigs ni]
-    ~
-  ::
-  ++  signature  ::  TODO: use signature:zig or signature:smart?
-    ^-  $-(json signature:zig)
-    %-  ot
-    :^    [%hash nu]
-        [%ship nu]
-      [%life ni]
-    ~
-  ::
-  ++  eth-hash
-    |=  jon=json
-    ^-  (unit @ud)
-    ?~  jon  ~
-    :-  ~
-    %.  jon
-    ni
-  ::
-  ++  ids
-    ^-  $-(json (set id:smart))
-    (as nu)
-  ::
-  ++  grains
-    ^-  $-(json (map grain-id=id:smart [@da location=town-location:ui =grain:smart]))
-    %+  op  hex
-    %-  ot
-    :^    [%timestamp di]
-        [%location town-location]
-      [%grain grain]
-    ~
-  ::
-  ++  grain
-    ^-  $-(json grain:smart)
-    %-  ot
-    :~  [%id nu]
-        [%lord nu]
-        [%holder nu]
-        [%town-id ni]
-        [%germ germ]
-    ==
-  ::
-  ++  germ
-    ::  TODO: rewrite when can get data/cont molds
-    |=  jon=json
-    ^-  germ:smart
-    ?>  ?=(%o -.jon)
-    =/  is-rice  (~(got by p.jon) %is-rice)
-    ?<  ?=(~ is-rice)
-    ?>  ?=(%b -.is-rice)
-    ?:  p.is-rice
-      :+  %&
-        %.  jon
-        %-  ot
-        :-  [%salt ni]
-        ~
-      `*`0
-    ::  is wheat
-    :+  %|
-      ~
-    %.  jon
-    %-  ot
-    :-  [%owns ids]
-    ~
-  ::
-  ++  slots
-    ^-  $-(json (map slot-id=id:smart [@da location=block-location:ui =slot:zig]))
-    %+  op  hex
-    %-  ot
-    :^    [%timestamp di]
-        [%location block-location]
-      [%slot slot]
-    ~
-  ::
-  ++  slot
-    ^-  $-(json slot:zig)
-    %-  ot
-    :+  [%header block-header]
-      [%block block]
-    ~
-  ::
-  ++  block-header
-    ^-  $-(json block-header:zig)
-    %-  ot
-    :^    [%num ni]
-        [%prev-header-hash nu]
-      [%data-hash nu]
-    ~
-  ::
-  ++  block
-    |=  jon=json
-    ^-  (unit block:zig)
-    ?~  jon  ~
-    :-  ~
-    %.  jon
-    %-  ot
-    :^    [%height ni]
-        [%signature signature]
-      [%chunks chunks]
-    ~
-  ::
-  ++  town
-    ^-  $-(json land:seq)
-    %-  ot
-    :+  [%granary granary]
-      [%populace populace]
-    ~
-  ::
-  ++  granary
-    ^-  $-(json granary:seq)
-    (op hex grain)
-  ::
-  ++  populace
-    ^-  $-(json populace:seq)
-    (op hex ni)
-  ::
-  --
+::  ++  dejs  ::  see https://github.com/uqbar-dao/ziggurat/blob/d395f3bb8100ddbfad10c38cd8e7606545e164d3/lib/indexer-bowl.hoon#L348
 --

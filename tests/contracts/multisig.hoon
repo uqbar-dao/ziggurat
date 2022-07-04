@@ -8,38 +8,12 @@
     ++  init-now  ~2022.6.20..17.54.07..7d8d
     ++  town-id    0x1
     ::
-    ++  account-1
-      ^-  grain
-      :*  id=0x1.beef
-          lord=`@ux`'zigs'
-          holder=0xbeef
-          town-id
-          [%& salt=`@`'zigs' data=[50 ~ `@ux`'zigs']]
-      ==
     ++  owner-1
       ^-  account
       [id=0xbeef nonce=0 zigs=0x1234.5678]
-    ::
-    ++  account-2
-      ^-  grain
-      :*  0x1.dead
-          `@ux`'zigs'
-          0xdead
-          town-id
-          [%& `@`'zigs' [30 ~ `@ux`'zigs']]
-      ==
     ++  owner-2
       ^-  account
       [0xdead 0 0x1234.5678]
-    ::
-    ++  account-3
-      ^-  grain
-      :*  0x1.cafe
-          `@ux`'zigs'
-          0xcafe
-          town-id
-          [%& `@`'zigs' [20 ~ `@ux`'zigs']]
-      ==
     ++  owner-3
       ^-  account
       [0xcafe 0 0x1234.5678]
