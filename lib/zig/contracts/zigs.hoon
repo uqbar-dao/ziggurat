@@ -14,8 +14,8 @@
   |=  inp=embryo
   ^-  chick
   |^
-  ?~  args.inp  !!
-  (process ;;(arguments:sur u.args.inp) (pin caller.inp))
+  ?~  action.inp  !!
+  (process ;;(arguments:sur u.action.inp) id.from.cart)
   ::
   ++  process
     |=  [args=arguments:sur caller-id=id]
@@ -30,10 +30,8 @@
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
-        :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%give to.args `id.new amount.args budget.args] (silt ~[id.giv]) (silt ~[id.new])]
-        [~ (malt ~[[id.new new]]) ~]
+        =-  (continuation ~[-] [%& ~ (malt ~[[id.new new]]) ~])
+        (call me.cart town-id.cart [%give to.args `id.new amount.args budget.args] ~[id.giv] ~[id.new])
       ::  otherwise, add to the existing account for that pubkey
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
@@ -55,10 +53,8 @@
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
-        :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%take to.args `id.new id.giv amount.args] ~ (silt ~[id.giv id.new])]
-        [~ (malt ~[[id.new new]]) ~]
+        =-  (continuation ~[-] [%& ~ (malt ~[[id.new new]]) ~])
+        (call me.cart town-id.cart [%take to.args `id.new id.giv amount.args] ~ ~[id.giv id.new])
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
       =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
@@ -81,23 +77,13 @@
         account(allowances (~(put by allowances.account) who.args amount.args))
       [%& (malt ~[[id.acc acc]]) ~ ~]
     ==
-    (result ~[giv rec] ~ ~)
-  ::
-      %set-allowance
-    =/  acc=grain  -:~(val by grains.inp)
-    ?>  !=(who.act holder.acc)
-    ?>  &(=(lord.acc me.cart) ?=(%& -.germ.acc))
-    =/  =account  ;;(account data.p.germ.acc)
-    =.  data.p.germ.acc
-      account(allowances (~(put by allowances.account) who.act amount.act))
-    (result ~[acc] ~ ~)
-  ==
+  --
 ::
 ++  read
-  |_  act=path
+  |_  =path
   ++  json
     ^-  ^json
-    ?+    args  !!
+    ?+    path  !!
         [%rice-data ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
@@ -107,14 +93,14 @@
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%rice-data @ ~]
-      =/  data  (cue (slav %ud i.t.args))
+      =/  data  (cue (slav %ud i.t.path))
       ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
         (account:enjs:lib ;;(account:sur data))
       (token-metadata:enjs:lib ;;(token-metadata:sur data))
     ::
         [%egg-args @ ~]
       %-  arguments:enjs:lib
-      ;;(arguments:sur (cue (slav %ud i.t.args)))
+      ;;(arguments:sur (cue (slav %ud i.t.path)))
     ==
   ::
   ++  noun

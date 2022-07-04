@@ -124,10 +124,8 @@
   ++  yolk
     |=  =yolk:smart
     ^-  json
-    ?>  ?=(account:smart caller.yolk)
     %-  pairs
-    :~  [%caller (account caller.yolk)]
-        [%args ~]
+    :~  [%args ~]
         [%my-grains (ids my-grains.yolk)]
         [%cont-grains (ids cont-grains.yolk)]
     ==

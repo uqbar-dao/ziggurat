@@ -178,7 +178,7 @@
       =+  /(scot %p our.bowl)/wallet/(scot %da now.bowl)/account/(scot %ux addr)/(scot %ux town-id.hall.town)/noun
       =+  .^(account:smart %gx -)
       =/  new=state-transition
-        %^    ~(mill-all mil - id.hall.town now.bowl)
+        %^    ~(mill-all mil - town-id.hall.town now.bowl)
             land.town
           ~(tap in `^basket`basket.state)
         1  ::  number of parallel "passes"
