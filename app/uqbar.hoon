@@ -39,7 +39,7 @@
       ?(%id %grain %holder %lord)
     ?.  ?=([@ @ @ ~] path)  ~
     =/  town=id:smart  (slav %ux i.t.path)
-    ?~  card=(watch-indexer town ~ /[i.path]/[i.t.t.path])  ~
+    ?~  card=(watch-indexer town ~ path)  ~
     ~[u.card]
   ::
       %scry
@@ -47,7 +47,7 @@
     ?.  ?=([@ @ @ @ ~] path)                      ~
     =/  town=id:smart  (slav %ux i.t.t.path)
     =/  card=(unit card)
-      (watch-indexer town /[i.path] /[i.t.path]/[i.t.t.t.path])
+      (watch-indexer town /[i.path] path)
     ?~(card ~ ~[u.card])
   ::
       %track
@@ -82,11 +82,11 @@
     ^-  (quip card _state)
     ?-    -.act
         %set-sources
-      ::  TEMPORARY: subscribe directly to rollup (hardcoded) to know active sequencers.
-      ::  this will only work pre-scaling so make sure to switch source to indexers
-      ::  down the line. also need to be on whitelist for this to work
+      ::  TODO: extract indexer to watch in less hacky way
+      ?>  ?=(^ indexers.act)
+      ?>  ?=(^ +.i.indexers.act)
       =+  /capitol-updates
-      :-  [%pass - %agent [rollup-host.act %rollup] %watch -]~
+      :-  ~[(~(watch pass:io -) i.+.i.indexers.act -)]
       state(sources (~(gas by *(map id:smart (list dock))) indexers.act))
     ::
         %add-source
