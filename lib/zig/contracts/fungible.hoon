@@ -125,11 +125,9 @@
       =/  =typed-message
         :-  (fry-rice holder.giv me.cart town-id.cart salt.p.germ.giv)
         (sham ;;(approve:sur [holder.giv to.args amount.args nonce.args deadline.args]))
-      ~&  >>  typed-message
-      ~&  >>  ;;(approve:sur [holder.giv to.args amount.args nonce.args deadline.args])
       =/  signed-hash  (sham typed-message)
-      ~&  >>  `@`signed-hash
-      ~&  >>  (hash-typed-message (fry-rice holder.giv me.cart town-id.cart salt.p.germ.giv) approve:sur [holder.giv to.args amount.args nonce.args deadline.args])
+      
+      ::  in production this won't work because we don't have access to zuse...
       =,  secp256k1:secp:crypto
       ::  recoer the address from the message and signature
       =/  recovered-address
