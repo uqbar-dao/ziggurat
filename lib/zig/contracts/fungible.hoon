@@ -56,7 +56,7 @@
         ::  create new rice for reciever and add it to state
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver]]]
+          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver 0]]]
         ::  continuation call: %give to rice we issued
         :+  %|
           :+  me.cart  town-id.cart
@@ -90,7 +90,7 @@
         ::  create new rice for reciever and add it to state
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver]]]
+          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]
         ::  continuation call: %take to rice found in book
         :+  %|
           :+  me.cart  town-id.cart
@@ -110,6 +110,56 @@
         %=  giver
           balance  (sub balance.giver amount.args)
           allowances  (~(jab by allowances.giver) caller-id |=(old=@ud (sub old amount.args)))
+        == 
+      ==
+      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
+    ::
+        %take-with-sig
+      ::  %take-with-sig allows for gasless approvals for transferring tokens
+      ::  the giver must sign the from-rice id and the typed +$approve struct above
+      ::  and the taker will pass in the signature to take the tokens
+      =/  giv=grain  (~(got by owns.cart) from-rice.args)
+      ?>  ?=(%& -.germ.giv)
+      =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
+      ::  reconstruct the typed message and hash
+      =/  =typed-message
+        :-  (fry-rice holder.giv me.cart town-id.cart salt.p.germ.giv)
+        (sham ;;(approve:sur [holder.giv to.args amount.args nonce.args deadline.args]))
+      ~&  >>  typed-message
+      ~&  >>  ;;(approve:sur [holder.giv to.args amount.args nonce.args deadline.args])
+      =/  signed-hash  (sham typed-message)
+      ~&  >>  `@`signed-hash
+      ~&  >>  (hash-typed-message (fry-rice holder.giv me.cart town-id.cart salt.p.germ.giv) approve:sur [holder.giv to.args amount.args nonce.args deadline.args])
+      =,  secp256k1:secp:crypto
+      ::  recoer the address from the message and signature
+      =/  recovered-address
+        %-  address-from-pub
+        %-  serialize-point
+        (ecdsa-raw-recover signed-hash sig.args)
+      ::  assert the signature is valid
+      ?>  =(recovered-address holder.giv)
+      ?>  (gte deadline.args now.cart)
+      ?>  (gte balance.giver amount.args)
+      ?~  account.args
+      ::  create new rice for reciever and add it to state
+        =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
+        =/  new=grain
+          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]
+        ::  continuation call: %take to rice found in book
+        :+  %|
+          :+  me.cart  town-id.cart
+          [caller.inp `[%take-with-sig to.args `id.new id.giv amount.args nonce.args deadline.args sig.args] ~ (silt ~[id.giv id.new])]
+        [~ (malt ~[[id.new new]]) ~]
+      ::  direct send
+      =/  rec=grain  (~(got by owns.cart) u.account.args)
+      ?>  ?=(%& -.germ.rec)
+      =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
+      ?>  =(metadata.receiver metadata.giver)
+      =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
+          data.p.germ.giv
+        %=  giver
+          balance  (sub balance.giver amount.args)
+          nonce  .+(nonce.giver)
         == 
       ==
       [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
@@ -172,7 +222,7 @@
         ::  need to issue
         =+  (fry-rice to.i.mints me.cart town-id.cart salt.meta)
         =/  new=grain
-          [- me.cart to.i.mints town-id.cart [%& salt.meta [0 ~ token.args]]]
+          [- me.cart to.i.mints town-id.cart [%& salt.meta [0 ~ token.args 0]]]
         %=  $
           mints        t.mints
           issued-rice  (~(put by issued-rice) id.new new)
@@ -229,7 +279,7 @@
         |=  [=id bal=@ud]
         =+  (fry-rice id me.cart town-id.cart salt)
         :-  -
-        [- me.cart id town-id.cart [%& salt [bal ~ id.metadata-grain]]]
+        [- me.cart id town-id.cart [%& salt [bal ~ id.metadata-grain 0]]]
       ::  big ol issued map
       [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~]
     ==
