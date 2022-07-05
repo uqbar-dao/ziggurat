@@ -23,7 +23,7 @@
     ==
   ::
   +$  arguments
-    $%  [%give to=id account=(unit id) amount=@ud budget=@ud]
+    $%  [%give budget=@ud to=id account=(unit id) amount=@ud]
         [%take to=id account=(unit id) from-account=id amount=@ud]
         [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
     ==

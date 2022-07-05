@@ -78,6 +78,7 @@
     =|  reward=@ud
     |-
     ?~  pending
+      ~&  >>  "total batch reward: {<reward>}"
       ::  create final state transition
       :*  [(~(pay tax (~(uni by p.land) all-diffs)) reward) q.land]
           processed
@@ -92,22 +93,21 @@
     ?^  overlap=(~(int by all-diffs) diff)
       ::  diff contains collision, reject
       ::
+      ~&  >>>  "mill: rejecting egg due to diff overlap"
       %=  $
         pending    t.pending
         processed  [i.pending(status.p.egg %9) processed]
       ==
-    ::  diff is isolated, proceedddd
+    ::  diff is isolated, proceed
     ::
-    =?  diff  ?=(account from.p.egg.i.pending)
-      (~(charge tax p.land) from.p.egg.i.pending fee)
     %=  $
       pending    t.pending
       processed  [i.pending(status.p.egg errorcode) processed]
-      all-diffs  (~(uni by all-diffs) diff)
       q.land     nonces
       reward     (add reward fee)
       lis-hits   [hits lis-hits]
       crows      [crow crows]
+      all-diffs  (~(uni by all-diffs) diff)
     ==
   ::
   ::  +mill: processes a single egg and returns map of modified grains + updated nonce
@@ -127,15 +127,22 @@
       ~&  >>>  "mill: tx rejected; bad nonce"
       [land 0 %3 ~ ~]  ::  bad nonce
     ::
-    ?.  (~(audit tax p.land) egg)
+    =/  [valid=? updated-zigs-action=(unit *)]
+      (~(audit tax p.land) egg)
+    ?.  valid
       ~&  >>>  "mill: tx rejected; not enough budget"
       [land 0 %4 ~ ~]  ::  can't afford gas
+    =?  action.q.egg  ?=(^ updated-zigs-action)
+      updated-zigs-action
     ::
     =/  res  (~(work farm p.land) egg)
-    =/  fee=@ud  (sub budget.p.egg rem.res)
+    ~&  res
+    =/  fee=@ud  (sub budget.p.egg rem.res) 
     :_  [fee errorcode.res hits.res crow.res]
-    :-  ?~(diff.res ~ u.diff.res)
-    (~(put by q.land) id.from.p.egg nonce.from.p.egg)
+    :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
+    ::  charge gas fee by including their designated zigs grain inside the diff
+    %-  ~(put by (fall diff.res ~))
+    (~(charge tax p.land) (fall diff.res ~) from.p.egg fee)
   ::
   ::  +tax: manage payment for egg in zigs
   ::
@@ -146,26 +153,40 @@
           allowances=(map sender=id @ud)
           metadata=id
       ==
-    ::  +audit: evaluate whether a caller can afford gas
+    ::  +audit: evaluate whether a caller can afford gas,
+    ::  and appropriately set budget for any zigs transactions
     ++  audit
       |=  =egg
-      ^-  ?
-      ?.  ?=(account from.p.egg)                    %.n
-      ?~  zigs=(~(get by granary) zigs.from.p.egg)  %.n
-      ?.  =(zigs-wheat-id lord.u.zigs)              %.n
-      ?.  ?=(%& -.germ.u.zigs)                      %.n
-      =/  acc  (hole token-account data.p.germ.u.zigs)
-      (gth balance.acc budget.p.egg)
+      ^-  [? action=(unit *)]
+      ?.  ?=(account from.p.egg)                    [%.n ~]
+      ?~  zigs=(~(get by granary) zigs.from.p.egg)  [%.n ~]
+      ?.  =(zigs-wheat-id lord.u.zigs)              [%.n ~]
+      ?.  ?=(%& -.germ.u.zigs)                      [%.n ~]
+      =/  acc     (hole token-account data.p.germ.u.zigs)
+      =/  enough  (gth balance.acc budget.p.egg)
+      ?.  =(zigs-wheat-id to.p.egg)  [enough ~]
+      ::  if egg contains a %give via the zigs contract,
+      ::  we insert budget at the beginning of the action. this is
+      ::  to prevent zigs transactions from spoofing correct budget.
+      =*  a  action.q.egg
+      ?~  a  [%.n ~]
+      ?.  ?=(%give -.u.a)  [enough ~]
+      [enough `[-.u.a budget.p.egg +.u.a]]
     ::  +charge: extract gas fee from caller's zigs balance
+    ::  returns a single modified grain to be inserted into a diff
+    ::  cannot crash after audit, as long as zigs contract adequately
+    ::  validates balance >= budget+amount. 
     ++  charge
-      |=  [payee=account fee=@ud]
-      ^-  ^granary
-      ?~  zigs=(~(get by granary) zigs.payee)  granary
-      ?.  ?=(%& -.germ.u.zigs)                 granary
-      =/  acc  (hole token-account data.p.germ.u.zigs)
+      |=  [diff=^granary payee=account fee=@ud]
+      ^-  [id grain]
+      =/  zigs=grain
+        ::  find grain in diff, or fall back to full state
+        %+  ~(gut by diff)  zigs.payee
+        (~(got by granary) zigs.payee)
+      ?>  ?=(%& -.germ.zigs)
+      =/  acc  (hole token-account data.p.germ.zigs)
       =.  balance.acc  (sub balance.acc fee)
-      =.  data.p.germ.u.zigs  acc
-      (~(put by granary) zigs.payee u.zigs)
+      [zigs.payee zigs(data.p.germ acc)]
     ::  +pay: give fees from eggs to miller
     ++  pay
       |=  total=@ud
