@@ -114,9 +114,9 @@
     ::
         %derive-new-address
       ::  if hdpath input is empty, use address-index+1 to get next
-      =+  (from-seed:bip32 [64 (to-seed:bip39 (trip mnem.seed.state) (trip pass.seed.state))])
+      =/  new-seed  (to-seed:bip39 (trip mnem.seed.state) (trip pass.seed.state))
       =/  core
-        %-  derive-path:-
+        %-  derive-path:(from-seed:bip32 [64 new-seed])
         ?:  !=("" hdpath.act)  hdpath.act
         (weld "m/44'/60'/0'/0/" (scow %ud address-index.seed.state))
       =+  addr=(address-from-prv:key:ethereum prv:core)
@@ -191,7 +191,7 @@
           :*  %pass  /submit-tx/(scot %ux egg-hash)
               %agent  [our.bowl %uqbar]
               %poke  %uqbar-write
-              !>([%submit egg.p])
+              !>(`write:uqbar`[%submit egg.p])
           ==
       ==
     ::
@@ -238,7 +238,7 @@
           :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
               %agent  [our.bowl %uqbar]
               %poke  %uqbar-write
-              !>([%submit egg])
+              !>(`write:uqbar`[%submit egg])
           ==
       ==
     ::
@@ -319,7 +319,7 @@
           :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
               %agent  [our.bowl %uqbar]
               %poke  %uqbar-write
-              !>([%submit egg])
+              !>(`write:uqbar`[%submit egg])
           ==
       ==
     ==
