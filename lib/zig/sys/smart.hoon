@@ -513,7 +513,7 @@
 ::
 ::  CRYPTO from zuse.hoon
 ::
-++  crypto  ^?
+++  crypto-non-zuse  ^?
   =,  ames
   =,  number
   |%

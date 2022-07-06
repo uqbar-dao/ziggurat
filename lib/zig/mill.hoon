@@ -3,16 +3,17 @@
 |_  [library=vase zink-cax=(map * @)]
 ::
 ++  verify-sig
-  |=  [=address hash=@ =sig eth=?]
+  |=  [=egg]
   ^-  ?
-  =?  v.sig  (gte v.sig 27)  (sub v.sig 27)
-  =+  %+  ecdsa-raw-recover:secp256k1:secp:crypto
-      hash  sig
-  .=  address
-  ?.  eth
-    (compress-point:secp256k1:secp:crypto -)
+  ?>  ?=(account from.p.egg)
+  =/  hash=@
+    ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
+  =?  v.sig.p.egg  (gte v.sig.p.egg 27)  (sub v.sig.p.egg 27)
+  .=  id.from.p.egg
   %-  address-from-pub:key:ethereum
-  (serialize-point:secp256k1:secp:crypto -)
+  %-  serialize-point:secp256k1:secp:crypto
+  %+  ecdsa-raw-recover:secp256k1:secp:crypto
+  hash  sig.p.egg
 ::
 ++  shut                                               ::  slam a door
   |=  [dor=vase arm=@tas dor-sam=vase arm-sam=vase]
@@ -121,9 +122,8 @@
     ^-  [^land burned=granary fee=@ud =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [land ~ 0 %1 ~ ~]
     ::  validate transaction signature
-    =+  ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
-    ?.  (verify-sig id.from.p.egg - sig.p.egg ?=(^ eth-hash.p.egg))
-    ~&  >>>  "mill: signature mismatch"
+    ?.  (verify-sig egg)
+      ~&  >>>  "mill: signature mismatch"
       [land ~ 0 %2 ~ ~]  ::  signed tx doesn't match account
     ::
     ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
