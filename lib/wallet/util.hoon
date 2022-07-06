@@ -23,12 +23,14 @@
       ~(tap in pubkeys)
     |=  k=@ux
     =-  [%pass - %agent [our %uqbar] %watch -]
-    /id/(scot %ux k)
+    :: /id/(scot %ux k)
+    /id/0x0/(scot %ux k)
   %+  turn
     ~(tap in pubkeys)
   |=  k=@ux
   =-  [%pass - %agent [our %uqbar] %watch -]
-  /holder/(scot %ux k)
+  :: /holder/(scot %ux k)
+  /holder/0x0/(scot %ux k)
 ::
 ++  clear-holder-and-id-sub
   |=  [id=@ux wex=boat:gall]
@@ -76,7 +78,7 @@
   ^-  book
   =/  =book  *book
   ?.  ?=(%grain -.update)  book
-  =/  grains-list  `(list [@da =town-location:ui =grain:smart])`~(val by grains.update)
+  =/  grains-list  `(list [@da =batch-location:ui =grain:smart])`(zing ~(val by grains.update))
   |-  ^-  ^book
   ?~  grains-list  book
   =/  =grain:smart  grain.i.grains-list
@@ -129,7 +131,7 @@
     ~&  >>>  "%wallet: failed to find matching metadata for a grain we hold"
     ~
   ?>  ?=(%grain -.update)
-  =/  meta-grain=grain:smart  +.+.+.-:~(tap by grains.update)
+  =/  meta-grain=grain:smart  +.+.-.+.-:~(tap by grains.update)
   ?>  ?=(%& -.germ.meta-grain)
   =/  found=(unit asset-metadata)
     ?+  token-type  ~

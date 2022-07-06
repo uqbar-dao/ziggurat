@@ -65,11 +65,10 @@ First make sure you're on the whitelist for the ship hosting the rollup simulato
 ```
 Then, use the wallet app to generate a wallet appropriate for you. The default town generator spawns "zigs" for the following 3 seed/key pairs:
 ```
-seed: 0xbeef  public key: 0x3.e87b.0cbb.431d.0e8a.2ee2.ac42.d9da.cab8.063d.6bb6.2ff9.b2aa.e1b9.0f56.9c3f.3423
-seed: 0xdead  public key: 0x2.eaea.cffd.2bbe.e0c0.02dd.b5f8.dd04.e63f.297f.14cf.d809.b616.2137.126c.da9e.8d3d
-seed: 0xcafe  public key: 0x2.4a1c.4643.b429.dc12.6f3b.03f3.f519.aebb.5439.08d3.e0bf.8fc3.cb52.b92c.9802.636e
+seed: 0xbeef  public key: 0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c
+seed: 0xdead  public key: 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5
+seed: 0xcafe  public key: 0x435a.11af.b1f8.24b8.a1d7.de8a.c8c1.cce1.363c.6f3b
 ```
-
 
 ---
 
@@ -150,15 +149,14 @@ Example pokes that will work upon chain initialization in dojo):
 *NEED INDEXER INFO TO WORK NON-CUSTOM*
 ```
 #  ZIGS
-:wallet &zig-wallet-poke [%submit 0x3.e87b.0cbb.431d.0e8a.2ee2.ac42.d9da.cab8.063d.6bb6.2ff9.b2aa.e1b9.0f56.9c3f.3423 0x74.6361.7274.6e6f.632d.7367.697a 0 [1 10.000] [%give 1.936.157.050 0x2.eaea.cffd.2bbe.e0c0.02dd.b5f8.dd04.e63f.297f.14cf.d809.b616.2137.126c.da9e.8d3d 777]]
+:wallet &zig-wallet-poke [%submit 0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c 0x74.6361.7274.6e6f.632d.7367.697a 0 [1 10.000] [%give 1.936.157.050 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 777]]
 
 #  NFT
-:wallet &zig-wallet-poke [%submit 0x3.e87b.0cbb.431d.0e8a.2ee2.ac42.d9da.cab8.063d.6bb6.2ff9.b2aa.e1b9.0f56.9c3f.3423 0xcafe.babe 1 [1 10.000] [%give 32.770.263.103.071.854 0x2.eaea.cffd.2bbe.e0c0.02dd.b5f8.dd04.e63f.297f.14cf.d809.b616.2137.126c.da9e.8d3d 1]]
+:wallet &zig-wallet-poke [%submit 0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c 0xcafe.babe 1 [1 10.000] [%give 32.770.263.103.071.854 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 1]]
 
 #  CUSTOM TRANSACTION
-:wallet &zig-wallet-poke [%submit-custom from=0x3.e87b.0cbb.431d.0e8a.2ee2.ac42.d9da.cab8.063d.6bb6.2ff9.b2aa.e1b9.0f56.9c3f.3423 to=0x74.6361.7274.6e6f.632d.7367.697a town=0x0 gas=[1 1.000] args='[%give 0x2.eaea.cffd.2bbe.e0c0.02dd.b5f8.dd04.e63f.297f.14cf.d809.b616.2137.126c.da9e.8d3d `0x532c.d5cf.befc.5c0f.0d88.3e91.f6da.0181 777 1.000]' my-grains=(silt ~[0x532c.d5cf.befc.5c0f.86e1.40bb.6e89.c2d8]) cont-grains=(silt ~[0x532c.d5cf.befc.5c0f.0d88.3e91.f6da.0181])]
+:wallet &zig-wallet-poke [%submit-custom from=0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c to=0x74.6361.7274.6e6f.632d.7367.697a town=0x0 gas=[1 1.000.000] args='[%give 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 `0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.aef5.916b.a26c.9f96.e5dd.3910.8f23.79fd 69.000]' my-grains=(silt ~[0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.ec2e.701b.c218.6018.975c.8e60.c3f6.fcac]) cont-grains=(silt ~[0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.aef5.916b.a26c.9f96.e5dd.3910.8f23.79fd])]
 ```
-
 ---
 
 ### DAO set up

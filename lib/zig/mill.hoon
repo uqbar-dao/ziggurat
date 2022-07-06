@@ -78,9 +78,9 @@
     =|  reward=@ud
     |-
     ?~  pending
-      ::  create final state transition -- combine diffs and burns with beginning state
-      =/  end-state  (~(dif by (~(uni by p.land) all-diffs)) all-burns)
-      :*  [(~(pay tax end-state) reward) q.land]
+      ~&  >>  "total batch reward: {<reward>}"
+      ::  create final state transition
+      :*  [(~(pay tax (~(uni by p.land) all-diffs)) reward) q.land]
           processed
           (flop lis-hits)
           all-diffs
@@ -96,23 +96,22 @@
         ==
       ::  diff or burned contains collision, reject
       ::
+      ~&  >>>  "mill: rejecting egg due to diff overlap"
       %=  $
         pending    t.pending
         processed  [i.pending(status.p.egg %9) processed]
       ==
     ::  diff is isolated, proceed
     ::
-    =?  diff  ?=(account from.p.egg.i.pending)
-      (~(charge tax p.land) from.p.egg.i.pending fee)
     %=  $
       pending    t.pending
       processed  [i.pending(status.p.egg errorcode) processed]
-      all-diffs  (~(uni by all-diffs) diff)
-      all-burns  (~(uni by all-burns) burned)
       q.land     nonces
       reward     (add reward fee)
       lis-hits   [hits lis-hits]
       crows      [crow crows]
+      all-diffs  (~(uni by all-diffs) diff)
+      all-burns  (~(uni by all-burns) burned)
     ==
   ::
   ::  +mill: processes a single egg and returns map of modified grains + updated nonce
@@ -122,24 +121,31 @@
     ^-  [^land burned=granary fee=@ud =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [land ~ 0 %1 ~ ~]
     ::  validate transaction signature
-    ::  =+  ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
-    ::  ?.  (verify-sig id.from.p.egg - sig.p.egg ?=(^ eth-hash.p.egg))
-    ::  ~&  >>>  "mill: signature mismatch"
-    ::    [land ~ 0 %2 ~ ~]  ::  signed tx doesn't match account
+    =+  ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
+    ?.  (verify-sig id.from.p.egg - sig.p.egg ?=(^ eth-hash.p.egg))
+    ~&  >>>  "mill: signature mismatch"
+      [land ~ 0 %2 ~ ~]  ::  signed tx doesn't match account
     ::
     ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
       ~&  >>>  "mill: tx rejected; bad nonce"
       [land ~ 0 %3 ~ ~]  ::  bad nonce
     ::
-    ?.  (~(audit tax p.land) egg)
+    =/  [valid=? updated-zigs-action=(unit *)]
+      (~(audit tax p.land) egg)
+    ?.  valid
       ~&  >>>  "mill: tx rejected; not enough budget"
       [land ~ 0 %4 ~ ~]  ::  can't afford gas
+    =?  action.q.egg  ?=(^ updated-zigs-action)
+      updated-zigs-action
     ::
     =/  res  (~(work farm p.land) egg)
-    =/  fee=@ud  (sub budget.p.egg rem.res)
+    ~&  res
+    =/  fee=@ud  (sub budget.p.egg rem.res) 
     :_  [burned.res fee errorcode.res hits.res crow.res]
-    :-  ?~(diff.res ~ u.diff.res)
-    (~(put by q.land) id.from.p.egg nonce.from.p.egg)
+    :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
+    ::  charge gas fee by including their designated zigs grain inside the diff
+    %-  ~(put by (fall diff.res ~))
+    (~(charge tax p.land) (fall diff.res ~) from.p.egg fee)
   ::
   ::  +tax: manage payment for egg in zigs
   ::
@@ -150,26 +156,40 @@
           allowances=(map sender=id @ud)
           metadata=id
       ==
-    ::  +audit: evaluate whether a caller can afford gas
+    ::  +audit: evaluate whether a caller can afford gas,
+    ::  and appropriately set budget for any zigs transactions
     ++  audit
       |=  =egg
-      ^-  ?
-      ?.  ?=(account from.p.egg)                    %.n
-      ?~  zigs=(~(get by granary) zigs.from.p.egg)  %.n
-      ?.  =(zigs-wheat-id lord.u.zigs)              %.n
-      ?.  ?=(%& -.germ.u.zigs)                      %.n
-      =/  acc  (hole token-account data.p.germ.u.zigs)
-      (gth balance.acc budget.p.egg)
+      ^-  [? action=(unit *)]
+      ?.  ?=(account from.p.egg)                    [%.n ~]
+      ?~  zigs=(~(get by granary) zigs.from.p.egg)  [%.n ~]
+      ?.  =(zigs-wheat-id lord.u.zigs)              [%.n ~]
+      ?.  ?=(%& -.germ.u.zigs)                      [%.n ~]
+      =/  acc     (hole token-account data.p.germ.u.zigs)
+      =/  enough  (gth balance.acc budget.p.egg)
+      ?.  =(zigs-wheat-id to.p.egg)  [enough ~]
+      ::  if egg contains a %give via the zigs contract,
+      ::  we insert budget at the beginning of the action. this is
+      ::  to prevent zigs transactions from spoofing correct budget.
+      =*  a  action.q.egg
+      ?~  a  [%.n ~]
+      ?.  ?=(%give -.u.a)  [enough ~]
+      [enough `[-.u.a budget.p.egg +.u.a]]
     ::  +charge: extract gas fee from caller's zigs balance
+    ::  returns a single modified grain to be inserted into a diff
+    ::  cannot crash after audit, as long as zigs contract adequately
+    ::  validates balance >= budget+amount. 
     ++  charge
-      |=  [payee=account fee=@ud]
-      ^-  ^granary
-      ?~  zigs=(~(get by granary) zigs.payee)  granary
-      ?.  ?=(%& -.germ.u.zigs)                 granary
-      =/  acc  (hole token-account data.p.germ.u.zigs)
+      |=  [diff=^granary payee=account fee=@ud]
+      ^-  [id grain]
+      =/  zigs=grain
+        ::  find grain in diff, or fall back to full state
+        %+  ~(gut by diff)  zigs.payee
+        (~(got by granary) zigs.payee)
+      ?>  ?=(%& -.germ.zigs)
+      =/  acc  (hole token-account data.p.germ.zigs)
       =.  balance.acc  (sub balance.acc fee)
-      =.  data.p.germ.u.zigs  acc
-      (~(put by granary) zigs.payee u.zigs)
+      [zigs.payee zigs(data.p.germ acc)]
     ::  +pay: give fees from eggs to miller
     ++  pay
       |=  total=@ud
@@ -301,31 +321,21 @@
         =/  payload   .*(q.library pay.cont.crop)
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]
-        ::  MULE
-        ::
-        =/  res
-          (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))^(sub budget 7)
-        ?:  ?=(%| -.-.res)
+        =/  gun
+          (ajar dor %write !>(cart) !>(embryo))
+        =/  =book
+          (zebra budget zink-cax gun)
+        ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
+        :-  hit.q.book
+        ?:  ?=(%| -.p.book)
           ::  error in contract execution
-          [~ ~ +.res %6]
-        [~ `p.-.res +.res %0]
-        ::  ZEBRA
-        ::
-        ::  =/  gun
-        ::    (ajar dor %write !>(cart) !>(embryo))
-        ::  =/  =book
-        ::    (zebra budget zink-cax gun)
-        ::  ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
-        ::  :-  hit.q.book
-        ::  ?:  ?=(%| -.p.book)
-        ::    ::  error in contract execution
-        ::    ~&  p.book
-        ::    [~ bud.q.book %6]
-        ::  ::  chick result
-        ::  ?~  p.p.book
-        ::    ~&  >>>  "mill: ran out of gas"
-        ::    [~ 0 %8]
-        ::  [(hole (unit chick) p.p.book) bud.q.book %0]
+          ~&  p.book
+          [~ bud.q.book %6]
+        ::  chick result
+        ?~  p.p.book
+          ~&  >>>  "mill: ran out of gas"
+          [~ 0 %8]
+        [(hole (unit chick) p.p.book) bud.q.book %0]
       --
     ::
     ::  +harvest: take a completed execution and validate all changes and additions to granary state

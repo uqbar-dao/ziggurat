@@ -20,7 +20,7 @@
       proposed-batch=(unit [=basket =land diff-hash=@ux root=@ux])
       status=?(%available %off)
   ==
-+$  inflated-state-0  [state-0 =mil]
++$  inflated-state-0  [state-0 =mil smart-lib-vase=vase]
 +$  mil  $_  ~(mill mill !>(0) *(map * @))
 --
 ::
@@ -34,24 +34,27 @@
     def   ~(. (default-agent this %|) bowl)
 ::
 ++  on-init
+  =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
+  =/  mil
+    %~  mill  mill
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
   :-  ~
   %_    this
       state
-    :-  [%0 ~ ~ ~ ~ ~ ~ %off]
-    %~  mill  mill
-    :-  ;;(vase (cue q.q.smart-lib-noun))
-    ;;((map * @) (cue q.q.zink-cax-noun))
+    :+  [%0 ~ ~ ~ ~ ~ ~ %off]
+      mil
+    smart-lib
   ==
 ::
 ++  on-save  !>(-.state)
 ++  on-load
   |=  =old=vase
   ::  on-load: pre-cue our compiled smart contract library
+  =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
   =/  mil
     %~  mill  mill
-    :-  ;;(vase (cue q.q.smart-lib-noun))
-    ;;((map * @) (cue q.q.zink-cax-noun))
-  `this(state [!<(state-0 old-vase) mil])
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
+  `this(state [!<(state-0 old-vase) mil smart-lib])
 ::
 ++  on-watch
   |=  =path
@@ -64,8 +67,8 @@
   ::  handle indexer watches here -- send latest state
   ?~  town  `this
   :_  this
-  =-  [%give %fact ~ %indexer-update -]~
-  !>([%new-state ~ u.town (rear roots.hall.u.town)])
+  =-  [%give %fact ~ %sequencer-indexer-update -]~
+  !>(`indexer-update`[%update ~ u.town (rear roots.hall.u.town)])
 ::
 ++  on-poke
   |=  [=mark =vase]
@@ -172,10 +175,10 @@
       ::
       ::  1. produce diff and new state with mill
       =/  addr  p.sequencer.hall.town
-      =+  /(scot %p our.bowl)/wallet/(scot %da now.bowl)/account/(scot %ux addr)/(scot %ud id.hall.town)/noun
+      =+  /(scot %p our.bowl)/wallet/(scot %da now.bowl)/account/(scot %ux addr)/(scot %ux town-id.hall.town)/noun
       =+  .^(account:smart %gx -)
       =/  new=state-transition
-        %^    ~(mill-all mil - id.hall.town now.bowl)
+        %^    ~(mill-all mil - town-id.hall.town now.bowl)
             land.town
           ~(tap in `^basket`basket.state)
         1  ::  number of parallel "passes"
@@ -194,7 +197,7 @@
       !>  :-  %receive-batch
           :-  addr
           ^-  batch
-          :*  id.hall.town
+          :*  town-id.hall.town
               mode.hall.town
               ~[diff.new]
               diff-hash
@@ -217,9 +220,11 @@
         ~&  >>  "%sequencer: batch approved by rollup"
         ?~  proposed-batch
           ~|("%sequencer: error: received batch approval without proposed batch" !!)
-        :_  this(town (transition-state town u.proposed-batch), proposed-batch ~, basket ~)
-        =-  [%give %fact ~[/indexer/updates] %indexer-update -]~
-        !>([%new-state ~(tap in basket.u.proposed-batch) land.u.proposed-batch root.u.proposed-batch])
+        =/  new-town=(unit ^town)
+          (transition-state town u.proposed-batch)
+        :_  this(town new-town, proposed-batch ~, basket ~)
+        =-  [%give %fact ~[/indexer/updates] %sequencer-indexer-update -]~
+        !>(`indexer-update`[%update ~(tap in basket.u.proposed-batch) (need new-town) root.u.proposed-batch])
       ::  TODO manage rejected moves here
       ~&  >>>  "%sequencer: our move was rejected by rollup!"
       ~&  u.p.sign
@@ -232,12 +237,12 @@
       [%pass wire %agent [src.bowl %rollup] %watch (snip `path`wire)]~
     ?.  ?=(%fact -.sign)  `this
     =^  cards  state
-      (update-fact !<(rollup-update q.cage.sign))
+      (update-fact !<(town-update q.cage.sign))
     [cards this]
   ==
   ::
   ++  update-fact
-    |=  upd=rollup-update
+    |=  upd=town-update
     ^-  (quip card _state)
     ?-    -.upd
         %new-peer-root
@@ -247,9 +252,9 @@
         %new-sequencer
       ::  check if we have been kicked off our town
       ::  this is in place for later..  TODO expand this functionality
-      ?~  town.state                     `state
-      ?.  =(town-id.upd id.hall.u.town)  `state
-      ?:  =(who.upd our.bowl)            `state
+      ?~  town.state                          `state
+      ?.  =(town-id.upd town-id.hall.u.town)  `state
+      ?:  =(who.upd our.bowl)                 `state
       ~&  >>>  "%sequencer: we've been kicked out of town!"
       `state
     ==
@@ -272,7 +277,7 @@
   ::
       [%town-id ~]
     ?~  town  ``noun+!>(~)
-    ``noun+!>(`id.hall.u.town)
+    ``noun+!>(`town-id.hall.u.town)
   ::
   ::  state reads fail if sequencer not active
   ::
@@ -285,10 +290,10 @@
     ?~  town  [~ ~]
     (read-grain t.path p.land.u.town)
   ::
-      [%read @ @tas @ta ^]  ::  execute contract read
+      [%read @ @tas @ta @ ^]  :: grain id, %noun/%json, argument @ta, other +jam'd data, like tx args, then any associated rice IDs
     ?~  town  [~ ~]
     ::  TODO pre-;; library
-    (read-wheat t.path now.bowl id.hall.u.town p.land.u.town ;;(vase q.q.smart-lib-noun))
+    (read-wheat t.path now.bowl town-id.hall.u.town p.land.u.town smart-lib-vase)
   ==
 ::
 ++  on-leave  on-leave:def

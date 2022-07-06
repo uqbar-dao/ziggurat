@@ -16,7 +16,7 @@
 +$  town      [=land =hall]
 ::
 +$  hall
-  $:  =id:smart
+  $:  town-id=id:smart
       =sequencer
       mode=availability-method
       latest-diff-hash=@ux
@@ -65,11 +65,14 @@
   ==
 ::
 +$  rollup-update
-  $%  [%new-peer-root town-id=id:smart root=@ux]
+  $%  capitol-update
+      town-update
+  ==
++$  capitol-update  [%new-capitol =capitol]
++$  town-update
+  $%  [%new-peer-root town-id=id:smart root=@ux timestamp=@da]
       [%new-sequencer town-id=id:smart who=ship]
   ==
-::
-+$  capitol-update  [%new-capitol =capitol]
 ::
 ::  indexer must verify root is posted to rollup before verifying new state
 +$  indexer-update  [%update eggs=(list [@ux egg:smart]) =town root=@ux]
