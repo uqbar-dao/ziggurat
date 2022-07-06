@@ -2,8 +2,8 @@
 ++  write
   |=  =embryo
   ^-  chick
-  =/  a  (dec 10)
-  [%& ~ ~ ~]
+  =+  (dec 10)
+  (result ~ ~ ~ [[%hello ~] ~])
 ++  read
   |_  =path
   ++  json

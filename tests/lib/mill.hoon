@@ -18,162 +18,221 @@
 ::
 /-  zink
 /+  *test, mill=zig-mill, *zig-sys-smart, *sequencer
+/=  zigsur          /lib/zig/contracts/lib/zigs-parallel
 /*  smart-lib-noun  %noun  /lib/zig/compiled/smart-lib/noun
 /*  zink-cax-noun   %noun  /lib/zig/compiled/hash-cache/noun
-/*  zigs-contract   %noun  /lib/zig/compiled/zigs/noun
+/*  zigs-contract   %noun  /lib/zig/compiled/zigs-parallel/noun
 /*  triv-contract   %noun  /lib/zig/compiled/trivial/noun
 |%
-++  init-now  *@da
 ::
+::  constants / dummy info for mill
+::
+++  init-now  *@da
+++  town-id    0x0
+++  set-fee    7
+++  fake-sig   [0 0 0]
 ++  mil
   %~  mill  mill
   :-  ;;(vase (cue q.q.smart-lib-noun))
   ;;((map * @) (cue q.q.zink-cax-noun))
 ::
++$  mill-result
+  [=land burned=granary fee=@ud =errorcode hits=(list hints:zink) =crow]
+::
+::  fake data
+::
+++  miller  ^-  account    [0x1512.3341 1 0x1.1512.3341]
+++  caller-1  ^-  account  [0xbeef 1 0x1.beef]
+++  caller-2  ^-  account  [0xdead 1 0x1.dead]
+++  caller-3  ^-  account  [0xcafe 1 0x1.cafe]
+::
 ++  zigs
   |%
-  +$  account-mold
-    $:  balance=@ud
-        allowances=(map sender=id @ud)
+  ++  holder-1  0xbeef
+  ++  holder-2  0xdead
+  ++  holder-3  0xcafe
+  ++  miller-account
+    ^-  grain
+    :*  0x1.1512.3341
+        zigs-wheat-id
+        0x1512.3341
+        town-id
+        [%& `@`'zigs' [1.000.000 ~ `@ux`'zigs-metadata']]
     ==
-  ++  town-id    0x0
-  ++  set-fee    7  :: arbitrary replacement for +bull calculations
-  ++  beef-zigs-grain
+  ++  beef-account
     ^-  grain
     :*  0x1.beef
         zigs-wheat-id
-        0xbeef
-        0x0
+        holder-1
+        town-id
         [%& `@`'zigs' [300.000 ~ `@ux`'zigs-metadata']]
     ==
-  ++  dead-zigs-grain
+  ++  dead-account
     ^-  grain
     :*  0x1.dead
         zigs-wheat-id
         0xdead
-        0x0
+        town-id
         [%& `@`'zigs' [200.000 ~ `@ux`'zigs-metadata']]
     ==
-  ++  cafe-zigs-grain
+  ++  cafe-account
     ^-  grain
     :*  0x1.cafe
         zigs-wheat-id
         0xcafe
-        0x0
+        town-id
         [%& `@`'zigs' [100.000 ~ `@ux`'zigs-metadata']]
     ==
   ++  wheat-grain
     ^-  grain
     =/  =wheat  ;;(wheat (cue q.q.zigs-contract))
-    :*  zigs-wheat-id  ::  id
-        zigs-wheat-id  ::  lord
-        zigs-wheat-id  ::  holders
-        town-id              ::  town-id
+    :*  zigs-wheat-id
+        zigs-wheat-id
+        zigs-wheat-id
+        town-id
         [%| wheat(owns (silt ~[0x1.beef 0x1.dead 0x1.cafe]))]
     ==
-  ++  triv-wheat-grain
-    ^-  grain
-    =/  =wheat  ;;(wheat (cue q.q.triv-contract))
-    :*  0xdada.dada  ::  id
-        0xdada.dada  ::  lord
-        0xdada.dada  ::  holders
-        town-id      ::  town-id
-        [%| wheat]
-    ==
-  ++  fake-granary
-    ^-  granary
-    =/  grains=(list (pair id grain))
-      :~  [zigs-wheat-id wheat-grain]
-          [0xdada.dada triv-wheat-grain]
-          [0x1.beef beef-zigs-grain]
-          [0x1.dead dead-zigs-grain]
-          [0x1.cafe cafe-zigs-grain]
-      ==
-    (~(gas by *(map id grain)) grains)
-  ++  fake-populace
-    ^-  populace
-    %-  %~  gas  by  *(map id @ud)
-    ~[[0xbeef 0] [0xdead 0] [0xcafe 0]]
-  ++  fake-town
-    ^-  land
-    [fake-granary fake-populace]
   --
 ::
-::  ++  test-trivial-fail
-::    =*  mil     mil:zigs
-::    =/  caller  [0xbeef 1 0x1.beef]
-::    =/  yok=yolk
-::      [caller `[%init ~] ~ ~]
-::    =/  shel=shell
-::      [caller [0 0 0] ~ zigs-wheat-id 1 333 0x0 0]
-::    =/  egg  [shel yok]
-::    =/  [=land fee=@ud =errorcode hits=(list hints:zink) =crow]
-::      %+  ~(mill mil [0xdead 1 0x1.dead] 0x0 init-now:zigs)
-::        fake-town:zigs
-::      egg
-::    %+  expect-eq
-::      !>(%6)
-::    !>(errorcode)
+++  triv-wheat
+  ^-  grain
+  =/  =wheat  ;;(wheat (cue q.q.triv-contract))
+  :*  0xdada.dada  ::  id
+      0xdada.dada  ::  lord
+      0xdada.dada  ::  holders
+      town-id
+      [%| wheat]
+  ==
 ::
-++  test-trivial-pass
-  =/  caller  [0xbeef 1 0x1.beef]
+++  fake-granary
+  ^-  granary
+  =/  grains=(list [id grain])
+    :~  [zigs-wheat-id wheat-grain:zigs]
+        [id:triv-wheat triv-wheat]
+        [id:miller-account:zigs miller-account:zigs]
+        [id:beef-account:zigs beef-account:zigs]
+        [id:dead-account:zigs dead-account:zigs]
+        [id:cafe-account:zigs cafe-account:zigs]
+    ==
+  (~(gas by *(map id grain)) grains)
+++  fake-populace
+  ^-  populace
+  %-  %~  gas  by  *(map id @ud)
+  ~[[holder-1:zigs 0] [holder-2:zigs 0] [holder-3:zigs 0]]
+++  fake-land
+  ^-  land
+  [fake-granary fake-populace]
+::
+::  BEGIN TESTS
+::
+::
+::  TESTS FOR +MILL
+::
+++  test-mill-trivial-gas-fail-audit
   =/  yok=yolk
-    [~ ~ ~]
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
   =/  shel=shell
-    [caller [0 0 0] ~ 0xdada.dada 1 5.000 0x0 0]
-  =/  egg  [shel yok]
-  =/  [=land burned=granary fee=@ud =errorcode hits=(list hints:zink) =crow]
-    %+  ~(mill mil [0xcafe 1 0x1.cafe] 0x0 init-now)
-      fake-town:zigs
-    egg
-  ~&  >>>  "budget spent: {<fee>}"
-  ~&  >>  hits
-  %+  expect-eq
-    !>(%0)
-  !>(errorcode)
+    [caller-1 fake-sig ~ id:triv-wheat 1 300.001 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed with correct errorcode
+    %+  expect-eq
+    !>(%4)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(fake-land)  !>(land.res)
+  ==
 ::
-++  test-zigs-give
-  =/  caller  [0xbeef 1 0x1.beef]
+++  test-mill-trivial-pass
   =/  yok=yolk
-    [`[%give 0xdead `0x1.dead 777] (silt ~[0x1.beef]) (silt ~[0x1.dead])]
+    [`[%random-command ~] ~ ~]
   =/  shel=shell
-    [caller [0 0 0] ~ zigs-wheat-id 1 50.000 0x0 0]
-  =/  egg  [shel yok]
-  =/  [=land burned=granary fee=@ud =errorcode hits=(list hints:zink) =crow]
-    %+  ~(mill mil [0xcafe 1 0x1.cafe] 0x0 init-now)
-      fake-town:zigs
-    egg
-  ~&  >>>  "budget spent: {<fee>}"
-  =/  correct  dead-zigs-grain:zigs
-  =.  germ.correct  [%& `@`'zigs' [200.777 ~ `@ux`'zigs-metadata']]
-  %+  expect-eq
-    !>(correct)
-  !>((~(got by p.land) 0x1.dead))
+    [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed
+    %+  expect-eq
+    !>(%0)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert we get trivial crow
+    %+  expect-eq
+    !>([[%hello ~] ~])  !>(crow.res)
+  ::  assert that fee paid correctly
+    %+  expect-eq
+     !>(299.993)
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
 ::
-::  ++  test-single-c-call
-::    =*  mil     mil:zigs
-::    =/  caller  [0xbeef 1 0x1.beef]
-::    =/  yok=yolk
-::      [caller `[%give 0x1234 ~ 777 333] (silt ~[0x1.beef]) ~]
-::    =/  shel=shell
-::      [caller [0 0 0] ~ zigs-wheat-id 1 500 0x0 0]
-::    =/  egg  [shel yok]
-::    =/  [=land fee=@ud =errorcode hits=(list hints:zink) =crow]
-::      %+  ~(mill mil [0xcafe 1 0x1.cafe] 0x0 init-now:zigs)
-::        fake-town:zigs
-::      egg
-::    ::  ?>  =(fee (mul 2 set-fee:zigs))
-::    ::  ?>  =(errorcode %0)
-::    =/  correct-id  (fry-rice 0x1234 zigs-wheat-id 0x0 `@`'zigs')
-::    =/  correct
-::      ^-  grain
-::      :*  correct-id
-::          zigs-wheat-id
-::          0x1234
-::          0x0
-::          [%& `@`'zigs' [777 ~ `@ux`'zigs-metadata']]
-::      ==
-::    %+  expect-eq
-::      !>(correct)
-::    !>((~(got by p.land) correct-id))
+::  TESTS FOR +MILL-ALL
+::
+++  test-mill-all-trivial-gas-fail-audit
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:triv-wheat 1 300.001 town-id 0]
+  =/  res=state-transition
+    %^  ~(mill-all mil miller town-id init-now)
+    fake-land  ~[[hash [shel yok]]]  1
+  ;:  weld
+  ::  assert that our call failed with correct errorcode
+    %+  expect-eq
+      !>(%4)
+    !>(status.p.+.-.processed.res)
+  ::  assert that miller gets no reward
+    %+  expect-eq
+      !>(`grain`miller-account:zigs)
+    !>(`grain`(~(got by p.land.res) id:miller-account:zigs))
+  ==
+::
+++  test-mill-all-trivial-pass
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  res=state-transition
+    %^  ~(mill-all mil miller town-id init-now)
+    fake-land  ~[[hash [shel yok]]]  1
+  ;:  weld
+  ::  assert that our call went through
+    %+  expect-eq
+      !>(%0)
+    !>(status.p.+.-.processed.res)
+  ::  assert fee paid
+    %+  expect-eq
+     !>(299.993)
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert fee received correctly
+    %+  expect-eq
+     !>(1.000.007)
+    =+  (~(got by p.land.res) id:miller-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
 --
