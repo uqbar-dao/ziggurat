@@ -1,4 +1,4 @@
-::  fungible.hoon [uqbar-dao]
+::  fungible.hoon [UQ| DAO]
 ::
 ::  Fungible token standard. Any new token that wishes to use this standard
 ::  format can be issued through this contract. The contract uses an account
@@ -244,6 +244,12 @@
       ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
         (account:enjs:lib ;;(account:sur data.p.germ.g))
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
+    ::
+        [%rice-data @ ~]
+      =/  data  (cue (slav %ud i.t.args))
+      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+        (account:enjs:lib ;;(account:sur data))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data))
     ::
         [%egg-args @ ~]
       %-  arguments:enjs:lib

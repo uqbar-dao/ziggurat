@@ -5,11 +5,12 @@
 /+  *test, cont=zig-contracts-nft, *zig-sys-smart
 =>  ::  test data
     |%
+    ++  init-now  *@da
     ++  metadata-1  ^-  grain
       :*  `@ux`'simple'
           `@ux`'nft'
           `@ux`'holder'
-          1  ::  town-id
+          town-id=0x1
           :+  %&  `@`'salt'
           :*  name='Simple NFT'
               symbol='SNFT'
@@ -41,7 +42,7 @@
       :*  0x1.beef
           `@ux`'nft'
           0xbeef
-          1
+          0x1
           [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1]]) ~ ~]]
       ==
     ++  owner-1  ^-  account
@@ -51,7 +52,7 @@
       :*  0x1.dead
           `@ux`'nft'
           0xdead
-          1
+          0x1
           [%& `@`'salt' [`@ux`'nft' (malt ~[[2 item-2] [3 item-3]]) ~ ~]]
       ==
     ++  owner-2  ^-  account
@@ -61,7 +62,7 @@
       :*  0x1.cafe
           `@ux`'nft'
           0xcafe
-          1
+          0x1
           [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
       ==
     ++  owner-3  ^-  account
@@ -83,19 +84,19 @@
       `[%give 0xdead `0x1.dead 1]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
-    [`@ux`'nft' 0 1 (malt ~[[id:`grain`account-2 account-2]])]
+    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`account-2 account-2]])]
   =/  updated-1  ^-  grain
     :*  0x1.beef
           `@ux`'nft'
           0xbeef
-          1
+          0x1
           [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
       ==
   =/  updated-2  ^-  grain
     :*  0x1.dead
           `@ux`'nft'
           0xdead
-          1
+          0x1
           [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1] [2 item-2] [3 item-3]]) ~ ~]]
       ==
   =/  res=chick
@@ -110,13 +111,13 @@
       `[%give 0xffff ~ 1]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
-    [`@ux`'nft' 0 1 ~]
-  =/  new-id  (fry-rice 0xffff `@ux`'nft' 1 `@`'salt')
+    [`@ux`'nft' init-now 0x1 ~]
+  =/  new-id  (fry-rice 0xffff `@ux`'nft' 0x1 `@`'salt')
   =/  new
     :*  new-id
         `@ux`'nft'
         0xffff
-        1
+        0x1
         [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
     ==
   =/  res=chick
@@ -134,7 +135,7 @@
       `[%give 0xdead `0x1.dead 2]
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
-    [`@ux`'nft' 0 1 (malt ~[[id:`grain`account-2 account-2]])]
+    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`account-2 account-2]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))

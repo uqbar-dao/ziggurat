@@ -5,11 +5,12 @@
 /+  *test, cont=zig-contracts-capitol, *zig-sys-smart
 =>  ::  test data
     |%
+    ++  init-now  *@da
     ++  world-grain  ^-  grain
       :*  `@ux`'world'            ::  id
           `@ux`'capitol'          ::  lord
           `@ux`'capitol'          ::  holder
-          0                       ::  town-id
+          0x0                     ::  town-id
           [%& `@`'world' data=*(map @ud @ux)]
       ==
     ::
@@ -17,19 +18,19 @@
       :*  `@ux`'ziggurat'
           `@ux`'capitol'
           `@ux`'capitol'
-          0
+          0x0
           [%& `@`'ziggurat' data=*(map ship [@ux ship @ud])]
       ==
     ++  world-cart  ^-  cart
       :*  `@ux`'capitol'
-          0
-          0
+          init-now
+          0x0
           (malt ~[[`@ux`'world' world-grain]])
       ==
     ++  ziggurat-cart  ^-  cart
       :*  `@ux`'capitol'
-          0
-          0
+          init-now
+          0x0
           (malt ~[[`@ux`'ziggurat' ziggurat-grain]])
       ==
     --
@@ -46,11 +47,11 @@
     :+  [0xbeef 0 0x1.beef]
       `[%become-validator [0x1111 ~zod 1]]
     ~
-  =/  updated-ziggurat
+  =/  updated-ziggurat=grain
     :*  `@ux`'ziggurat'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'ziggurat' (malt ~[[~zod [0x1111 ~zod 1]]])]
     ==
   =/  res=chick
@@ -64,15 +65,15 @@
     :+  [0xbeef 0 0x1.beef]
       `[%become-validator [0x1111 ~zod 1]]
     ~
-  =/  initial
+  =/  initial=grain
     :*  `@ux`'ziggurat'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'ziggurat' (malt ~[[~zod [0x1111 ~zod 1]]])]
     ==
   =/  =cart
-    [`@ux`'capitol' 0 0 (malt ~[[`@ux`'ziggurat' initial]])]
+    [`@ux`'capitol' init-now 0x0 (malt ~[[`@ux`'ziggurat' initial]])]
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) inp)))
   (expect-eq !>(%.n) !>(-.res))
@@ -84,22 +85,22 @@
     :+  [0xbeef 0 0x1.beef]
       `[%stop-validating [0x1111 ~zod 1]]
     ~
-  =/  initial
+  =/  initial=grain
     :*  `@ux`'ziggurat'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'ziggurat' (malt ~[[~zod [0x1111 ~zod 1]]])]
     ==
-  =/  updated-ziggurat
+  =/  updated-ziggurat=grain
     :*  `@ux`'ziggurat'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'ziggurat' ~]
     ==
   =/  =cart
-    [`@ux`'capitol' 0 0 (malt ~[[`@ux`'ziggurat' initial]])]
+    [`@ux`'capitol' init-now 0x0 (malt ~[[`@ux`'ziggurat' initial]])]
   =/  res=chick
     (~(write cont cart) inp)
   =/  correct=chick
@@ -122,11 +123,11 @@
     :+  [0xbeef 0 0x1.beef]
       `[%init [0x1111 ~zod 1] 1]
     ~
-  =/  updated-world
+  =/  updated-world=grain
     :*  `@ux`'world'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'world' (malt ~[[1 (malt ~[[~zod [0xbeef [0x1111 ~zod 1]]]])]])]
     ==
   =/  res=chick
@@ -142,22 +143,22 @@
     :+  [0xdead 0 0x1.dead]
       `[%join [0x2222 ~bus 1] 1]
     ~
-  =/  initial
+  =/  initial=grain
     :*  `@ux`'world'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'world' (malt ~[[1 (malt ~[[~zod [0xbeef [0x1111 ~zod 1]]]])]])]
     ==
-  =/  updated-world
+  =/  updated-world=grain
     :*  `@ux`'world'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'world' (malt ~[[1 (malt ~[[~zod [0xbeef [0x1111 ~zod 1]]] [~bus [0xdead [0x2222 ~bus 1]]]])]])]
     ==
   =/  =cart
-    [`@ux`'capitol' 0 0 (malt ~[[`@ux`'world' initial]])]
+    [`@ux`'capitol' init-now 0x0 (malt ~[[`@ux`'world' initial]])]
   =/  res=chick
     (~(write cont cart) inp)
   =/  correct=chick
@@ -171,22 +172,22 @@
     :+  [0xdead 0 0x1.dead]
       `[%exit [0x2222 ~bus 1] 1]
     ~
-  =/  initial
+  =/  initial=grain
     :*  `@ux`'world'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'world' (malt ~[[1 (malt ~[[~zod [0xbeef [0x1111 ~zod 1]]] [~bus [0xdead [0x2222 ~bus 1]]]])]])]
     ==
-  =/  updated-world
+  =/  updated-world=grain
     :*  `@ux`'world'
         `@ux`'capitol'
         `@ux`'capitol'
-        0
+        0x0
         [%& `@`'world' (malt ~[[1 (malt ~[[~zod [0xbeef [0x1111 ~zod 1]]]])]])]
     ==
   =/  =cart
-    [`@ux`'capitol' 0 0 (malt ~[[`@ux`'world' initial]])]
+    [`@ux`'capitol' init-now 0x0 (malt ~[[`@ux`'world' initial]])]
   =/  res=chick
     (~(write cont cart) inp)
   =/  correct=chick

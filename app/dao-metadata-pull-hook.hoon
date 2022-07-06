@@ -1,4 +1,4 @@
-::  dao-metadata-pull-hook [uqbar-dao]:
+::  dao-metadata-pull-hook [UQ| DAO]:
 ::
 ::  allow syncing DAO comms data from foreign paths to local paths
 ::
@@ -161,7 +161,7 @@
     met         ~(. mdl bowl)
     hc          ~(. +> bowl)
 ::
-++  on-init  
+++  on-init
   :_  this
   :~  watch-invites:hc
       watch-contacts:hc
@@ -169,14 +169,14 @@
   ==
 ::
 ++  on-save  !>(state)
-++  on-load  
+++  on-load
   |=  =vase
   =+  !<(old=versioned-state vase)
   ?-  -.old
     %2  `this(state old)
   ==
 ::
-++  on-poke  
+++  on-poke
   |=  [=mark =vase]
   ?.  ?=(%metadata-hook-update mark)
     (on-poke:def mark vase)
@@ -192,7 +192,7 @@
     preview+(en-path:resource group.hook-update)
   (fact-kick:io path mark^vase)
 ::
-++  on-agent  
+++  on-agent
   |=  [=wire =sign:agent:gall]
   =^  cards  state
     ?+  wire  (on-agent:def:hc wire sign)
@@ -211,7 +211,7 @@
     ==
   [cards this]
 ::
-++  on-watch  
+++  on-watch
   |=  =path
   ?>  (team:title [our src]:bowl)
   ?+  path  (on-watch:def path)
@@ -220,7 +220,7 @@
     =/  rid=resource
       (de-path:resource t.path)
     =/  prev=(unit group-preview:metadata)
-      ?^  (peek-metadatum:met %groups rid)  
+      ?^  (peek-metadatum:met %groups rid)
         (some (get-preview:met rid))
       (~(get by previews) rid)
     ?~  prev

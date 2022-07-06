@@ -1,6 +1,4 @@
-::
-::
-::  DAO management contract
+::  dao.hoon  [UQ| DAO]
 ::
 ::  Provides the entire on-chain backend for an EScape DAO.
 ::  Holds a recording of members along with their roles. This
@@ -132,6 +130,10 @@
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
       (dao:enjs:lib ;;(dao:sur data.p.germ.g))
+    ::
+        [%rice-data @ ~]
+      %-  dao:enjs:lib
+      ;;(dao:sur (cue (slav %ud i.t.args)))
     ::
         [%egg-args @ ~]
       %-  arguments:enjs:lib

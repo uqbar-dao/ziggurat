@@ -1,5 +1,4 @@
 /+  smart=zig-sys-smart
-/*  smart-lib-noun  %noun  /lib/zig/compiled/smart-lib/noun
 :-  %say
 |=  [[now=@da eny=@uvJ bek=beak] [pax=path ~] ~]
 |^
@@ -8,7 +7,9 @@
 =/  contract-text  .^(@t %cx pax)
 =/  [raw=(list [face=term =path]) contract-hoon=hoon]  (parse-pile (trip contract-text))
 ::  generate initial subject containing uHoon
-=/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
+=/  smart-txt  .^(@t %cx /(scot %p p.bek)/zig/(scot %da now)/lib/zig/sys/smart/hoon)
+=/  hoon-txt   .^(@t %cx /(scot %p p.bek)/zig/(scot %da now)/lib/zig/sys/hoon/hoon)
+=/  smart-lib=vase  (slap (slap !>(~) (ream hoon-txt)) (ream smart-txt))
 =/  braw=(list hoon)
   ::  compose libraries flatly against uHoon subject
   %+  turn  raw

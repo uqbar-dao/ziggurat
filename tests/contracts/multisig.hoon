@@ -5,40 +5,15 @@
 =,  lib
 =>  ::  test data
     |%
-    ++  town-id  1
+    ++  init-now  ~2022.6.20..17.54.07..7d8d
+    ++  town-id    0x1
     ::
-    ++  account-1
-      ^-  grain
-      :*  id=0x1.beef
-          lord=`@ux`'zigs'
-          holder=0xbeef
-          town-id
-          [%& salt=`@`'zigs' data=[50 ~ `@ux`'zigs']]
-      ==
     ++  owner-1
       ^-  account
       [id=0xbeef nonce=0 zigs=0x1234.5678]
-    ::
-    ++  account-2
-      ^-  grain
-      :*  0x1.dead
-          `@ux`'zigs'
-          0xdead
-          town-id
-          [%& `@`'zigs' [30 ~ `@ux`'zigs']]
-      ==
     ++  owner-2
       ^-  account
       [0xdead 0 0x1234.5678]
-    ::
-    ++  account-3
-      ^-  grain
-      :*  0x1.cafe
-          `@ux`'zigs'
-          0xcafe
-          town-id
-          [%& `@`'zigs' [20 ~ `@ux`'zigs']]
-      ==
     ++  owner-3
       ^-  account
       [0xcafe 0 0x1234.5678]
@@ -62,7 +37,7 @@
         ==
       egg
     ++  egg-add-member-hash
-      (sham-egg [egg-add-member owner-1 block=1])
+      (sham-egg [egg-add-member owner-1 (add init-now ~s1)])
     ++  egg-remove-member
       =|  =egg
       =.  p.egg
@@ -81,7 +56,7 @@
         ==
       egg
     ++  egg-remove-member-hash
-      (sham-egg [egg-add-member owner-2 block=5])
+      (sham-egg [egg-add-member owner-2 (add init-now ~s5)])
     ::
     ++  multisig-state-1
       ::  base state
@@ -112,9 +87,9 @@
           pending:multisig-state-4
       ==
     ::
-    :: for our specific case, id and salt were pre-calculated by calling the contract
-    ++  multisig-grain-id    0x2cf5.9fbd.b2bd.49c3.7524.50a3.ddbb.2248
-    ++  multisig-salt        0xdfa.acb2.58c6.5735.f9b1.f3f8.017b.f0f7  
+    :: for our specific case, id and salt were simply pre-calculated by calling the contract
+    ++  multisig-grain-id    0x5a0e.c09d.57d9.4bda.7524.50a3.ddbb.2248
+    ++  multisig-salt        0x96be.233c.46b2.2eea.4f01.2490.8a36.3041  
     ++  multisig-grain-1
       ^-  grain
       :*  id=multisig-grain-id
@@ -169,7 +144,7 @@
         args=`[%create-multisig threshold=1 members=(silt ~[id:owner-1])]
         grains=~
     ==
-  =/  =cart  [multisig-wheat-id block=0 town-id owns=~]
+  =/  =cart  [multisig-wheat-id (add init-now ~s0) town-id owns=~]
   =/  res=chick  (~(write cont cart) embryo)
   =*  expected-grain  multisig-grain-1
   =/  grain  ?>(?=(%.y -.res) (snag 0 ~(val by issued.p.res)))
@@ -184,7 +159,7 @@
         args=`[%submit-tx egg-add-member]
         grains=~
     ==
-  =/  =cart  [me=multisig-wheat-id block=1 town-id owns=(malt ~[[id:multisig-grain-1 multisig-grain-1]])]
+  =/  =cart  [me=multisig-wheat-id (add init-now ~s1) town-id owns=(malt ~[[id:multisig-grain-1 multisig-grain-1]])]
   ::  executing the contract call with the context
   =/  res=chick  (~(write cont cart) embryo)
   ::
@@ -198,7 +173,7 @@
         args=`[%vote egg-add-member-hash]
         grains=~
     ==
-  =/  =cart  [me=multisig-wheat-id block=2 town-id owns=(malt ~[[id:multisig-grain-2 multisig-grain-2]])]
+  =/  =cart  [me=multisig-wheat-id (add init-now ~s2) town-id owns=(malt ~[[id:multisig-grain-2 multisig-grain-2]])]
   ::
   =/  res=chick  (~(write cont cart) embryo)
   ::
@@ -225,7 +200,7 @@
         args=args.q:egg-add-member
         grains=~
     ==
-  =/  =cart  [me=multisig-wheat-id block=3 town-id owns=(malt ~[[id:multisig-grain-3 multisig-grain-3]])]
+  =/  =cart  [me=multisig-wheat-id (add init-now ~s3) town-id owns=(malt ~[[id:multisig-grain-3 multisig-grain-3]])]
   =/  res=chick  (~(write cont cart) embryo)
   ::
   =*  expected-grain  multisig-grain-4
@@ -239,7 +214,7 @@
         args=`[%set-threshold 2]
         grains=~
     ==
-  =/  =cart  [me=multisig-wheat-id block=4 town-id owns=(malt ~[[id:multisig-grain-4 multisig-grain-4]])]
+  =/  =cart  [me=multisig-wheat-id (add init-now ~s4) town-id owns=(malt ~[[id:multisig-grain-4 multisig-grain-4]])]
   =/  res=chick  (~(write cont cart) embryo)
   =*  expected-grain  multisig-grain-5
   =/  grain  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
@@ -255,7 +230,7 @@
         args=`[%submit-tx egg-remove-member]
         grains=~
     ==
-  =/  =cart      [me=multisig-wheat-id block=5 town-id owns=(malt ~[[id:multisig-grain-5 multisig-grain-5]])]
+  =/  =cart      [me=multisig-wheat-id (add init-now ~s5) town-id owns=(malt ~[[id:multisig-grain-5 multisig-grain-5]])]
   =/  res=chick  (~(write cont cart) embryo)
   =/  grain-submit-tx  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
   =.  test-output  (weld test-output (expect-eq !>(expected-grain-submit-tx) !>(grain-submit-tx)))
@@ -266,7 +241,7 @@
         args=`[%vote egg-remove-member-hash]
         grains=~
     ==
-  =.  cart  [me=multisig-wheat-id block=6 town-id owns=(malt ~[[id:expected-grain-submit-tx expected-grain-submit-tx]])]  
+  =.  cart  [me=multisig-wheat-id (add init-now ~s6) town-id owns=(malt ~[[id:expected-grain-submit-tx expected-grain-submit-tx]])]  
   =.  res   (~(write cont cart) embryo)
   =/  grain-vote-tx-1  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
   =.  test-output  (weld test-output (expect-eq !>(expected-grain-vote-tx-1) !>(grain-vote-tx-1)))
@@ -277,7 +252,7 @@
         args=`[%vote egg-remove-member-hash]
         grains=~
     ==
-  =.  cart  [me=multisig-wheat-id block=7 town-id owns=(malt ~[[id:expected-grain-vote-tx-1 expected-grain-vote-tx-1]])]  
+  =.  cart  [me=multisig-wheat-id (add init-now ~s7) town-id owns=(malt ~[[id:expected-grain-vote-tx-1 expected-grain-vote-tx-1]])]  
   =.  res   (~(write cont cart) embryo)
   =/  [grain-vote-tx-2=grain next=_next:*hen]
     ?>  ?=(%.n -.res)
@@ -300,7 +275,7 @@
         args=args.q:egg-remove-member
         grains=~
     ==
-  =.  cart  [me=multisig-wheat-id block=8 town-id owns=(malt ~[[id:expected-grain-vote-tx-2 expected-grain-vote-tx-2]])]  
+  =.  cart  [me=multisig-wheat-id (add init-now ~s8) town-id owns=(malt ~[[id:expected-grain-vote-tx-2 expected-grain-vote-tx-2]])]  
   =.  res   (~(write cont cart) embryo)
   =/  grain-remove-member  ?>(?=(%.y -.res) (snag 0 ~(val by changed.p.res)))
   =.  test-output  (weld test-output (expect-eq !>(expected-grain-remove-member) !>(grain-remove-member)))

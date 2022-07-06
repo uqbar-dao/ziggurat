@@ -1,10 +1,11 @@
-:~  %ziggurat
+:~  %uqbar
     %sequencer
-    %wallet
+    %indexer
+    %dao
     %dao-graph-pull-hook
     %dao-graph-push-hook
     %dao-metadata-pull-hook
     %dao-metadata-push-hook
-    %dao
-    %indexer
+    %wallet
+    %rollup
 ==
