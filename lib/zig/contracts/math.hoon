@@ -14,6 +14,7 @@
         [%sub amount=@ud]
         [%giv who=id]
     ==
+  ::
   ++  process
     |=  [=action caller-id=id]
     ^-  chick
@@ -32,7 +33,7 @@
     ?-    -.action
         %add
       =*  amount           amount.action
-      =.  number.variable     (add amount number.variable)
+      =.  number.variable  (add amount number.variable)
       =.  data.p.germ.var  variable  
       [%& changed=(malt ~[[id.var var]]) ~ ~]
     ::
@@ -40,17 +41,17 @@
       [%& changed=(malt ~[[id.var var(holder who.action)]]) ~ ~]
     ::
         %sub
-      =*  amount           amount.action
-      ?>  (gte number.variable amount.action)  :: prevent subtraction underflow from causing a crash
+      =*  amount  amount.action
+      ?>  (gte number.variable amount)  :: prevent subtraction underflow from causing a crash
       ?:  =(0 amount)
         [%& ~ ~ ~]
       =/  =yolk
-        :*  me.cart 
+        :*  caller
             `[%sub (dec amount)]
             my-grains=~
             cont-grains=(silt ~[id.var])
         ==
-      =.  number.variable     (dec number.variable)
+      =.  number.variable  (dec number.variable)
       =.  data.p.germ.var  variable
       [%| next=[to=me.cart town-id.cart yolk] roost=[changed=(malt ~[[id.var var]]) ~ ~]]
     ==
