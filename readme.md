@@ -155,7 +155,7 @@ Example pokes that will work upon chain initialization in dojo):
 :wallet &zig-wallet-poke [%submit 0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c 0xcafe.babe 1 [1 10.000] [%give 32.770.263.103.071.854 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 1]]
 
 #  CUSTOM TRANSACTION
-:wallet &zig-wallet-poke [%submit-custom from=0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c to=0x74.6361.7274.6e6f.632d.7367.697a town=0x0 gas=[1 1.000.000] args='[%give 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 `0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.aef5.916b.a26c.9f96.e5dd.3910.8f23.79fd 69.000]' my-grains=(silt ~[0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.ec2e.701b.c218.6018.975c.8e60.c3f6.fcac]) cont-grains=(silt ~[0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.aef5.916b.a26c.9f96.e5dd.3910.8f23.79fd])]
+:wallet &zig-wallet-poke [%submit-custom from=0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c to=0x74.6361.7274.6e6f.632d.7367.697a town=0x0 gas=[1 1.000.000] args='[%give 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 69.000]' my-grains=(silt ~[0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.ec2e.701b.c218.6018.975c.8e60.c3f6.fcac]) cont-grains=~]
 ```
 ---
 

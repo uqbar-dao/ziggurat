@@ -3,7 +3,7 @@
 |_  [library=vase zink-cax=(map * @)]
 ::
 ++  verify-sig
-  |=  [=egg]
+  |=  =egg
   ^-  ?
   ?>  ?=(account from.p.egg)
   =/  hash=@

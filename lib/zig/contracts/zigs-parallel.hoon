@@ -6,7 +6,7 @@
 ::  because %give must include their gas budget, in order for
 ::  zig spends to be guaranteed not to underflow.
 ::
-/+  *zig-sys-smart
+::  /+  *zig-sys-smart
 /=  sur  /lib/zig/contracts/lib/zigs-parallel
 =,  sur
 |_  =cart
@@ -28,7 +28,7 @@
     =/  new=grain  [id me.cart to.act town-id.cart [%& salt ticket]]
     ::  modify sending account
     =.  data.p.germ.giv  giver(balance (sub balance.giver amount.act))
-    (result ~[giv] ~[new] ~)
+    (result ~[giv] ~[new] ~ ~)
   ::
       %take
     =/  giv=grain  (~(got by owns.cart) from-account.act)
@@ -54,7 +54,7 @@
         |=  old=@ud
         (sub old amount.act)
       ==
-    (result ~[giv] ~[new] ~)
+    (result ~[giv] ~[new] ~ ~)
   ::
       %redeem
     ::  deposit tickets into account
@@ -74,7 +74,7 @@
       :-  grain(data.p.germ tik(redeemed %.y))
       account(balance (add balance.account value.tik))
     =.  data.p.germ.home  rec
-    (result [home spent] ~ ~)
+    (result [home spent] ~ ~ ~)
   ::
       %give-set
     =/  giv=grain  +.-:grains.inp
@@ -84,7 +84,7 @@
     =/  make  ~(tap in tickets.act)
     =|  made=(list grain)
     |-
-    ?~  make  (result ~[giv(data.p.germ giver)] made ~)
+    ?~  make  (result ~[giv(data.p.germ giver)] made ~ ~)
     =/  =ticket    [amount.i.make %.n metadata.giver]
     =/  salt=@ux   (shax (cat 3 salt.p.germ.giv (cat 3 from.cart)))
     =/  =id        (fry-rice id.i.make me.cart town-id.cart -)
@@ -104,7 +104,7 @@
     =/  make  ~(tap in tickets.act)
     =|  made=(list grain)
     |-
-    ?~  make  (result ~[giv(data.p.germ giver)] made ~)
+    ?~  make  (result ~[giv(data.p.germ giver)] made ~ ~)
     =/  =ticket    [amount.i.make %.n metadata.giver]
     =/  salt=@ux   (shax (cat 3 salt.p.germ.giv (cat 3 from.cart)))
     =/  =id        (fry-rice id.i.make me.cart town-id.cart -)
@@ -132,7 +132,7 @@
           allowances
         (~(put by allowances.account) who.act amount.act)
       ==
-    (result ~[acc] ~ ~)
+    (result ~[acc] ~ ~ ~)
   ==
 ::
 ++  read
