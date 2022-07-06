@@ -74,10 +74,10 @@
           burns=*granary
       ==
     =+  [res fee err hits cro]=(mill land i.pending)
-    =+  i.pending(status.p err)
+    =+  egg=i.pending(status.p err)
     %_  $
       pending    t.pending
-      processed  [[`@ux`(shax (jam -)) -] processed]
+      processed  [[`@ux`(sham egg) egg] processed]
       land       res
       reward     (add reward fee)
       lis-hits   [hits lis-hits]
@@ -91,7 +91,7 @@
     ^-  [^land fee=@ud =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [land 0 %1 ~ ~]
     ::  validate transaction signature
-    =+  ?~(eth-hash.p.egg (sham (jam q.egg)) u.eth-hash.p.egg)
+    =+  ?~(eth-hash.p.egg (sham q.egg) u.eth-hash.p.egg)
     ::  all addresses should be ETH-style, but might not be signed ETH-style.
     ?.  (verify-sig id.from.p.egg - sig.p.egg %.y)
       ~&  >>>  "mill: signature mismatch"

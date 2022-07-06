@@ -209,7 +209,7 @@
             ?~  priv.keypair
               [0 0 0]
             %+  ecdsa-raw-sign:secp256k1:secp:crypto
-              (sham (jam yolk))
+              (sham yolk)
             u.priv.keypair
             ~
             to.act
@@ -222,7 +222,7 @@
         ::  if we don't have private key for this address, set as pending
         ::  and allow frontend to sign with HW wallet or otherwise
         ~&  >>  "%wallet: storing unsigned tx"
-        `state(pending `[(sham (jam yolk)) egg [%custom args.act]])
+        `state(pending `[(sham yolk) egg [%custom args.act]])
       ::  if we have key, use signature and submit
       =+  egg-hash=(hash-egg egg)
       =/  our-txs
@@ -297,13 +297,13 @@
       =/  =yolk:smart   [caller args.formatted our-grains.formatted cont-grains.formatted]
       =/  sig           ?~  priv.keypair
                           [0 0 0]
-                        (ecdsa-raw-sign:secp256k1:secp:crypto (sham (jam yolk)) u.priv.keypair)
+                        (ecdsa-raw-sign:secp256k1:secp:crypto (sham yolk) u.priv.keypair)
       =/  =egg:smart    [[caller sig ~ to.act rate.gas.act bud.gas.act town.act status=%100] yolk]
       ?~  priv.keypair
         ::  if we don't have private key for this address, set as pending
         ::  and allow frontend to sign with HW wallet or otherwise
         ~&  >>  "%wallet: storing unsigned tx"
-        `state(pending `[(shax (jam yolk)) egg args.act])
+        `state(pending `[(sham yolk) egg args.act])
       ::  if we have key, use signature and submit
       =+  egg-hash=(hash-egg egg)
       =/  our-txs

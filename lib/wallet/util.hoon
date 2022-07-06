@@ -7,7 +7,7 @@
   |=  =egg:smart
   ^-  @ux
   ::  hash the immutable+unique aspects of a transaction
-  (shax (jam [from.p.egg sig.p.egg town-id.p.egg]))
+  `@ux`(sham q.egg)
 ::
 ++  tx-update-card
   |=  [=egg:smart args=(unit supported-args)]

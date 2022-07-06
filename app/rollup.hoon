@@ -100,7 +100,7 @@
         ~|("%rollup: rejecting batch; sequencer doesn't match town" !!)
       ?.  (verify-sig:mill from.act new-root.act sig.act %.y)
         ~|("%rollup: rejecting batch; sequencer signature not valid" !!)
-      ?.  =(diff-hash.act (shax (jam state-diffs.act)))
+      ?.  =(diff-hash.act (sham state-diffs.act))
         ~|("%rollup: rejecting batch; diff hash not valid" !!)
       ::  check that other town state roots are up-to-date
       ::  recent-enough is a variable here that can be adjusted
