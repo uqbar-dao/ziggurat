@@ -28,7 +28,7 @@
 ::  I will heavily comment this contract in order to make it a good example
 ::  for others to use.
 ::
-::  /+  *zig-sys-smart
+:: /+  *zig-sys-smart
 /=  fungible  /lib/zig/contracts/lib/fungible
 =,  fungible
 |_  =cart
@@ -102,9 +102,6 @@
       =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
       ?>  =(metadata.receiver metadata.giver)
       ::  update the allowance of taker
-      =.  allowances.giver
-        %+  ~(jab by allowances.giver)  caller-id
-        |=(old=@ud (sub old amount.args))
       =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
           data.p.germ.giv
         %=  giver
