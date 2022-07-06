@@ -490,6 +490,26 @@
     --  ::ga
   --  ::number
 ::
+::  HTML from zuse.hoon
+::
+++  html  ^?
+  |%
+  ::                                                    ::
+  ::::                    ++mimes:html                  ::  (2e1) MIME
+    ::                                                  ::::
+  ++  mimes  ^?
+    |%
+    ::                                                  ::  ++as-octs:mimes:html
+    ++  as-octs                                         ::  atom to octstream
+      |=  tam=@  ^-  octs
+      [(met 3 tam) tam]
+    ::                                                  ::  ++as-octt:mimes:html
+    ++  as-octt                                         ::  tape to octstream
+      |=  tep=tape  ^-  octs
+      (as-octs (rap 3 tep))
+    --
+  --  ::  html
+::
 ::  CRYPTO from zuse.hoon
 ::
 ++  crypto  ^?
@@ -709,7 +729,6 @@
       --
     ::                                                  ::  ++ecba:aes:crypto
     ++  ecba                                            ::  AES-128 ECB
-      ~%  %ecba  +>  ~
       |_  key=@H
       ::                                                ::  ++en:ecba:aes:crypto
       ++  en                                            ::  encrypt
@@ -736,7 +755,6 @@
       --  ::ecba
     ::                                                  ::  ++ecbb:aes:crypto
     ++  ecbb                                            ::  AES-192 ECB
-      ~%  %ecbb  +>  ~
       |_  key=@I
       ::                                                ::  ++en:ecbb:aes:crypto
       ++  en                                            ::  encrypt
@@ -2174,9 +2192,12 @@
     ::                                                  ::::
   ++  secp  !.
     ::  TODO: as-octs and hmc are outside of jet parent
-    =>  :-  hmc=hmac-sha256l:hmac:crypto
-        as-octs=as-octs:mimes:html
     |%
+    :: as-octs from as-octs:mimes:html
+    ++  as-octs                                         ::  atom to octstream
+      |=  tam=@  ^-  octs
+      [(met 3 tam) tam]
+    :: end as-octs
     +$  jacobian   [x=@ y=@ z=@]                    ::  jacobian point
     +$  point      [x=@ y=@]                        ::  curve point
     +$  domain
@@ -2341,7 +2362,7 @@
         ?>  (valid-hash hash)
         =/  v  (fil 3 bytes 1)
         =/  k  0
-        =.  k  %+  hmc  [bytes k]
+        =.  k  %+  hmac-sha256l:hmac  [bytes k]
                %-  as-octs
                %+  can  3
                :~  [bytes hash]
@@ -2349,8 +2370,8 @@
                    [1 0]
                    [bytes v]
                ==
-        =.  v  (hmc bytes^k bytes^v)
-        =.  k  %+  hmc  [bytes k]
+        =.  v  (hmac-sha256l:hmac bytes^k bytes^v)
+        =.  k  %+  hmac-sha256l:hmac  [bytes k]
                %-  as-octs
                %+  can  3
                :~  [bytes hash]
@@ -2358,8 +2379,8 @@
                    [1 1]
                    [bytes v]
                ==
-        =.  v  (hmc bytes^k bytes^v)
-        (hmc bytes^k bytes^v)
+        =.  v  (hmac-sha256l:hmac bytes^k bytes^v)
+        (hmac-sha256l:hmac bytes^k bytes^v)
       ::
       ++  ecdsa-raw-sign
         |=  [hash=@ private-key=@]

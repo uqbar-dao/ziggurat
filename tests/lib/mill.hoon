@@ -118,7 +118,7 @@
 ++  test-trivial-pass
   =/  caller  [0xbeef 1 0x1.beef]
   =/  yok=yolk
-    [caller ~ ~ ~]
+    [~ ~ ~]
   =/  shel=shell
     [caller [0 0 0] ~ 0xdada.dada 1 5.000 0x0 0]
   =/  egg  [shel yok]
@@ -135,7 +135,7 @@
 ++  test-zigs-give
   =/  caller  [0xbeef 1 0x1.beef]
   =/  yok=yolk
-    [caller `[%give 0xdead `0x1.dead 777 50.000] (silt ~[0x1.beef]) (silt ~[0x1.dead])]
+    [`[%give 0xdead `0x1.dead 777] (silt ~[0x1.beef]) (silt ~[0x1.dead])]
   =/  shel=shell
     [caller [0 0 0] ~ zigs-wheat-id 1 50.000 0x0 0]
   =/  egg  [shel yok]
