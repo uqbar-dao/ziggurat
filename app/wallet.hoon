@@ -17,6 +17,7 @@
       =transaction-store
       pending=(unit [yolk-hash=@ =egg:smart args=supported-args])
       =metadata-store
+      =amount-or-id
   ==
 --
 ::
@@ -260,7 +261,13 @@
       ::  only supporting small subset of contract calls, for tokens and NFTs
       =/  formatted=[args=(unit *) our-grains=(set @ux) cont-grains=(set @ux)]
         ?-    -.args.act
+            ::  save token-id if NFT, else save amount
+            %give-nft  
+          =+  amount-or-id=item-id.args.act  -
             %give
+          ?~  amount-or-id
+            =+  amount-or-id=amount.args.act
+          ::  add data to subj.
           ~|  "wallet can't find metadata for that token!"
           =/  metadata  (~(got by metadata-store.state) salt.args.act)
           ~|  "wallet can't find our zigs account for that town!"
@@ -270,24 +277,11 @@
             ::  they don't have an account for this token
             ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
               [`[%give to.args.act ~ amount.args.act bud.gas.act] (silt ~[id.our-account]) ~]
-            [`[%give to.args.act ~ amount.args.act] (silt ~[id.our-account]) ~]
+            [`[%give to.args.act ~ amount-or-id] (silt ~[id.our-account]) ~]
           ::  they have an account for this token, include it in transaction
           :+  ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
                 `[%give to.args.act `their-account-id amount.args.act bud.gas.act]
-              `[%give to.args.act `their-account-id amount.args.act]
-            (silt ~[id.our-account])
-          (silt ~[their-account-id])
-        ::  ONLT difference between this and token give is amount vs. item-id.
-        ::  therefore should figure out way to just unify them.
-            %give-nft
-          ~|  "wallet can't find metadata for that token!"
-          =/  metadata  (~(got by metadata-store.state) salt.args.act)
-          ~|  "wallet can't find our zigs account for that town!"
-          =/  our-account=grain:smart  +:(~(got by book) [town.act to.act salt.metadata])
-          =/  their-account-id  (fry-rice:smart to.args.act to.act town.act salt.metadata)
-          ?~  exists=(scry:uqbar %grain their-account-id [our now]:bowl)
-            [`[%give to.args.act ~ item-id.args.act] (silt ~[id.our-account]) ~]
-          :+  `[%give to.args.act `their-account-id item-id.args.act]
+              `[%give to.args.act `their-account-id amount-or-id]
             (silt ~[id.our-account])
           (silt ~[their-account-id])
         ::
