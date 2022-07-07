@@ -12,16 +12,16 @@
   ^-  chick
   |^
   ?~  args.inp  !!
-  (process ;;(arguments:sur u.args.inp) (pin caller.inp))
+  (process ;;(action u.args.inp) (pin caller.inp))
   ::
   ++  process
-    |=  [args=arguments:sur caller-id=id]
+    |=  [args=action caller-id=id]
     ?-    -.args
         %give
       =/  giv=grain  -:~(val by grains.inp)
       ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
-      =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
-      =/  =item:sur  (~(got by items.giver) item-id.args)
+      =/  giver=nft-account  ;;(nft-account data.p.germ.giv)
+      =/  =item              (~(got by items.giver) item-id.args)
       ?>  transferrable.item  ::  asset item is transferrable
       ?~  account.args
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
@@ -33,7 +33,7 @@
         [~ (malt ~[[id.new new]]) ~]
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
-      =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
+      =/  receiver=nft-account  ;;(nft-account data.p.germ.rec)
       ?>  =(metadata.receiver metadata.giver)
       =:  data.p.germ.giv  giver(items (~(del by items.giver) item-id.args))
           data.p.germ.rec  receiver(items (~(put by items.receiver) item-id.args item))
@@ -44,7 +44,7 @@
       ::  expects token metadata in owns.cart
       =/  tok=grain  (~(got by owns.cart) token.args)
       ?>  &(=(lord.tok me.cart) ?=(%& -.germ.tok))
-      =/  meta  ;;(collection-metadata:sur data.p.germ.tok)
+      =/  meta  ;;(collection-metadata data.p.germ.tok)
       ::  first, check if token is mintable
       ?>  &(mintable.meta ?=(^ cap.meta) ?=(^ minters.meta))
       ::  check if mint will surpass supply cap
@@ -56,7 +56,7 @@
       =/  changed-rice  (malt ~[[id.tok tok]])
       =/  issued-rice   *(map id grain)
       =/  mints         ~(tap in mints.args)
-      =/  next-mints    *(set mint:sur)
+      =/  next-mints    *(set mint)
       |-
       ?~  mints
         ::  update metadata token with new supply
@@ -89,12 +89,12 @@
       ::  have rice, can modify
       =/  =grain  (~(got by owns.cart) u.account.i.mints)
       ?>  &(=(lord.grain me.cart) ?=(%& -.germ.grain))
-      =/  acc  ;;(account:sur data.p.germ.grain)
+      =/  acc  ;;(nft-account data.p.germ.grain)
       ?>  =(metadata.acc token.args)
       ::  create map of items in this mint to unify with accounts
       =/  mint-list  ~(tap in items.i.mints)
-      =/  new-items=(map @ud item:sur)
-        =+  new-items=*(map @ud item:sur)
+      =/  new-items=(map @ud item)
+        =+  new-items=*(map @ud item)
         |-
         ?~  mint-list
           new-items
@@ -116,7 +116,7 @@
       =/  distribution-total=@ud
         %+  roll
           %+  turn  ~(tap by distribution.args)
-          |=  [@ ics=(set item-contents:sur)]
+          |=  [@ ics=(set item-contents)]
           ~(wyt in ics)
         add
       ?>  ?:  mintable.args
@@ -131,7 +131,7 @@
             me.cart
             town-id.cart
             :+  %&  salt
-            ^-  collection-metadata:sur
+            ^-  collection-metadata
             :*  name.args
                 symbol.args
                 attributes.args
@@ -147,10 +147,10 @@
       =/  accounts
         %-  ~(gas by *(map id grain))
         %+  turn  ~(tap by distribution.args)
-        |=  [=id items=(set item-contents:sur)]
+        |=  [=id items=(set item-contents)]
         =/  mint-list  ~(tap in items)
-        =/  new-items=(map @ud item:sur)
-          =+  new-items=*(map @ud item:sur)
+        =/  new-items=(map @ud item)
+          =+  new-items=*(map @ud item)
           |-
           ?~  mint-list
             new-items
@@ -184,14 +184,14 @@
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
       ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
-        ;;(account:sur data.p.germ.g)
-      ;;(collection-metadata:sur data.p.germ.g)
+        ;;(nft-account data.p.germ.g)
+      ;;(collection-metadata data.p.germ.g)
     ::
         [%rice-data @ ~]
       =/  data  (cue (slav %ud i.t.args))
       ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
-        ;;(account:sur data)
-      ;;(collection-metadata:sur data)
+        ;;(nft-account data)
+      ;;(collection-metadata data)
     ::
         [%egg-args @ ~]
       (cue (slav %ud i.t.args))

@@ -11,7 +11,7 @@
       salt=@
   ==
 ::
-+$  account  ::  holds your items from a given collection
++$  nft-account  ::  holds your items from a given collection
   $:  metadata=id
       items=(map @ud item)      :: maps to item ids
   ==
@@ -31,7 +31,7 @@
       items=(set item-contents)
   ==
 ::
-+$  arguments
++$  action
   $%  [%give to=id account=(unit id) item-id=@ud]
       [%mint token=id mints=(set mint)]
       $:  %deploy
