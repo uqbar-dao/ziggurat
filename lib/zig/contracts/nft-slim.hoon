@@ -175,29 +175,26 @@
 ++  read
   |_  args=path
   ++  json
-    ^-  ^json
+    ~
+  ::
+  ++  noun
     ?+    args  !!
         [%rice-data ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
       ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
-        (account:enjs:lib ;;(account:sur data.p.germ.g))
-      (collection-metadata:enjs:lib ;;(collection-metadata:sur data.p.germ.g))
+        ;;(account:sur data.p.germ.g)
+      ;;(collection-metadata:sur data.p.germ.g)
     ::
         [%rice-data @ ~]
       =/  data  (cue (slav %ud i.t.args))
       ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
-        (account:enjs:lib ;;(account:sur data))
-      %-  collection-metadata:enjs:lib
+        ;;(account:sur data)
       ;;(collection-metadata:sur data)
     ::
         [%egg-args @ ~]
-      %-  arguments:enjs:lib
-      ;;(arguments:sur (cue (slav %ud i.t.args)))
+      (cue (slav %ud i.t.args))
     ==
-  ::
-  ++  noun
-    ~
   --
 --
