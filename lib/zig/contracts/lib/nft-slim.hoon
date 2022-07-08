@@ -35,7 +35,7 @@
   $%  [%give to=id account=(unit id) item-id=@ud]
       [%mint token=id mints=(set mint)]
       $:  %deploy
-          distribution=[meta=id (set item-contents)]
+          distribution=[meta=id items=(set item-contents)]
           minters=(set id)
           name=@t
           symbol=@t

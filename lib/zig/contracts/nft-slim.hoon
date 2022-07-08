@@ -3,8 +3,8 @@
 ::  NFT standard. Provides abilities similar to ERC-721 tokens, also ability
 ::  to deploy and mint new sets of tokens.
 ::
-::  /+  *zig-sys-smart
-/=  nft  /lib/zig/contracts/lib/nft
+  /+  *zig-sys-smart
+/=  nft  /lib/zig/contracts/lib/nft-slim
 =,  nft
 |_  =cart
 ++  write
@@ -113,12 +113,8 @@
       ?>  ?:(mintable.args ?=(^ minters.args) %.y)
       ::  if !mintable, enforce distribution adds up to cap
       ::  otherwise, enforce distribution < cap
-      =/  distribution-total=@ud
-        %+  roll
-          %+  turn  ~(tap by distribution.args)
-          |=  [@ ics=(set item-contents)]
-          ~(wyt in ics)
-        add
+      =/  distribution-total=@ud 
+        ~(wyt in items.distribution.args)
       ?>  ?:  mintable.args
             (gth cap.args distribution-total)
           =(cap.args distribution-total)
@@ -134,7 +130,6 @@
             ^-  collection-metadata
             :*  name.args
                 symbol.args
-                attributes.args
                 supply=distribution-total
                 ?:(mintable.args `cap.args ~)
                 mintable.args
@@ -142,12 +137,11 @@
                 deployer=caller-id
                 salt
         ==  ==
-      ::  generate accounts
       =+  next-item-id=0
       =/  accounts
         %-  ~(gas by *(map id grain))
-        %+  turn  ~(tap by distribution.args)
-        |=  [=id items=(set item-contents)]
+        :_  ~
+        =/  [=id items=(set item-contents)]  distribution.args
         =/  mint-list  ~(tap in items)
         =/  new-items=(map @ud item)
           =+  new-items=*(map @ud item)
@@ -163,7 +157,6 @@
         =+  (fry-rice id me.cart town-id.cart salt)
         :-  -
         [- me.cart id town-id.cart [%& salt [id.metadata-grain new-items ~ ~]]]
-      ::  big ol issued map
       [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~]
     ==
   --
