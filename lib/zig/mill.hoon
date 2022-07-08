@@ -121,9 +121,9 @@
     ^-  [^land burned=granary fee=@ud =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [land ~ 0 %1 ~ ~]
     ::  validate transaction signature
-    ?.  (verify-sig egg)
-      ~&  >>>  "mill: signature mismatch"
-      [land ~ 0 %2 ~ ~]  ::  signed tx doesn't match account
+    ::  ?.  (verify-sig egg)
+    ::    ~&  >>>  "mill: signature mismatch"
+    ::    [land ~ 0 %2 ~ ~]  ::  signed tx doesn't match account
     ::
     ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
       ~&  >>>  "mill: tx rejected; bad nonce"
@@ -161,6 +161,7 @@
       ^-  [? action=(unit *)]
       ?.  ?=(account from.p.egg)                    [%.n ~]
       ?~  zigs=(~(get by granary) zigs.from.p.egg)  [%.n ~]
+      ?.  =(id.from.p.egg holder.u.zigs)            [%.n ~]
       ?.  =(zigs-wheat-id lord.u.zigs)              [%.n ~]
       ?.  ?=(%& -.germ.u.zigs)                      [%.n ~]
       =/  acc     (hole token-account data.p.germ.u.zigs)
@@ -319,21 +320,12 @@
         =/  payload   .*(q.library pay.cont.crop)
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]
-        =/  gun
-          (ajar dor %write !>(cart) !>(embryo))
-        =/  =book
-          (zebra budget zink-cax gun)
-        ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
-        :-  hit.q.book
-        ?:  ?=(%| -.p.book)
+        =/  res
+          (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))^(sub budget 7)
+        ?:  ?=(%| -.-.res)
           ::  error in contract execution
-          ~&  p.book
-          [~ bud.q.book %6]
-        ::  chick result
-        ?~  p.p.book
-          ~&  >>>  "mill: ran out of gas"
-          [~ 0 %8]
-        [(hole (unit chick) p.p.book) bud.q.book %0]
+          [~ ~ +.res %6]
+        [~ `p.-.res +.res %0]
       --
     ::
     ::  +harvest: take a completed execution and validate all changes and additions to granary state

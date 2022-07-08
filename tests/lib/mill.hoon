@@ -128,15 +128,140 @@
 ::
 ::  tests for +mill
 ::
-++  test-mill-bad-account  !!
+++  test-mill-bad-account
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  shel=shell
+    [0xbeef fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed
+    %+  expect-eq
+    !>(%1)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(fake-land)  !>(land.res)
+  ==
 ::
-++  test-mill-high-nonce  !!
+++  test-mill-high-nonce
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  shel=shell
+    [[0xbeef 2 0x1.beef] fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed
+    %+  expect-eq
+    !>(%3)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(fake-land)  !>(land.res)
+  ==
 ::
-++  test-mill-low-nonce  !!
+++  test-mill-low-nonce
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  shel=shell
+    [[0xbeef 0 0x1.beef] fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed
+    %+  expect-eq
+    !>(%3)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(fake-land)  !>(land.res)
+  ==
 ::
-++  test-mill-missing-account-grain  !!
+++  test-mill-missing-account-grain
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  shel=shell
+    [[0xbeef 1 0x2.beef] fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed
+    %+  expect-eq
+    !>(%4)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(fake-land)  !>(land.res)
+  ==
 ::
-++  test-mill-wrong-account-grain  !!
+++  test-mill-wrong-account-grain
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  shel=shell
+    [[0xbeef 1 0x1.dead] fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed
+    %+  expect-eq
+    !>(%4)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(fake-land)  !>(land.res)
+  ==
 ::
 ++  test-mill-low-budget
   =/  yok=yolk
