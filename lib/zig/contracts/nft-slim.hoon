@@ -64,7 +64,7 @@
         =.  data.p.germ.tok
           %=  meta
             supply    next-item-id
-            mintable  ?:(=(u.cap.meta supply.meta) %.y %.n)
+            mintable  (lth u.cap.meta supply.meta)
           ==
         ::  finished minting, return chick
         ?~  issued-rice
