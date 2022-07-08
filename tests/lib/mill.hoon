@@ -38,7 +38,7 @@
   %.n
 ::
 +$  mill-result
-  [=land burned=granary fee=@ud =errorcode hits=(list hints:zink) =crow]
+  [fee=@ud =land burned=granary =errorcode hits=(list hints:zink) =crow]
 ::
 ::  fake data
 ::

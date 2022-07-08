@@ -78,6 +78,7 @@
   $:  me=id
       from=[=id nonce=@ud]
       now=@da
+      ::  TODO: bring back batch #
       town-id=id
       owns=(map id grain)
   ==
@@ -3385,5 +3386,5 @@
         $(t (add t (lsh [3 (mul (dec j) out)] f)), j +(j))
       (rev 3 d (end [3 d] t))
     --
-  --  ::crypto  
+  --  ::crypto
 --

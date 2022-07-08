@@ -88,7 +88,7 @@
           all-burns
       ==
     ::
-    =/  [[diff=granary nonces=populace] burned=granary fee=@ud =errorcode hits=(list hints) =crow]
+    =/  [fee=@ud [diff=granary nonces=populace] burned=granary =errorcode hits=(list hints) =crow]
       (mill land egg.i.pending)
     =/  diff-and-burned  (~(uni by diff) burned)
     ?.  ?&  ?=(~ (~(int by all-diffs) diff-and-burned))
@@ -118,33 +118,34 @@
   ::
   ++  mill
     |=  [=land =egg]
-    ^-  [^land burned=granary fee=@ud =errorcode hits=(list hints) =crow]
-    ?.  ?=(account from.p.egg)  [[~ q.land] ~ 0 %1 ~ ~]
+    ^-  [fee=@ud ^land burned=granary =errorcode hits=(list hints) =crow]
+    ?.  ?=(account from.p.egg)  [0 [~ q.land] ~ %1 ~ ~]
     ::  validate transaction signature
     ?.  ?:(check-sigs (verify-sig egg) %.y)
       ~&  >>>  "mill: signature mismatch"
-      [[~ q.land] ~ 0 %2 ~ ~]  ::  signed tx doesn't match account
+      [0 [~ q.land] ~ %2 ~ ~]  ::  signed tx doesn't match account
     ::
     ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
       ~&  >>>  "mill: tx rejected; bad nonce"
-      [[~ q.land] ~ 0 %3 ~ ~]  ::  bad nonce
+      [0 [~ q.land] ~ %3 ~ ~]  ::  bad nonce
     ::
     =/  [valid=? updated-zigs-action=(unit *)]
       (~(audit tax p.land) egg)
     ?.  valid
       ~&  >>>  "mill: tx rejected; not enough budget"
-      [[~ q.land] ~ 0 %4 ~ ~]  ::  can't afford gas
+      [0 [~ q.land] ~ %4 ~ ~]  ::  can't afford gas
     =?  action.q.egg  ?=(^ updated-zigs-action)
       updated-zigs-action
     ::
     =/  res  (~(work farm p.land) egg)
     =/  fee=@ud  (sub budget.p.egg rem.res)
-    :_  [burned.res fee errorcode.res hits.res crow.res]
-    :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
-    ::  charge gas fee by including their designated zigs grain inside the diff
-    ?:  =(0 fee)  ~
-    %-  ~(put by (fall diff.res ~))
-    (~(charge tax p.land) (fall diff.res ~) from.p.egg fee)
+    =/  new-land
+      :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
+      ::  charge gas fee by including their designated zigs grain inside the diff
+      ?:  =(0 fee)  ~
+      %-  ~(put by (fall diff.res ~))
+      (~(charge tax p.land) (fall diff.res ~) from.p.egg fee)
+    [fee new-land [burned errorcode hits crow]:res]
   ::
   ::  +tax: manage payment for egg in zigs
   ::
