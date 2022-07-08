@@ -106,7 +106,7 @@
           =(cap.args distribution-total)
       ::  generate salt
       =/  salt  (sham (cat 3 caller-id symbol.args))
-      ::  generate metadata
+      ::  create metadata
       =/  metadata-grain  ^-  grain
         :*  (fry-rice me.cart me.cart town-id.cart salt)
             me.cart
@@ -123,27 +123,7 @@
                 deployer=caller-id
                 salt
         ==  ==
-      =+  next-item-id=0
-      =/  accounts
-        %-  ~(gas by *(map id grain))
-        :_  ~
-        =/  [=id items=(set item-contents)]  distribution.args
-        =/  mint-list  ~(tap in items)
-        =/  new-items=(map @ud item)
-          =+  new-items=*(map @ud item)
-          |-
-          ?~  mint-list
-            new-items
-          =+  [+(next-item-id) i.mint-list]
-          %=  $
-            mint-list  t.mint-list
-            new-items      (~(put by new-items) -.- -)
-            next-item-id   +(next-item-id)
-          ==
-        =+  (fry-rice id me.cart town-id.cart salt)
-        :-  -
-        [- me.cart id town-id.cart [%& salt `nft-account`[id.metadata-grain new-items]]]
-      [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~]
+      [%& ~ (malt ~[[id.metadata-grain metadata-grain]]) ~]
     ==
   --
 ::
