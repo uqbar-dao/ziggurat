@@ -28,11 +28,12 @@
     ::
         %mint
       ::  expects token metadata in owns.cart
-      =/  tok=grain  (~(got by owns.cart) token.args)
+      =/  tok=grain  (~(got by owns.cart) meta.args)
       ?>  &(=(lord.tok me.cart) ?=(%& -.germ.tok))
       =/  meta  ;;(collection-metadata data.p.germ.tok)
       ::  first, check if token is mintable
       ?>  &(mintable.meta ?=(^ cap.meta) ?=(^ minters.meta))
+      ?>  (~(has in minters.meta) caller-id)
       ::  check if mint will surpass supply cap
       ?>  (gth u.cap.meta (add supply.meta ~(wyt in mints.args)))
       ::  cleared to execute!
@@ -45,53 +46,12 @@
       =/  next-mints    *(set mint)
       |-
       ?~  mints
-        ::  update metadata token with new supply
-        =.  data.p.germ.tok
-          %=  meta
-            supply    next-item-id
-            mintable  (lth u.cap.meta supply.meta)
-          ==
-        ::  finished minting, return chick
-        ?~  issued-rice
-          [%& changed-rice ~ ~]
-        ::  finished but need to mint to newly-issued rices
-        =/  call-grains=(set id)
-          ~(key by `(map id grain)`issued-rice)
-        :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%mint token.args next-mints] ~ call-grains]
-        [changed-rice issued-rice ~]
-      ::
-      ?~  account.i.mints
-        ::  need to issue
-        =+  (fry-rice to.i.mints me.cart town-id.cart salt.meta)
-        =/  new=grain
-          [- me.cart to.i.mints town-id.cart [%& salt.meta `nft-account`[token.args ~]]]
-        %=  $
-          mints   t.mints
-          issued-rice  (~(put by issued-rice) id.new new)
-          next-mints   (~(put in next-mints) [to.i.mints `id.new items.i.mints])
-        ==
-      ::  have rice, can modify
-      =/  =grain  (~(got by owns.cart) u.account.i.mints)
-      ?>  &(=(lord.grain me.cart) ?=(%& -.germ.grain))
-      =/  acc  ;;(nft-account data.p.germ.grain)
-      ?>  =(metadata.acc token.args)
-      ::  create map of items in this mint to unify with accounts
-      =/  mint-list  ~(tap in items.i.mints)
-      =/  new-items=(map @ud item)
-        =+  new-items=*(map @ud item)
-        |-
-        ?~  mint-list
-          new-items
-        =+  [+(next-item-id) i.mint-list]
-        %=  $
-          mint-list     t.mint-list
-          new-items     (~(put by new-items) -.- -)
-          next-item-id  +(next-item-id)
-        ==
-      =.  data.p.germ.grain  acc(items (~(uni by items.acc) new-items))
-      $(mints t.mints, changed-rice (~(put by changed-rice) id.grain grain))
+        *chick
+      *chick
+      ::  basically, we need to recurse over mints and
+      ::  a) create item grains for all items in items.i.mints
+      ::  b) make sure their holder is set to to.i.mints
+      ::  c) update the supply/cap/mintable as per old logic
     ::
         %deploy
       ::  no rice expected as input, only arguments
