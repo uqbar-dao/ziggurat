@@ -17,7 +17,6 @@
       =transaction-store
       pending=(unit [yolk-hash=@ =egg:smart args=supported-args])
       =metadata-store
-      =amount-or-id
   ==
 --
 ::
@@ -260,33 +259,29 @@
       ::  need to check transaction type and collect rice based on it
       ::  only supporting small subset of contract calls, for tokens and NFTs
       =/  formatted=[args=(unit *) our-grains=(set @ux) cont-grains=(set @ux)]
-        ?-    -.args.act
-            ::  save token-id if NFT, else save amount
-            %give-nft  
-          =+  amount-or-id=item-id.args.act  -
-            %give
-          ?~  amount-or-id
-            =+  amount-or-id=amount.args.act
-          ::  add data to subj.
-          ~|  "wallet can't find metadata for that token!"
-          =/  metadata  (~(got by metadata-store.state) salt.args.act)
-          ~|  "wallet can't find our zigs account for that town!"
-          =/  our-account=grain:smart  +:(~(got by book) [town.act to.act salt.metadata])
-          =/  their-account-id  (fry-rice:smart to.args.act to.act town.act salt.metadata)
-          ?~  exists=(scry:uqbar %grain their-account-id [our now]:bowl)
-            ::  they don't have an account for this token
-            ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
-              [`[%give to.args.act ~ amount.args.act bud.gas.act] (silt ~[id.our-account]) ~]
-            [`[%give to.args.act ~ amount-or-id] (silt ~[id.our-account]) ~]
-          ::  they have an account for this token, include it in transaction
-          :+  ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
-                `[%give to.args.act `their-account-id amount.args.act bud.gas.act]
-              `[%give to.args.act `their-account-id amount-or-id]
-            (silt ~[id.our-account])
-          (silt ~[their-account-id])
-        ::
-          %custom  !!
-        ==
+        ::  if sending NFT, save item-id
+        ?:  =(-.args.act %give-nft)  amount-or-id=item-id.args.act
+        ::  else, save amount to send
+        ?:  =(-.args.act %give)  amount-or-id=amount.args.act
+        ?:  =(-.args.act %custom)  !!  ~
+        ::  add data to subj.
+        ~|  "wallet can't find metadata for that token!"
+        =/  metadata  (~(got by metadata-store.state) salt.args.act)
+        ~|  "wallet can't find our zigs account for that town!"
+        =/  our-account=grain:smart  +:(~(got by book) [town.act to.act salt.metadata])
+        =/  their-account-id  (fry-rice:smart to.args.act to.act town.act salt.metadata)
+        ?~  exists=(scry:uqbar %grain their-account-id [our now]:bowl)
+          ::  they don't have an account for this token
+          ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
+            [`[%give to.args.act ~ amount.args.act bud.gas.act] (silt ~[id.our-account]) ~]
+          [`[%give to.args.act ~ amount-or-id] (silt ~[id.our-account]) ~]
+        ::  they have an account for this token, include it in transaction
+        :+  ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
+              `[%give to.args.act `their-account-id amount.args.act bud.gas.act]
+            `[%give to.args.act `their-account-id amount-or-id]
+          (silt ~[id.our-account])
+        (silt ~[their-account-id])
+      ==
       =/  keypair       (~(got by keys.state) from.act)
       =/  =yolk:smart   [caller args.formatted our-grains.formatted cont-grains.formatted]
       =/  sig           ?~  priv.keypair
