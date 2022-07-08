@@ -62,57 +62,91 @@
   ++  mill-all
     |=  [=land basket=(list [@ux =egg]) passes=@ud]
     ^-  state-transition
-    ::
-    ::  TODOs:
-    ::  -  add multiple sequential passes
+    |^
     ::
     =/  pending
       %+  sort  basket
       |=  [a=[@ux =egg] b=[@ux =egg]]
       (gth rate.p.egg.a rate.p.egg.b)
     ::
-    =|  processed=(list [@ux egg])
-    =|  all-diffs=granary
-    =|  lis-hits=(list (list hints))
-    =|  crows=(list crow)
-    =|  all-burns=granary
+    =|  final=state-transition
     =|  reward=@ud
     |-
-    ?~  pending
-      ::  create final state transition
-      :*  [(~(pay tax (~(uni by p.land) all-diffs)) reward) q.land]
-          processed
-          (flop lis-hits)
-          all-diffs
-          crows
-          all-burns
-      ==
-    ::
-    =/  [fee=@ud [diff=granary nonces=populace] burned=granary =errorcode hits=(list hints) =crow]
-      (mill land egg.i.pending)
-    =/  diff-and-burned  (~(uni by diff) burned)
-    ?.  ?&  ?=(~ (~(int by all-diffs) diff-and-burned))
-            ?=(~ (~(int by all-burns) diff-and-burned))
+    ?:  ?|  ?=(~ pending)
+            =(0 passes)
         ==
-      ::  diff or burned contains collision, reject
+      ::  create final state transition
+      final(land land)
+    ::  otherwise, perform a pass
+    =/  [passed=state-transition rejected=(list [@ux egg])]
+      (pass land pending)
+    %=  $
+      land             land.passed
+      pending          rejected
+      processed.final  (weld processed.passed processed.final)
+      hits.final       (weld hits.passed hits.final)
+      diff.final       (~(uni by diff.final) diff.passed)
+      crows.final      (weld crows.passed crows.final)
+      burns.final      (~(uni by burns.final) burns.passed)
+    ==
+    ::
+    ++  pass
+      |=  [=^land pending=(list [@ux =egg])]
+      ^-  [state-transition rejected=(list [@ux egg])]
+      =|  processed=(list [@ux egg])
+      =|  rejected=(list [@ux egg])
+      =|  all-diffs=granary
+      =|  lis-hits=(list (list hints))
+      =|  crows=(list crow)
+      =|  all-burns=granary
+      =|  reward=@ud
+      |-
+      ?~  pending
+        :_  rejected
+        :*  [(~(pay tax (~(uni by p.land) all-diffs)) reward) q.land]
+            processed
+            (flop lis-hits)
+            all-diffs
+            crows
+            all-burns
+        ==
       ::
-      ~&  >>>  "mill: rejecting egg due to diff overlap"
+      =/  [fee=@ud [diff=granary nonces=populace] burned=granary =errorcode hits=(list hints) =crow]
+        (mill land egg.i.pending)
+      =/  diff-and-burned  (~(uni by diff) burned)
+      ?.  ?&  ?=(~ (~(int by all-diffs) diff-and-burned))
+              ?=(~ (~(int by all-burns) diff-and-burned))
+          ==
+        ?.  =(%0 errorcode)
+          ::  invalid egg
+          ::
+          %=  $
+            pending    t.pending
+            processed  [i.pending(status.p.egg errorcode) processed]
+            q.land     nonces
+            reward     (add reward fee)
+            lis-hits   [hits lis-hits]
+          ==
+        ::  valid, but diff or burned contains collision, reject
+        ::
+        ~&  >>>  "mill: rejecting egg due to diff overlap"
+        %=  $
+          pending    t.pending
+          rejected  [i.pending rejected]
+        ==
+      ::  diff is isolated, proceed
+      ::
       %=  $
         pending    t.pending
-        processed  [i.pending(status.p.egg %9) processed]
+        processed  [i.pending(status.p.egg errorcode) processed]
+        q.land     nonces
+        reward     (add reward fee)
+        lis-hits   [hits lis-hits]
+        crows      [crow crows]
+        all-diffs  (~(uni by all-diffs) diff)
+        all-burns  (~(uni by all-burns) burned)
       ==
-    ::  diff is isolated, proceed
-    ::
-    %=  $
-      pending    t.pending
-      processed  [i.pending(status.p.egg errorcode) processed]
-      q.land     nonces
-      reward     (add reward fee)
-      lis-hits   [hits lis-hits]
-      crows      [crow crows]
-      all-diffs  (~(uni by all-diffs) diff)
-      all-burns  (~(uni by all-burns) burned)
-    ==
+    --
   ::
   ::  +mill: processes a single egg and returns map of modified grains + updated nonce
   ::

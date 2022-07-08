@@ -386,9 +386,9 @@
     !>(~)  !>(p.land.res)
   ==
 ::
-++  test-mill-germinate-only-take-lorded-grains  !!
+++  test-mill-germinate-only-take-lorded-grains  (expect !>(%.n))
 ::
-++  test-mill-fertilize-only-take-held-grains  !!
+++  test-mill-fertilize-only-take-held-grains  (expect !>(%.n))
 ::
 ++  test-mill-trivial-pass
   =/  yok=yolk
@@ -424,44 +424,44 @@
 ::
 ::  tests for 'changed' grains
 ::
-++  test-harvest-changed-grain-exists  !!
+++  test-harvest-changed-grain-exists  (expect !>(%.n))
 ::
-++  test-harvest-changed-grain-type-doesnt-change  !!
+++  test-harvest-changed-grain-type-doesnt-change  (expect !>(%.n))
 ::
-++  test-harvest-changed-grain-id-changes  !!
+++  test-harvest-changed-grain-id-changes  (expect !>(%.n))
 ::
-++  test-harvest-rice-salt-change  !!
+++  test-harvest-rice-salt-change  (expect !>(%.n))
 ::
-++  test-harvest-changed-issued-overlap  !!
+++  test-harvest-changed-issued-overlap  (expect !>(%.n))
 ::
-++  test-harvest-changed-without-provenance  !!
+++  test-harvest-changed-without-provenance  (expect !>(%.n))
 ::
 ::  tests for 'issued' grains
 ::
-++  test-harvest-issued-ids-not-matching  !!
+++  test-harvest-issued-ids-not-matching  (expect !>(%.n))
 ::
-++  test-harvest-issued-ids-bad-rice-hash  !!
+++  test-harvest-issued-ids-bad-rice-hash  (expect !>(%.n))
 ::
-++  test-harvest-issued-ids-bad-wheat-hash  !!
+++  test-harvest-issued-ids-bad-wheat-hash  (expect !>(%.n))
 ::
-++  test-harvest-issued-without-provenance  !!
+++  test-harvest-issued-without-provenance  (expect !>(%.n))
 ::
-++  test-harvest-issued-already-exists  !!
+++  test-harvest-issued-already-exists  (expect !>(%.n))
 ::
 ::
 ::  tests for 'burned' grains
 ::
-++  test-harvest-burned-grain-doesnt-exist  !!
+++  test-harvest-burned-grain-doesnt-exist  (expect !>(%.n))
 ::
-++  test-harvest-burned-ids-not-matching  !!
+++  test-harvest-burned-ids-not-matching  (expect !>(%.n))
 ::
-++  test-harvest-burned-overlap-with-changed  !!
+++  test-harvest-burned-overlap-with-changed  (expect !>(%.n))
 ::
-++  test-harvest-burned-overlap-with-issued  !!
+++  test-harvest-burned-overlap-with-issued  (expect !>(%.n))
 ::
-++  test-harvest-burned-without-provenance  !!
+++  test-harvest-burned-without-provenance  (expect !>(%.n))
 ::
-++  test-harvest-burned-gas-payment-account  !!
+++  test-harvest-burned-gas-payment-account  (expect !>(%.n))
 ::
 ::  tests for +mill-all
 ::
@@ -473,7 +473,7 @@
     [caller-1 fake-sig ~ id:triv-wheat 1 300.001 town-id 0]
   =/  res=state-transition
     %^  ~(mill-all mil miller town-id init-now)
-    fake-land  ~[[hash [shel yok]]]  1
+    fake-land  ~[[hash [shel yok]]]  1.024
   ;:  weld
   ::  assert that our call failed with correct errorcode
     %+  expect-eq
@@ -493,7 +493,7 @@
     [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
   =/  res=state-transition
     %^  ~(mill-all mil miller town-id init-now)
-    fake-land  ~[[hash [shel yok]]]  1
+    fake-land  ~[[hash [shel yok]]]  1.024
   ;:  weld
   ::  assert that our call went through
     %+  expect-eq
