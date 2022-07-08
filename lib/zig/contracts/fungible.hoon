@@ -144,7 +144,7 @@
       =.  data.p.germ.tok
         %=  meta
           supply    new-total
-          mintable  ?:(=(u.cap.meta supply.meta) %.y %.n)
+          mintable  (lth supply.meta u.cap.meta)
         ==
       ::  for accounts which we know rice of, find in owns.cart
       ::  and alter. for others, generate id and add to c-call
