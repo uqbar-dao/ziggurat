@@ -27,7 +27,7 @@
       ?~  account.args
         =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
         =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv [metadata.giver ~ ~ ~]]]
+          [- me.cart to.args town-id.cart [%& salt.p.germ.giv `nft-account`[metadata.giver ~]]]
         :+  %|
           :+  me.cart  town-id.cart
           [caller.inp `[%give to.args `id.new item-id.args] (silt ~[id.giv]) (silt ~[id.new])]
@@ -81,7 +81,7 @@
         ::  need to issue
         =+  (fry-rice to.i.mints me.cart town-id.cart salt.meta)
         =/  new=grain
-          [- me.cart to.i.mints town-id.cart [%& salt.meta [token.args ~ ~ ~]]]
+          [- me.cart to.i.mints town-id.cart [%& salt.meta `nft-account`[token.args ~]]]
         %=  $
           mints   t.mints
           issued-rice  (~(put by issued-rice) id.new new)
@@ -157,7 +157,7 @@
           ==
         =+  (fry-rice id me.cart town-id.cart salt)
         :-  -
-        [- me.cart id town-id.cart [%& salt [id.metadata-grain new-items ~ ~]]]
+        [- me.cart id town-id.cart [%& salt `nft-account`[id.metadata-grain new-items]]]
       [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~]
     ==
   --

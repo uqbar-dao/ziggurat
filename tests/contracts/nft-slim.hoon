@@ -3,6 +3,8 @@
 ::  (remove again before compiling for deployment)
 ::
 /+  *test, cont=zig-contracts-nft-slim, *zig-sys-smart
+/=  nft  /lib/zig/contracts/lib/nft-slim
+=,  nft
 =>  ::  test data
     |%
     ++  init-now  *@da
@@ -12,6 +14,7 @@
           `@ux`'holder'
           town-id=0x1
           :+  %&  `@`'salt'
+          ^-  collection-metadata
           :*  name='Simple NFT'
               symbol='SNFT'
               supply=3
@@ -21,14 +24,6 @@
               deployer=0x0
               salt=`@`'salt'
       ==  ==
-    ::
-    +$  item  [id=@ud item-contents]  
-    +$  item-contents
-      $:  data=(set [@t @t])
-          desc=@t
-          uri=@t
-          transferrable=?
-      ==
     ::
     ++  item-1  ^-  item
       [1 (silt ~[['hair' 'red'] ['eyes' 'blue'] ['mouth' 'smile']]) 'a smiling face' 'ipfs://fake1' %.y]
@@ -117,7 +112,7 @@
         `@ux`'nft'
         0xffff
         0x1
-        [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
+        [%& `@`'salt' [`@ux`'nft' ~]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
