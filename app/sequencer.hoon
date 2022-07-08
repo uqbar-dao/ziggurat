@@ -21,7 +21,7 @@
       status=?(%available %off)
   ==
 +$  inflated-state-0  [state-0 =mil smart-lib-vase=vase]
-+$  mil  $_  ~(mill mill !>(0) *(map * @))
++$  mil  $_  ~(mill mill !>(0) *(map * @) %.y)
 --
 ::
 =|  inflated-state-0
@@ -37,7 +37,7 @@
   =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
   =/  mil
     %~  mill  mill
-    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun)) %.y]
   :-  ~
   %_    this
       state
@@ -53,7 +53,7 @@
   =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
   =/  mil
     %~  mill  mill
-    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun)) %.y]
   `this(state [!<(state-0 old-vase) mil smart-lib])
 ::
 ++  on-watch

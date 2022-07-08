@@ -1,6 +1,6 @@
 /-  *sequencer
 /+  *zink-zink, *zig-sys-smart, ethereum
-|_  [library=vase zink-cax=(map * @)]
+|_  [library=vase zink-cax=(map * @) check-sigs=?]
 ::
 ++  verify-sig
   |=  =egg
@@ -121,7 +121,7 @@
     ^-  [^land burned=granary fee=@ud =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [[~ q.land] ~ 0 %1 ~ ~]
     ::  validate transaction signature
-    ?.  (verify-sig egg)
+    ?.  ?:(check-sigs (verify-sig egg) %.y)
       ~&  >>>  "mill: signature mismatch"
       [[~ q.land] ~ 0 %2 ~ ~]  ::  signed tx doesn't match account
     ::

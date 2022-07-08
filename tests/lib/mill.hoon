@@ -33,8 +33,9 @@
 ++  fake-sig   [0 0 0]
 ++  mil
   %~  mill  mill
-  :-  ;;(vase (cue q.q.smart-lib-noun))
-  ;;((map * @) (cue q.q.zink-cax-noun))
+  :+    ;;(vase (cue q.q.smart-lib-noun))
+    ;;((map * @) (cue q.q.zink-cax-noun))
+  %.n
 ::
 +$  mill-result
   [=land burned=granary fee=@ud =errorcode hits=(list hints:zink) =crow]
