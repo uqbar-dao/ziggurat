@@ -104,11 +104,21 @@
       [%| wheat]
   ==
 ::
+++  empty-wheat
+  ^-  grain
+  :*  0xffff.ffff  ::  id
+      0xffff.ffff  ::  lord
+      0xffff.ffff  ::  holders
+      town-id
+      [%| ~ ~]
+  ==
+::
 ++  fake-granary
   ^-  granary
   =/  grains=(list [id grain])
     :~  [zigs-wheat-id wheat-grain:zigs]
         [id:triv-wheat triv-wheat]
+        [id:empty-wheat empty-wheat]
         [id:miller-account:zigs miller-account:zigs]
         [id:beef-account:zigs beef-account:zigs]
         [id:dead-account:zigs dead-account:zigs]
@@ -152,7 +162,7 @@
     !>(~)  !>(crow.res)
   ::  assert that diff is correct
     %+  expect-eq
-    !>(fake-land)  !>(land.res)
+    !>(~)  !>(p.land.res)
   ==
 ::
 ++  test-mill-high-nonce
@@ -179,7 +189,7 @@
     !>(~)  !>(crow.res)
   ::  assert that diff is correct
     %+  expect-eq
-    !>(fake-land)  !>(land.res)
+    !>(~)  !>(p.land.res)
   ==
 ::
 ++  test-mill-low-nonce
@@ -206,7 +216,7 @@
     !>(~)  !>(crow.res)
   ::  assert that diff is correct
     %+  expect-eq
-    !>(fake-land)  !>(land.res)
+    !>(~)  !>(p.land.res)
   ==
 ::
 ++  test-mill-missing-account-grain
@@ -233,7 +243,7 @@
     !>(~)  !>(crow.res)
   ::  assert that diff is correct
     %+  expect-eq
-    !>(fake-land)  !>(land.res)
+    !>(~)  !>(p.land.res)
   ==
 ::
 ++  test-mill-wrong-account-grain
@@ -260,7 +270,7 @@
     !>(~)  !>(crow.res)
   ::  assert that diff is correct
     %+  expect-eq
-    !>(fake-land)  !>(land.res)
+    !>(~)  !>(p.land.res)
   ==
 ::
 ++  test-mill-low-budget
@@ -288,14 +298,92 @@
     !>(~)  !>(crow.res)
   ::  assert that diff is correct
     %+  expect-eq
-    !>(fake-land)  !>(land.res)
+    !>(~)  !>(p.land.res)
   ==
 ::
-++  test-mill-missing-contract  !!
+++  test-mill-missing-contract
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
+  =/  shel=shell
+    [caller-1 fake-sig ~ 0x27.3708.9341 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed with correct errorcode
+    %+  expect-eq
+    !>(%5)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(~)  !>(p.land.res)
+  ==
 ::
-++  test-mill-contract-not-wheat  !!
+++  test-mill-contract-not-wheat
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:dead-account:zigs 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed with correct errorcode
+    %+  expect-eq
+    !>(%5)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(~)  !>(p.land.res)
+  ==
 ::
-++  test-mill-contract-is-empty  !!
+++  test-mill-contract-is-empty
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:empty-wheat 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed with correct errorcode
+    %+  expect-eq
+    !>(%5)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert no fee
+    %+  expect-eq
+    !>(0)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that diff is correct
+    %+  expect-eq
+    !>(~)  !>(p.land.res)
+  ==
 ::
 ++  test-mill-germinate-only-take-lorded-grains  !!
 ::
