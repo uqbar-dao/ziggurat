@@ -6,7 +6,7 @@
   /+  *zig-sys-smart
 /=  nft  /lib/zig/contracts/lib/nft-slim
 =,  nft
-::  TODO could possibly remove accounts for simplicity
+::  TODO we are definitely removing accounts for simplicity
 |_  =cart
 ++  write
   |=  inp=embryo
@@ -19,27 +19,12 @@
     |=  [args=action caller-id=id]
     ?-    -.args
         %give
-      =/  giv=grain  -:~(val by grains.inp)
+      =/  item=grain  -:~(val by grains.inp)
       ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
-      =/  giver=nft-account  ;;(nft-account data.p.germ.giv)
-      =/  =item              (~(got by items.giver) item-id.args)
-      ?>  transferrable.item  ::  asset item is transferrable
-      ?~  account.args
-        =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
-        =/  new=grain
-          [- me.cart to.args town-id.cart [%& salt.p.germ.giv `nft-account`[metadata.giver ~]]]
-        :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%give to.args `id.new item-id.args] (silt ~[id.giv]) (silt ~[id.new])]
-        [~ (malt ~[[id.new new]]) ~]
-      =/  rec=grain  (~(got by owns.cart) u.account.args)
-      ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
-      =/  receiver=nft-account  ;;(nft-account data.p.germ.rec)
-      ?>  =(metadata.receiver metadata.giver)
-      =:  data.p.germ.giv  giver(items (~(del by items.giver) item-id.args))
-          data.p.germ.rec  receiver(items (~(put by items.receiver) item-id.args item))
-      ==
-      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
+      ?>  =(caller-id holder.item)
+      ?>  transferrable.item
+      =.  holder.item  to.args
+      [%& (malt ~[[id.item item]]) ~ ~]
     ::
         %mint
       ::  expects token metadata in owns.cart
