@@ -18,10 +18,10 @@
 ::
 /-  zink
 /+  *test, mill=zig-mill, *zig-sys-smart, *sequencer
-/=  zigsur          /lib/zig/contracts/lib/zigs-parallel
+/=  zigsur          /lib/zig/contracts/lib/zigs
 /*  smart-lib-noun  %noun  /lib/zig/compiled/smart-lib/noun
 /*  zink-cax-noun   %noun  /lib/zig/compiled/hash-cache/noun
-/*  zigs-contract   %noun  /lib/zig/compiled/zigs-parallel/noun
+/*  zigs-contract   %noun  /lib/zig/compiled/zigs/noun
 /*  triv-contract   %noun  /lib/zig/compiled/trivial/noun
 |%
 ::
@@ -41,7 +41,7 @@
 ::
 ::  fake data
 ::
-++  miller  ^-  account    [0x1512.3341 1 0x1.1512.3341]
+++  miller    ^-  account  [0x1512.3341 1 0x1.1512.3341]
 ++  caller-1  ^-  account  [0xbeef 1 0x1.beef]
 ++  caller-2  ^-  account  [0xdead 1 0x1.dead]
 ++  caller-3  ^-  account  [0xcafe 1 0x1.cafe]
@@ -123,12 +123,22 @@
   ^-  land
   [fake-granary fake-populace]
 ::
-::  BEGIN TESTS
+::  begin tests
 ::
 ::
-::  TESTS FOR +MILL
+::  tests for +mill
 ::
-++  test-mill-trivial-gas-fail-audit
+++  test-mill-bad-account  !!
+::
+++  test-mill-high-nonce  !!
+::
+++  test-mill-low-nonce  !!
+::
+++  test-mill-missing-account-grain  !!
+::
+++  test-mill-wrong-account-grain  !!
+::
+++  test-mill-low-budget
   =/  yok=yolk
     [`[%random-command ~] ~ ~]
   =/  hash=@ux  `@ux`(sham yok)
@@ -155,6 +165,16 @@
     %+  expect-eq
     !>(fake-land)  !>(land.res)
   ==
+::
+++  test-mill-missing-contract  !!
+::
+++  test-mill-contract-not-wheat  !!
+::
+++  test-mill-contract-is-empty  !!
+::
+++  test-mill-germinate-only-take-lorded-grains  !!
+::
+++  test-mill-fertilize-only-take-held-grains  !!
 ::
 ++  test-mill-trivial-pass
   =/  yok=yolk
@@ -186,7 +206,50 @@
     !>(-.data.p.germ.-)
   ==
 ::
-::  TESTS FOR +MILL-ALL
+::  tests for harvest (validation checks on contract outputs)
+::
+::  tests for 'changed' grains
+::
+++  test-harvest-changed-grain-exists  !!
+::
+++  test-harvest-changed-grain-type-doesnt-change  !!
+::
+++  test-harvest-changed-grain-id-changes  !!
+::
+++  test-harvest-rice-salt-change  !!
+::
+++  test-harvest-changed-issued-overlap  !!
+::
+++  test-harvest-changed-without-provenance  !!
+::
+::  tests for 'issued' grains
+::
+++  test-harvest-issued-ids-not-matching  !!
+::
+++  test-harvest-issued-ids-bad-rice-hash  !!
+::
+++  test-harvest-issued-ids-bad-wheat-hash  !!
+::
+++  test-harvest-issued-without-provenance  !!
+::
+++  test-harvest-issued-already-exists  !!
+::
+::
+::  tests for 'burned' grains
+::
+++  test-harvest-burned-grain-doesnt-exist  !!
+::
+++  test-harvest-burned-ids-not-matching  !!
+::
+++  test-harvest-burned-overlap-with-changed  !!
+::
+++  test-harvest-burned-overlap-with-issued  !!
+::
+++  test-harvest-burned-without-provenance  !!
+::
+++  test-harvest-burned-gas-payment-account  !!
+::
+::  tests for +mill-all
 ::
 ++  test-mill-all-trivial-gas-fail-audit
   =/  yok=yolk

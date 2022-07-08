@@ -55,7 +55,7 @@
   ::
   ::  All eggs must be run through mill in parallel -- they should all operate against the
   ::  same starting state passed through `land` at the beginning. Each run of mill should
-  ::  create a (validated) diff set, which can then be compared with an accumulated set of 
+  ::  create a (validated) diff set, which can then be compared with an accumulated set of
   ::  diffs. If there is overlap, that egg should be discarded or pushed into the next
   ::  parallel "pass", depending on sequencer parameters.
   ::
@@ -65,7 +65,7 @@
     ::
     ::  TODOs:
     ::  -  add multiple sequential passes
-    ::  
+    ::
     =/  pending
       %+  sort  basket
       |=  [a=[@ux =egg] b=[@ux =egg]]
@@ -79,7 +79,6 @@
     =|  reward=@ud
     |-
     ?~  pending
-      ~&  >>  "total batch reward: {<reward>}"
       ::  create final state transition
       :*  [(~(pay tax (~(uni by p.land) all-diffs)) reward) q.land]
           processed
@@ -139,8 +138,7 @@
       updated-zigs-action
     ::
     =/  res  (~(work farm p.land) egg)
-    ~&  res
-    =/  fee=@ud  (sub budget.p.egg rem.res) 
+    =/  fee=@ud  (sub budget.p.egg rem.res)
     :_  [burned.res fee errorcode.res hits.res crow.res]
     :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
     ::  charge gas fee by including their designated zigs grain inside the diff
@@ -178,7 +176,7 @@
     ::  +charge: extract gas fee from caller's zigs balance
     ::  returns a single modified grain to be inserted into a diff
     ::  cannot crash after audit, as long as zigs contract adequately
-    ::  validates balance >= budget+amount. 
+    ::  validates balance >= budget+amount.
     ++  charge
       |=  [diff=^granary payee=account fee=@ud]
       ^-  [id grain]
@@ -369,7 +367,6 @@
           %-  ~(all in issued.res)
           |=  [=id =grain]
           ::  id in issued map must be equal to id in grain AND
-          ::  all newly issued grains must have properly-hashed id AND
           ::  lord of grain must be contract issuing it AND
           ::  grain must not yet exist at that id AND
           ::  grain IDs must match defined hashing functions
