@@ -161,10 +161,7 @@
     ==
   --
 ::
-::  TODO what to do with these
-::  Possible options:
-::  - turn them into noun queries
-::  - nix em
+::  TODO 
 ++  read
   |_  args=path
   ++  json
@@ -172,22 +169,17 @@
   ::
   ++  noun
     ?+    args  !!
-        [%rice-data ~]
+        [%collection-data ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
-      ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
-        ;;(nft-account data.p.germ.g)
       ;;(collection-metadata data.p.germ.g)
     ::
-        [%rice-data @ ~]
-      =/  data  (cue (slav %ud i.t.args))
-      ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
-        ;;(nft-account data)
-      ;;(collection-metadata data)
-    ::
-        [%egg-args @ ~]
-      (cue (slav %ud i.t.args))
+        [%account-data ~]
+      ?>  =(1 ~(wyt by owns.cart))
+      =/  g=grain  -:~(val by owns.cart)
+      ?>  ?=(%& -.germ.g)
+      ;;(nft-account data.p.germ.g)
     ==
   --
 --
