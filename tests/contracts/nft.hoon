@@ -23,7 +23,7 @@
               salt=`@`'salt'
       ==  ==
     ::
-    +$  item  [id=@ud item-contents]  
+    +$  item  [id=@ud allowance=(unit id) item-contents]  
     +$  item-contents
       $:  data=(set [@t @t])
           desc=@t
@@ -32,39 +32,38 @@
       ==
     ::
     ++  item-1  ^-  item
-      [1 (silt ~[['hair' 'red'] ['eyes' 'blue'] ['mouth' 'smile']]) 'a smiling face' 'ipfs://fake1' %.y]
+      [1 ~ (silt ~[['hair' 'red'] ['eyes' 'blue'] ['mouth' 'smile']]) 'a smiling face' 'ipfs://fake1' %.y]
     ++  item-2  ^-  item
-      [2 (silt ~[['hair' 'brown'] ['eyes' 'green'] ['mouth' 'frown']]) 'a frowny face' 'ipfs://fake2' %.y]
+      [2 ~ (silt ~[['hair' 'brown'] ['eyes' 'green'] ['mouth' 'frown']]) 'a frowny face' 'ipfs://fake2' %.y]
     ++  item-3  ^-  item
-      [3 (silt ~[['hair' 'grey'] ['eyes' 'black'] ['mouth' 'squiggle']]) 'a weird face' 'ipfs://fake3' %.n]
+      [3 ~ (silt ~[['hair' 'grey'] ['eyes' 'black'] ['mouth' 'squiggle']]) 'a weird face' 'ipfs://fake3' %.n]
     ::
-    ++  account-1  ^-  grain
-      :*  0x1.beef
+    ++  nft-1  ^-  grain
+      :*  `@ux`'nft-1'
           `@ux`'nft'
           0xbeef
-          0x1
-          [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1]]) ~ ~]]
+          town-id=0x1
+          :+  %&  `@`'salt'  item-1
       ==
-    ++  owner-1  ^-  account
-      [0xbeef 0 0x1234.5678]
-    ::
-    ++  account-2  ^-  grain
-      :*  0x1.dead
+    ++  nft-2  ^-  grain
+      :*  `@ux`'nft-2'
           `@ux`'nft'
           0xdead
-          0x1
-          [%& `@`'salt' [`@ux`'nft' (malt ~[[2 item-2] [3 item-3]]) ~ ~]]
+          town-id=0x1
+          :+  %&  `@`'salt'  item-2
       ==
-    ++  owner-2  ^-  account
-      [0xdead 0 0x1234.5678]
-    ::
-    ++  account-3  ^-  grain
-      :*  0x1.cafe
+    ++  nft-3  ^-  grain
+      :*  `@ux`'nft-3'
           `@ux`'nft'
           0xcafe
-          0x1
-          [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
+          town-id=0x1
+          :+  %&  `@`'salt'  item-3
       ==
+    ::
+    ++  owner-1  ^-  account
+      [0xbeef 0 0x1234.5678]
+    ++  owner-2  ^-  account
+      [0xdead 0 0x1234.5678]
     ++  owner-3  ^-  account
       [0xcafe 0 0x1234.5678]
     ::
@@ -78,75 +77,57 @@
 ::
 ::  tests for %give
 ::
-++  test-give-known-receiver  ^-  tang
+++  test-give  ^-  tang
+  ::  from 1 to 2
   =/  =embryo
     :+  owner-1
-      `[%give 0xdead `0x1.dead 1]
-    (malt ~[[id:`grain`account-1 account-1]])
+      `[%give 0xdead]
+    (malt ~[[id:`grain`nft-1 nft-1]])
   =/  =cart
-    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`account-2 account-2]])]
-  =/  updated-1  ^-  grain
-    :*  0x1.beef
-          `@ux`'nft'
-          0xbeef
-          0x1
-          [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
-      ==
-  =/  updated-2  ^-  grain
-    :*  0x1.dead
-          `@ux`'nft'
-          0xdead
-          0x1
-          [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1] [2 item-2] [3 item-3]]) ~ ~]]
-      ==
-  =/  res=chick
-    (~(write cont cart) embryo)
-  =/  correct=chick
-    [%& (malt ~[[id.updated-1 updated-1] [id.updated-2 updated-2]]) ~ ~]
-  (expect-eq !>(correct) !>(res))
-::
-++  test-give-unknown-receiver  ^-  tang
-  =/  =embryo
-    :+  owner-1
-      `[%give 0xffff ~ 1]
-    (malt ~[[id:`grain`account-1 account-1]])
-  =/  =cart
-    [`@ux`'nft' init-now 0x1 ~]
-  =/  new-id  (fry-rice 0xffff `@ux`'nft' 0x1 `@`'salt')
-  =/  new
-    :*  new-id
+    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`nft-1 nft-1]])]
+  =/  updated  ^-  grain
+    :*  `@ux`'nft-1'
         `@ux`'nft'
-        0xffff
+        0xdead
         0x1
-        [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
+        [%& `@`'salt' item-1]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
-  =/  correct=chick
-    :+  %|
-      :+  me.cart  town-id.cart
-      [owner-1 `[%give 0xffff `new-id 1] (silt ~[0x1.beef]) (silt ~[new-id])]
-    [~ (malt ~[[new-id new]]) ~]
+   =/  correct=chick
+    [%& (malt ~[[id.updated updated]]) ~ ~]
   (expect-eq !>(correct) !>(res))
 ::
 ++  test-give-doesnt-have  ^-  tang
+  ::  give 1 to 2 with account 3
   =/  =embryo
-    :+  owner-1
-      `[%give 0xdead `0x1.dead 2]
-    (malt ~[[id:`grain`account-1 account-1]])
+    :+  owner-3
+      `[%give 0xdead]
+    (malt ~[[id:`grain`nft-1 nft-1]])
   =/  =cart
-    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`account-2 account-2]])]
+    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`nft-1 nft-1]])]
+  =/  updated  ^-  grain
+    :*  `@ux`'nft-1'
+        `@ux`'nft'
+        0xdead
+        0x1
+        [%& `@`'salt' item-1]
+    ==
   =/  res=(each * (list tank))
     (mule |.((~(write cont cart) embryo)))
   (expect-eq !>(%.n) !>(-.res))
 ::
-::  tests for %take
-::
-
-::
 ::  tests for %set-allowance
 ::
-
+++  set-allowance  ~
+::
+++  revoke-allowance  ~
+::
+::  tests for %take
+::
+++  take  ~
+::
+++  take-not-approved  ~
 ::
 ::  tests for %mint
 ::
