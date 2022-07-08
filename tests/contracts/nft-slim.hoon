@@ -2,7 +2,7 @@
 ::  to test, make sure to add library import at top of contract
 ::  (remove again before compiling for deployment)
 ::
-/+  *test, cont=zig-contracts-nft, *zig-sys-smart
+/+  *test, cont=zig-contracts-nft-slim, *zig-sys-smart
 =>  ::  test data
     |%
     ++  init-now  *@da
@@ -14,7 +14,6 @@
           :+  %&  `@`'salt'
           :*  name='Simple NFT'
               symbol='SNFT'
-              attributes=(silt ~['hair' 'eyes' 'mouth'])
               supply=3
               cap=~
               mintable=%.n
@@ -43,7 +42,7 @@
           `@ux`'nft'
           0xbeef
           0x1
-          [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1]]) ~ ~]]
+          [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1]])]]
       ==
     ++  owner-1  ^-  account
       [0xbeef 0 0x1234.5678]
@@ -53,7 +52,7 @@
           `@ux`'nft'
           0xdead
           0x1
-          [%& `@`'salt' [`@ux`'nft' (malt ~[[2 item-2] [3 item-3]]) ~ ~]]
+          [%& `@`'salt' [`@ux`'nft' (malt ~[[2 item-2] [3 item-3]])]]
       ==
     ++  owner-2  ^-  account
       [0xdead 0 0x1234.5678]
@@ -63,7 +62,7 @@
           `@ux`'nft'
           0xcafe
           0x1
-          [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
+          [%& `@`'salt' [`@ux`'nft' ~]]
       ==
     ++  owner-3  ^-  account
       [0xcafe 0 0x1234.5678]
@@ -90,14 +89,14 @@
           `@ux`'nft'
           0xbeef
           0x1
-          [%& `@`'salt' [`@ux`'nft' ~ ~ ~]]
+          [%& `@`'salt' [`@ux`'nft' ~]]
       ==
   =/  updated-2  ^-  grain
     :*  0x1.dead
           `@ux`'nft'
           0xdead
           0x1
-          [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1] [2 item-2] [3 item-3]]) ~ ~]]
+          [%& `@`'salt' [`@ux`'nft' (malt ~[[1 item-1] [2 item-2] [3 item-3]])]]
       ==
   =/  res=chick
     (~(write cont cart) embryo)

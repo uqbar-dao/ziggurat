@@ -1,11 +1,12 @@
-::  nft.hoon [UQ| DAO]
+::  nft-slim.hoon [UQ| DAO]
 ::
-::  NFT standard. Provides abilities similar to ERC-721 tokens, also ability
-::  to deploy and mint new sets of tokens.
+::  Slimmed down version of the NFT standard.
+::  Allows deploying and mint new sets of tokens.
 ::
   /+  *zig-sys-smart
 /=  nft  /lib/zig/contracts/lib/nft-slim
 =,  nft
+::  TODO could possibly remove accounts for simplicity
 |_  =cart
 ++  write
   |=  inp=embryo
