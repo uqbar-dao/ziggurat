@@ -31,22 +31,24 @@
       =/  tok=grain  (~(got by owns.cart) meta.args)
       ?>  &(=(lord.tok me.cart) ?=(%& -.germ.tok))
       =/  meta  ;;(collection-metadata data.p.germ.tok)
-      ::  first, check if token is mintable
+      ::  first, make sure token is mintable
       ?>  &(mintable.meta ?=(^ cap.meta) ?=(^ minters.meta))
       ?>  (~(has in minters.meta) caller-id)
-      ::  check if mint will surpass supply cap
+      ::  make sure mint won't surpass supply cap
       ?>  (gth u.cap.meta (add supply.meta ~(wyt in mints.args)))
       ::  cleared to execute!
       =/  next-item-id  supply.meta
-      ::  for accounts which we know rice of, find in owns.cart
-      ::  and alter. for others, generate id and add to c-call
-      =/  changed-rice  (malt ~[[id.tok tok]])
-      =/  issued-rice   *(map id grain)
+      ::  TODO a further simplification could be to only allow 1 mint per tx.
       =/  mints         ~(tap in mints.args)
-      =/  next-mints    *(set mint)
+      =/  issued-items  *(map id grain)
       |-
       ?~  mints
-        *chick
+        =.  data.p.germ.tok
+          %=  meta
+            supply    next-item-id
+            mintable  (lth supply.meta u.cap.meta)
+          ==
+        [%& ~ issued-items ~]
       *chick
       ::  basically, we need to recurse over mints and
       ::  a) create item grains for all items in items.i.mints
