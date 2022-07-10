@@ -900,4 +900,82 @@
     ?>  ?=(%& -.germ.-)
     !>(-.data.p.germ.-)
   ==
+::
+++  test-mill-all-20-trivial-passes
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  bask
+    %+  turn  (gulf 1 20)
+    |=  n=@ud
+    :-  hash
+    :_  yok
+    shel(rate (sub 21 n), from [id:caller-1 n zigs:caller-1])
+  =/  res=state-transition
+    %^  ~(mill-all mil miller town-id init-now)
+    fake-land  bask  1.024
+  =/  expected-cost
+    ::  rates 20-1 all * 7
+    (reel (turn (gulf 1 20) |=(a=@ (mul a 7))) add)
+  ;:  weld
+  ::  assert that our calls went through
+    %+  expect-eq
+      !>(%.y)
+    !>  %+  levy  processed.res
+        |=  [@ux =egg]
+        =(status.p.egg %0)
+  ::  assert fees paid
+    %+  expect-eq
+     !>((sub 300.000 expected-cost))
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert fees received correctly
+    %+  expect-eq
+     !>((add 1.000.000 expected-cost))
+    =+  (~(got by p.land.res) id:miller-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
+::
+++  test-mill-all-100-trivial-passes
+  =/  yok=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash=@ux  `@ux`(sham yok)
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  bask
+    %+  turn  (gulf 1 100)
+    |=  n=@ud
+    :-  hash
+    :_  yok
+    shel(rate (sub 101 n), from [id:caller-1 n zigs:caller-1])
+  =/  res=state-transition
+    %^  ~(mill-all mil miller town-id init-now)
+    fake-land  bask  1.024
+  =/  expected-cost
+    ::  rates 20-1 all * 7
+    (reel (turn (gulf 1 100) |=(a=@ (mul a 7))) add)
+  ;:  weld
+  ::  assert that our calls went through
+    %+  expect-eq
+      !>(%.y)
+    !>  %+  levy  processed.res
+        |=  [@ux =egg]
+        =(status.p.egg %0)
+  ::  assert fees paid
+    %+  expect-eq
+     !>((sub 300.000 expected-cost))
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert fees received correctly
+    %+  expect-eq
+     !>((add 1.000.000 expected-cost))
+    =+  (~(got by p.land.res) id:miller-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
 --

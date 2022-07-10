@@ -65,9 +65,11 @@
     |^
     ::
     =/  pending
+      ::  sort in REVERSE since each pass will reconstruct by appending
+      ::  rejected to front, so need to +flop before each pass
       %+  sort  basket
       |=  [a=[@ux =egg] b=[@ux =egg]]
-      (gth rate.p.egg.a rate.p.egg.b)
+      (lth rate.p.egg.a rate.p.egg.b)
     ::
     =|  final=state-transition
     =|  reward=@ud
@@ -79,7 +81,7 @@
       final(land land)
     ::  otherwise, perform a pass
     =/  [passed=state-transition rejected=(list [@ux egg])]
-      (pass land pending)
+      (pass land (flop pending))
     %=  $
       land             land.passed
       pending          rejected
@@ -93,6 +95,7 @@
     ++  pass
       |=  [=^land pending=(list [@ux =egg])]
       ^-  [state-transition rejected=(list [@ux egg])]
+      =|  callers=(set id)  ::  so that we immediately send repeat callers to next pass
       =|  processed=(list [@ux egg])
       =|  rejected=(list [@ux egg])
       =|  all-diffs=granary
@@ -111,6 +114,13 @@
             all-burns
         ==
       ::
+      =/  caller-id  (pin from.p.egg.i.pending)
+      ?:  (~(has in callers) caller-id)
+        %=  $
+          pending   t.pending
+          rejected  [i.pending rejected]
+        ==
+      ::
       =/  [fee=@ud [diff=granary nonces=populace] burned=granary =errorcode hits=(list hints) =crow]
         (mill land egg.i.pending)
       =/  diff-and-burned  (~(uni by diff) burned)
@@ -118,23 +128,24 @@
               ?=(~ (~(int by all-burns) diff-and-burned))
           ==
         ?.  =(%0 errorcode)
-          ::  invalid egg
-          ::
+          ::  invalid egg -- do not send to next pass,
+          ::  but do increment nonce
           %=  $
             pending    t.pending
             processed  [i.pending(status.p.egg errorcode) processed]
             q.land     nonces
+            callers    (~(put in callers) caller-id)
             reward     (add reward fee)
             lis-hits   [hits lis-hits]
           ==
-        ::  valid, but diff or burned contains collision, reject
+        ::  valid, but diff or burned contains collision. re-mill in next pass
         ::
-        ~&  >>>  "mill: rejecting egg due to diff overlap"
         %=  $
-          pending    t.pending
+          pending   t.pending
           rejected  [i.pending rejected]
         ==
       ::  diff is isolated, proceed
+      ::  increment nonce
       ::
       %=  $
         pending    t.pending
@@ -143,6 +154,7 @@
         reward     (add reward fee)
         lis-hits   [hits lis-hits]
         crows      [crow crows]
+        callers    (~(put in callers) caller-id)
         all-diffs  (~(uni by all-diffs) diff)
         all-burns  (~(uni by all-burns) burned)
       ==
@@ -161,18 +173,21 @@
     ::
     ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
       ~&  >>>  "mill: tx rejected; bad nonce"
+      ~&  >>  "expected {<+((~(gut by q.land) id.from.p.egg 0))>}, got {<nonce.from.p.egg>}"
       [0 [~ q.land] ~ %3 ~ ~]  ::  bad nonce
     ::
     =/  [valid=? updated-zigs-action=(unit *)]
       (~(audit tax p.land) egg)
     ?.  valid
-      ~&  >>>  "mill: tx rejected; not enough budget"
+      ~&  >>>  "mill: tx rejected; account balance less than budget"
       [0 [~ q.land] ~ %4 ~ ~]  ::  can't afford gas
     =?  action.q.egg  ?=(^ updated-zigs-action)
       updated-zigs-action
     ::
     =/  res  (~(work farm p.land) egg)
-    =/  fee=@ud  (sub budget.p.egg rem.res)
+    =/  fee=@ud
+      %+  mul  rate.p.egg
+      (sub budget.p.egg rem.res)
     =/  new-land
       :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
       ::  charge gas fee by including their designated zigs grain inside the diff
@@ -201,7 +216,9 @@
       ?.  =(zigs-wheat-id lord.u.zigs)              [%.n ~]
       ?.  ?=(%& -.germ.u.zigs)                      [%.n ~]
       =/  acc     (hole token-account data.p.germ.u.zigs)
-      =/  enough  (gth balance.acc budget.p.egg)
+      ::  maximum possible charge is full budget * rate
+      =/  max  (mul budget.p.egg rate.p.egg)
+      =/  enough  (gth balance.acc max)
       ?.  =(zigs-wheat-id to.p.egg)  [enough ~]
       ::  if egg contains a %give via the zigs contract,
       ::  we insert budget at the beginning of the action. this is
@@ -209,7 +226,7 @@
       =*  a  action.q.egg
       ?~  a  [%.n ~]
       ?.  ?=(%give -.u.a)  [enough ~]
-      [enough `[-.u.a budget.p.egg +.u.a]]
+      [enough `[-.u.a max +.u.a]]
     ::  +charge: extract gas fee from caller's zigs balance
     ::  returns a single modified grain to be inserted into a diff
     ::  cannot crash after audit, as long as zigs contract adequately
@@ -255,7 +272,7 @@
       |=  =egg
       ^-  [hits=(list hints) diff=(unit ^granary) burned=^granary =crow rem=@ud =errorcode]
       =/  hatchling
-        (incubate egg(budget.p (div budget.p.egg rate.p.egg)) ~ ~)
+        (incubate egg ~ ~)
       hatchling(hits (flop hits.hatchling))
     ::  +incubate: fertilize and germinate, then grow
     ++  incubate
