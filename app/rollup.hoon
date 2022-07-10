@@ -79,8 +79,11 @@
       ::  assets from other towns
       =+  (~(put by capitol) town-id.hall.act hall.act)
       :_  state(capitol -)
-      :~  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update !>(`town-update`[%new-peer-root town-id.hall.act (rear roots.hall.act) now.bowl])]
-          [%give %fact ~[/capitol-updates] %sequencer-rollup-update !>(`capitol-update`[%new-capitol -])]
+      :~  =-  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update -]
+          !>(`town-update`[%new-peer-root town-id.hall.act (rear roots.hall.act) now.bowl])
+      ::
+          =-  [%give %fact ~[/capitol-updates] %sequencer-rollup-update -]
+          !>(`capitol-update`[%new-capitol -])
       ==
     ::
         %bridge-assets
@@ -102,7 +105,7 @@
         new-root.act  sig.act
       ?.  =(from.act recovered)
         ~|("%rollup: rejecting batch; sequencer signature not valid" !!)
-      ?.  =(diff-hash.act (shax (jam state-diffs.act)))
+      ?.  =(diff-hash.act (sham state-diffs.act))
         ~|("%rollup: rejecting batch; diff hash not valid" !!)
       ::  check that other town state roots are up-to-date
       ::  recent-enough is a variable here that can be adjusted
@@ -131,8 +134,11 @@
           ==
       =+  (~(put by capitol) town-id.act -)
       :_  state(capitol -)
-      :~  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update !>(`town-update`[%new-peer-root town-id.act new-root.act now.bowl])]
-          [%give %fact ~[/capitol-updates] %sequencer-rollup-update !>(`capitol-update`[%new-capitol -])]
+      :~  =-  [%give %fact ~[/peer-root-updates] %sequencer-rollup-update -]
+          !>(`town-update`[%new-peer-root town-id.act new-root.act now.bowl])
+      ::
+          =-  [%give %fact ~[/capitol-updates] %sequencer-rollup-update -]
+          !>(`capitol-update`[%new-capitol -])
       ==
     ==
   --

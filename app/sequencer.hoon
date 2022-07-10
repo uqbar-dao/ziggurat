@@ -95,7 +95,7 @@
       ::  poke rollup ship with params of new town
       ::  (will be rejected if id is taken)
       =/  =land  ?~(starting-state.act [~ ~] u.starting-state.act)
-      =/  new-root  (shax (jam land))
+      =/  new-root  `@ux`(sham land)
       =/  =^town
         :-  land
         :*  town-id.act
@@ -105,7 +105,7 @@
             [new-root]~
         ==
       =/  sig
-        (ecdsa-raw-sign:secp256k1:secp:crypto new-root private-key.act)
+        (ecdsa-raw-sign:secp256k1:secp:crypto `@uvI`new-root private-key.act)
       :_  %=  state
             rollup       `rollup-host.act
             private-key  `private-key.act
@@ -144,7 +144,7 @@
       :-  %+  turn  ~(tap in eggs.act)
           |=  =egg:smart
           ^-  card
-          =/  hash  (shax (jam q.egg))
+          =/  hash  (sham q.egg)
           =/  usig  (ecdsa-raw-sign:secp256k1:secp:crypto hash (need private-key.state))
           =+  [%uqbar-write !>([%receipt `@ux`hash (sign:sig our.bowl now.bowl hash) usig])]
           [%pass /submit-transaction/(scot %ux hash) %agent [src.bowl %uqbar] %poke -]
@@ -152,7 +152,7 @@
       ^+  basket
       %-  ~(run in eggs.act)
       |=  =egg:smart
-      [`@ux`(shax (jam q.egg)) egg]
+      [`@ux`(sham q.egg) egg]
     ::
     ::  batching
     ::
@@ -182,14 +182,14 @@
             land.town
           ~(tap in `^basket`basket.state)
         1  ::  number of parallel "passes"
-      =/  new-root      (shax (jam land.new))
-      =/  diff-hash     (shax (jam ~[diff.new]))
+      =/  new-root      `@ux`(sham land.new)
+      =/  diff-hash     `@ux`(sham ~[diff.new])
       ::  2. generate our signature
       ::  (address sig, that is)
       ?~  private-key.state
         ~|("%sequencer: error: no signing key found" !!)
       =/  sig
-        (ecdsa-raw-sign:secp256k1:secp:crypto new-root u.private-key.state)
+        (ecdsa-raw-sign:secp256k1:secp:crypto `@uvI`new-root u.private-key.state)
       ::  3. poke rollup
       :_  state(proposed-batch `[basket.state land.new diff-hash new-root], basket ~)
       =-  [%pass /batch-submit/(scot %ux new-root) %agent [u.rollup.state %rollup] %poke -]~

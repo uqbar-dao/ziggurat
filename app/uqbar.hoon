@@ -133,7 +133,7 @@
       =/  town-id  `@ux`town-id.p.egg.write
       ?~  seq=(~(get by sequencers.state) town-id)
         ~|("%uqbar: no known sequencer for that town" !!)
-      =/  egg-hash  (scot %ux `@ux`(shax (jam q.egg.write)))
+      =/  egg-hash  (scot %ux `@ux`(sham q.egg.write))
       :_  state
       =+  [%sequencer-town-action !>([%receive (silt ~[egg.write])])]
       :~  [%pass /submit-transaction/egg-hash %agent [q.u.seq %sequencer] %poke -]
