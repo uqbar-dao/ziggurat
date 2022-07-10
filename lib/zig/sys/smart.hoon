@@ -5,10 +5,10 @@
 ::  +fry: hash lord+town+germ to make contract grain pubkey
 ::
 ++  fry-contract
-  |=  [lord=id town-id=id bat=*]
+  |=  [lord=id town-id=id cont=(unit [bat=* pay=*])]
   ^-  id
   ^-  @ux
-  =+  (jam bat)
+  =+  (sham cont)
   (shax (cat 3 lord (cat 3 town-id -)))
 ::
 ++  fry-rice
@@ -36,11 +36,12 @@
   (~(gas in *(set id)) cont)
 ::
 ++  result
-  |=  [changed=(list grain) issued=(list grain) =crow]
+  |=  [changed=(list grain) issued=(list grain) burned=(list grain) =crow]
   ^-  chick
   :-  %&
-  :+  (~(gas by *(map id grain)) (turn changed |=(=grain [id.grain grain])))
-    (~(gas by *(map id grain)) (turn issued |=(=grain [id.grain grain])))
+  :^    (~(gas by *(map id grain)) (turn changed |=(=grain [id.grain grain])))
+      (~(gas by *(map id grain)) (turn issued |=(=grain [id.grain grain])))
+    (~(gas by *(map id grain)) (turn burned |=(=grain [id.grain grain])))
   crow
 ::
 ++  continuation
@@ -77,6 +78,7 @@
   $:  me=id
       from=[=id nonce=@ud]
       now=@da
+      ::  TODO: bring back batch #
       town-id=id
       owns=(map id grain)
   ==
@@ -116,7 +118,7 @@
       %4  ::  4: lack zigs to fulfill budget
       %5  ::  5: couldn't find contract
       %6  ::  6: crash in contract execution
-      %7  ::  7: validation of changed/issued rice failed
+      %7  ::  7: validation of changed/issued/burned rice failed
       %8  ::  8: ran out of gas while executing
       %9  ::  9: was not parallel / superceded by another egg in batch
   ==
@@ -146,7 +148,7 @@
 +$  chick    (each rooster hen)
 +$  crow     (list [@tas json])
 ::
-+$  rooster  [changed=(map id grain) issued=(map id grain) =crow]
++$  rooster  [changed=(map id grain) issued=(map id grain) burned=(map id grain) =crow]
 +$  hen      [next=(list [to=id town-id=id =yolk]) =rooster]
 ::
 ::  JSON, from lull.hoon and zuse.hoon
@@ -512,7 +514,7 @@
 ::
 ::  CRYPTO from zuse.hoon
 ::
-++  crypto  ^?
+++  crypto-non-zuse  ^?
   =,  ames
   =,  number
   |%
@@ -3384,5 +3386,5 @@
         $(t (add t (lsh [3 (mul (dec j) out)] f)), j +(j))
       (rev 3 d (end [3 d] t))
     --
-  --  ::crypto  
+  --  ::crypto
 --

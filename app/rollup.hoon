@@ -4,7 +4,7 @@
 ::  Receives state transitions (moves) for towns, verifies them,
 ::  and allows sequencer ships to continue processing batches.
 ::
-/+  *sequencer, *rollup, mill=zig-mill, default-agent, dbug, verb
+/+  *sequencer, *rollup, ethereum, mill=zig-mill, default-agent, dbug, verb
 |%
 +$  card  card:agent:gall
 +$  state-0
@@ -95,7 +95,12 @@
         ~|("%rollup: rejecting batch; town not found" !!)
       ?.  =([from.act src.bowl] sequencer.u.hall)
         ~|("%rollup: rejecting batch; sequencer doesn't match town" !!)
-      ?.  (verify-sig:mill from.act new-root.act sig.act %.y)
+      =/  recovered
+        %-  address-from-pub:key:ethereum
+        %-  serialize-point:secp256k1:secp:crypto
+        %+  ecdsa-raw-recover:secp256k1:secp:crypto
+        new-root.act  sig.act
+      ?.  =(from.act recovered)
         ~|("%rollup: rejecting batch; sequencer signature not valid" !!)
       ?.  =(diff-hash.act (shax (jam state-diffs.act)))
         ~|("%rollup: rejecting batch; diff hash not valid" !!)

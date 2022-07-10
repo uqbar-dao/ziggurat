@@ -28,9 +28,9 @@
   ==
 ::
 +$  action
-  $%  [%give to=id amount=@ud budget=@ud]        ::  produces single ticket
+  $%  [%give budget=@ud to=id amount=@ud]        ::  produces single ticket
       [%take to=id amount=@ud from-account=id]   ::  produces single ticket
-      [%give-set tickets=(set [=id amount=@ud]) budget=@ud]       ::  produces ticket(s)
+      [%give-set budget=@ud tickets=(set [=id amount=@ud])]       ::  produces ticket(s)
       [%take-set tickets=(set [=id amount=@ud]) from-account=id]  ::  produces ticket(s)
       [%redeem my-account=id]             ::  takes every other grain in embryo and cashes in ticket
       [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)

@@ -1,19 +1,20 @@
-::  /+  *zig-sys-smart
+/+  *zig-sys-smart
 |%
 ++  sur
   |%
   +$  token-metadata
     ::  will be automatically inserted into town state
     ::  at instantiation, along with this contract
+    ::  hardcoded values included to match token standard
     $:  name=@t
         symbol=@t
         decimals=@ud
         supply=@ud
-        cap=(unit @ud)
-        mintable=?  ::  will be unmintable, with zigs instead generated in mill
-        minters=(set id)
+        cap=~
+        mintable=%.n
+        minters=~
         deployer=id  ::  will be 0x0
-        salt=@  ::  'zigs'
+        salt=@       ::  'zigs'
     ==
   ::
   +$  account
@@ -22,7 +23,7 @@
         metadata=id
     ==
   ::
-  +$  arguments
+  +$  action
     $%  [%give budget=@ud to=id account=(unit id) amount=@ud]
         [%take to=id account=(unit id) from-account=id amount=@ud]
         [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
@@ -66,7 +67,7 @@
           [%symbol %s symbol.md]
           [%decimals (numb decimals.md)]
           [%supply (numb supply.md)]
-          [%cap ?~(cap.md ~ (numb u.cap.md))]
+          [%cap ~]
           [%mintable %b mintable.md]
           [%minters (minters minters.md)]
           [%deployer %s (scot %ux deployer.md)]
@@ -85,18 +86,18 @@
         [%s (scot %ux i)]
       --
     ::
-    ++  arguments
-      |=  a=arguments:sur
+    ++  action
+      |=  a=action:sur
       ^-  json
       %+  frond  -.a
       ?-    -.a
       ::
           %give
         %-  pairs
-        :~  [%to %s (scot %ux to.a)]
+        :~  [%budget (numb budget.a)]
+            [%to %s (scot %ux to.a)]
             [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]
             [%amount (numb amount.a)]
-            [%budget (numb budget.a)]
         ==
       ::
           %take
