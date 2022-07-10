@@ -17,15 +17,24 @@
   ++  process
     |=  [args=action caller-id=id]
     ?-    -.args
-    ::  TODO invert order
-        %give
-      =/  item=grain  -:~(val by grains.inp)
-      ?>  &(=(lord.item me.cart) ?=(%& -.germ.item))
-      ?>  =(caller-id holder.item)
-      =/  item-data  ;;(^item data.p.germ.item)
-      ?>  transferrable.item-data
-      =.  holder.item  to.args
-      [%& (malt ~[[id.item item]]) ~ ~]
+        %deploy
+      ?>  ?=(^ minters.args)
+      =/  salt  (sham (cat 3 caller-id symbol.args))
+      =/  metadata-grain=grain
+        :*  (fry-rice me.cart me.cart town-id.cart salt)
+            me.cart
+            me.cart
+            town-id.cart
+            :+  %&  salt
+            ^-  collection-metadata
+            :*  name.args
+                symbol.args
+                supply=0
+                cap.args
+                minters.args
+                deployer=caller-id
+        ==  ==
+      [%& ~ (malt ~[[id.metadata-grain metadata-grain]]) ~]
     ::
         %mint
       =/  meta-grain=grain  (~(got by owns.cart) meta.args)
@@ -64,26 +73,14 @@
       =.  data.p.germ.meta-grain  new-meta
       [%& (malt ~[[id.meta-grain meta-grain]]) new-issued ~]
     ::
-        %deploy
-      ?>  ?=(^ minters.args)
-      ::  generate salt
-      =/  salt  (sham (cat 3 caller-id symbol.args))
-      ::  create metadata
-      =/  metadata-grain=grain
-        :*  (fry-rice me.cart me.cart town-id.cart salt)
-            me.cart
-            me.cart
-            town-id.cart
-            :+  %&  salt
-            ^-  collection-metadata
-            :*  name.args
-                symbol.args
-                supply=0
-                cap.args
-                minters.args
-                deployer=caller-id
-        ==  ==
-      [%& ~ (malt ~[[id.metadata-grain metadata-grain]]) ~]
+        %give
+      =/  item=grain  -:~(val by grains.inp)
+      ?>  &(=(lord.item me.cart) ?=(%& -.germ.item))
+      ?>  =(caller-id holder.item)
+      =/  item-data  ;;(^item data.p.germ.item)
+      ?>  transferrable.item-data
+      =.  holder.item  to.args
+      [%& (malt ~[[id.item item]]) ~ ~]
     ==
   --
 ::
