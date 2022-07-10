@@ -5,10 +5,10 @@
 ::  +fry: hash lord+town+germ to make contract grain pubkey
 ::
 ++  fry-contract
-  |=  [lord=id town-id=id bat=*]
+  |=  [lord=id town-id=id cont=(unit [bat=* pay=*])]
   ^-  id
   ^-  @ux
-  =+  (jam bat)
+  =+  (sham cont)
   (shax (cat 3 lord (cat 3 town-id -)))
 ::
 ++  fry-rice
@@ -118,7 +118,7 @@
       %4  ::  4: lack zigs to fulfill budget
       %5  ::  5: couldn't find contract
       %6  ::  6: crash in contract execution
-      %7  ::  7: validation of changed/issued rice failed
+      %7  ::  7: validation of changed/issued/burned rice failed
       %8  ::  8: ran out of gas while executing
       %9  ::  9: was not parallel / superceded by another egg in batch
   ==

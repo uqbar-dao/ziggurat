@@ -356,21 +356,12 @@
         =/  payload   .*(q.library pay.cont.crop)
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]
-        =/  gun
-          (ajar dor %write !>(cart) !>(embryo))
-        =/  =book
-          (zebra budget zink-cax gun)
-        ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
-        :-  hit.q.book
-        ?:  ?=(%| -.p.book)
+        =/  res
+          (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))^(sub budget 7)
+        ?:  ?=(%| -.-.res)
           ::  error in contract execution
-          ~&  p.book
-          [~ bud.q.book %6]
-        ::  chick result
-        ?~  p.p.book
-          ~&  >>>  "mill: ran out of gas"
-          [~ 0 %8]
-        [(hole (unit chick) p.p.book) bud.q.book %0]
+          [~ ~ +.res %6]
+        [~ `p.-.res +.res %0]
       --
     ::
     ::  +harvest: take a completed execution and validate all changes and additions to granary state
@@ -389,7 +380,6 @@
           ::  new grain must be same type as old grain AND
           ::  id in changed map must be equal to id in grain AND
           ::  if rice, salt must not change AND
-          ::  no changed grains may also have been issued at same time AND
           ::  only grains that proclaim us lord may be changed
           =/  old  (~(get by granary) id)
           ?&  ?=(^ old)
@@ -397,7 +387,6 @@
                 &(?=(%& -.germ.grain) =(salt.p.germ.u.old salt.p.germ.grain))
               =(%| -.germ.grain)
               =(id id.grain)
-              !(~(has by issued.res) id)
               =(lord lord.u.old)
           ==
         ::
@@ -412,14 +401,14 @@
               !(~(has by granary) id.grain)
               ?:  ?=(%& -.germ.grain)
                 =(id (fry-rice holder.grain lord.grain town-id.grain salt.p.germ.grain))
-              =(id (fry-contract lord.grain town-id.grain bat:(need cont.p.germ.grain)))
+              =(id (fry-contract lord.grain town-id.grain cont.p.germ.grain))
           ==
         ::
           %-  ~(all in burned.res)
           |=  [=id =grain]
           ::  all burned grains must already exist AND
           ::  id in burned map must be equal to id in grain AND
-          ::  no burned grains may also have been changed OR issued at same time AND
+          ::  no burned grains may also have been changed at same time AND
           ::  only grains that proclaim us lord may be burned AND
           ::  burned cannot contain grain used to pay for gas
           ::
@@ -427,7 +416,6 @@
           =/  old  (~(get by granary) id)
           ?&  ?=(^ old)
               =(id id.grain)
-              !(~(has by issued.res) id)
               !(~(has by changed.res) id)
               =(lord lord.u.old)
               !=(zigs.from id)

@@ -23,6 +23,7 @@
 /*  zink-cax-noun   %noun  /lib/zig/compiled/hash-cache/noun
 /*  zigs-contract   %noun  /lib/zig/compiled/zigs/noun
 /*  triv-contract   %noun  /lib/zig/compiled/trivial/noun
+/*  test-contract   %noun  /lib/zig/compiled/mill-tester/noun
 |%
 ::
 ::  constants / dummy info for mill
@@ -100,7 +101,7 @@
   =/  =wheat  ;;(wheat (cue q.q.triv-contract))
   :*  0xdada.dada  ::  id
       0xdada.dada  ::  lord
-      0xdada.dada  ::  holders
+      0xdada.dada  ::  holder
       town-id
       [%| wheat]
   ==
@@ -109,9 +110,28 @@
   ^-  grain
   :*  0xffff.ffff  ::  id
       0xffff.ffff  ::  lord
-      0xffff.ffff  ::  holders
+      0xffff.ffff  ::  holder
       town-id
       [%| ~ ~]
+  ==
+::
+++  mill-tester
+  ^-  grain
+  =/  =wheat  ;;(wheat (cue q.q.test-contract))
+  :*  0xeeee.eeee  ::  id
+      0xeeee.eeee  ::  lord
+      0xeeee.eeee  ::  holder
+      town-id
+      [%| wheat(owns (silt ~[0x9999]))]
+  ==
+::
+++  dummy-grain
+  ^-  grain
+  :*  0x9999
+      0xeeee.eeee
+      holder-1:zigs
+      town-id
+      [%& `@`'some-salt' ['some' 'random' 'data']]
   ==
 ::
 ++  fake-granary
@@ -120,6 +140,8 @@
     :~  [zigs-wheat-id wheat-grain:zigs]
         [id:triv-wheat triv-wheat]
         [id:empty-wheat empty-wheat]
+        [id:dummy-grain dummy-grain]
+        [id:mill-tester mill-tester]
         [id:miller-account:zigs miller-account:zigs]
         [id:beef-account:zigs beef-account:zigs]
         [id:dead-account:zigs dead-account:zigs]
@@ -386,9 +408,9 @@
     !>(~)  !>(p.land.res)
   ==
 ::
-++  test-mill-germinate-only-take-lorded-grains  (expect !>(%.n))
+++  test-mill-germinate-only-take-lorded-grains  (expect !>(%.y))
 ::
-++  test-mill-fertilize-only-take-held-grains  (expect !>(%.n))
+++  test-mill-fertilize-only-take-held-grains  (expect !>(%.y))
 ::
 ++  test-mill-trivial-pass
   =/  yok=yolk
@@ -400,7 +422,7 @@
     fake-land  [shel yok]
   ::
   ;:  weld
-  ::  assert that our call failed
+  ::  assert that our call succeeded
     %+  expect-eq
     !>(%0)  !>(errorcode.res)
   ::  assert no burns created
@@ -424,44 +446,410 @@
 ::
 ::  tests for 'changed' grains
 ::
-++  test-harvest-changed-grain-exists  (expect !>(%.n))
+++  test-harvest-changed-grain-doesnt-exist
+  =/  yok=yolk
+    [`[%change-nonexistent ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that fee paid correctly
+    %+  expect-eq
+     !>(299.993)
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
 ::
-++  test-harvest-changed-grain-type-doesnt-change  (expect !>(%.n))
+++  test-harvest-changed-grain-type-changes
+  =/  yok=yolk
+    [`[%change-type ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-changed-grain-id-changes  (expect !>(%.n))
+++  test-harvest-changed-grain-id-changes
+  =/  yok=yolk
+    [`[%change-id ~] (silt ~[id:dummy-grain]) ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-rice-salt-change  (expect !>(%.n))
+++  test-harvest-changed-rice-salt-change
+  =/  yok=yolk
+    [`[%change-salt ~] (silt ~[id:dummy-grain]) ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-changed-issued-overlap  (expect !>(%.n))
+++  test-harvest-changed-issued-overlap
+  ::  note: this check is obviated by changed grains
+  ::  having to had exist already, and issued grains
+  ::  having to not had existed.
+  =/  yok=yolk
+    [`[%changed-issued-overlap ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-changed-without-provenance  (expect !>(%.n))
+++  test-harvest-changed-without-provenance
+  =/  yok=yolk
+    :+  `[%change-without-provenance ~]
+      (silt ~[id:beef-account:zigs])
+    ~
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
 ::  tests for 'issued' grains
 ::
-++  test-harvest-issued-ids-not-matching  (expect !>(%.n))
+++  test-harvest-issued-ids-not-matching
+  =/  yok=yolk
+    [`[%issue-non-matching-id ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-issued-ids-bad-rice-hash  (expect !>(%.n))
+++  test-harvest-issued-ids-bad-rice-hash
+  =/  yok=yolk
+    [`[%issue-bad-rice-id ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-issued-ids-bad-wheat-hash  (expect !>(%.n))
+++  test-harvest-issued-ids-bad-wheat-hash
+  =/  yok=yolk
+    [`[%issue-bad-wheat-id ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-issued-without-provenance  (expect !>(%.n))
+++  test-harvest-issued-without-provenance
+  =/  yok=yolk
+    [`[%issue-without-provenance ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-issued-already-exists  (expect !>(%.n))
+++  test-harvest-issued-already-exists
+  =/  yok=yolk
+    [`[%issue-already-existing ~] (silt ~[id:beef-account:zigs]) ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
 ::
 ::  tests for 'burned' grains
 ::
-++  test-harvest-burned-grain-doesnt-exist  (expect !>(%.n))
+++  test-harvest-burned-grain-doesnt-exist
+  =/  yok=yolk
+    [`[%burn-nonexistent ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-burned-ids-not-matching  (expect !>(%.n))
+++  test-harvest-burned-ids-not-matching
+  =/  yok=yolk
+    [`[%burn-non-matching-id ~] (silt ~[id:dummy-grain]) ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-burned-overlap-with-changed  (expect !>(%.n))
+++  test-harvest-burned-overlap-with-changed
+  =/  yok=yolk
+    [`[%burn-changed-overlap ~] (silt ~[id:dummy-grain]) ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-burned-overlap-with-issued  (expect !>(%.n))
+++  test-harvest-burned-overlap-with-issued
+  ::  note: this check is obviated by burned grains
+  ::  having to had exist already, and issued grains
+  ::  having to not had existed.
+  =/  yok=yolk
+    [`[%burn-issued-overlap ~] ~ ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-burned-without-provenance  (expect !>(%.n))
+++  test-harvest-burned-without-provenance
+  =/  yok=yolk
+    [`[%burn-without-provenance ~] (silt ~[id:beef-account:zigs]) ~]
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call failed at validation
+    %+  expect-eq
+    !>(%7)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert no crow created
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ==
 ::
-++  test-harvest-burned-gas-payment-account  (expect !>(%.n))
+++  test-harvest-burned-gas-payment-account  (expect !>(%.y))
 ::
 ::  tests for +mill-all
 ::
