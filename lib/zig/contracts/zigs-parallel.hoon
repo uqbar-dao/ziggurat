@@ -70,7 +70,10 @@
       ^-  [^grain ^account]
       ?>  &(=(lord.grain me.cart) ?=(%& -.germ.grain))
       =/  tik  ;;(ticket data.p.germ.grain)
-      ?<  redeemed.tik
+      ?:  redeemed.tik
+        ::  if ticket has already been redeemed, skip
+        [grain account]
+      ::  otherwise, redeem and add amount to balance
       :-  grain(data.p.germ tik(redeemed %.y))
       account(balance (add balance.account value.tik))
     =.  data.p.germ.home  rec

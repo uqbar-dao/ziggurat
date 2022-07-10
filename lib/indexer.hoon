@@ -125,7 +125,7 @@
     |=  =yolk:smart
     ^-  json
     %-  pairs
-    :~  [%args ~]
+    :~  [%action ~]
         [%my-grains (ids my-grains.yolk)]
         [%cont-grains (ids cont-grains.yolk)]
     ==
