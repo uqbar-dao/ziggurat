@@ -22,7 +22,7 @@
 ::
 +$  action
   $%  [%deploy name=@t symbol=@t cap=@ud minters=(set id)]  ::  expects no grains
-      [%mint meta=id items=(set item-contents)]             ::  expects metadata grain in owns.cart  / cont-grains
+      [%mint items=(set item-contents)]                     ::  expects metadata grain in owns.cart  / cont-grains
       [%give to=id]                                         ::  expects the item grain in grains.inp / my-grains 
   ==
 --

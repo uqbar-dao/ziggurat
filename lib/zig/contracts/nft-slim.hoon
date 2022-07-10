@@ -37,9 +37,10 @@
       [%& ~ (malt ~[[id.metadata-grain metadata-grain]]) ~]
     ::
         %mint
-      =/  meta-grain=grain  (~(got by owns.cart) meta.args)
-      ?>  &(=(lord.meta-grain me.cart) ?=(%& -.germ.meta-grain))
+      =/  meta-grain=grain  -:~(val by owns.cart)
+      ?>  ?=(%& -.germ.meta-grain)
       =/  meta               ;;(collection-metadata data.p.germ.meta-grain)
+      ::  pre-mint checks
       =/  mintable           (lth supply.meta cap.meta)
       =/  caller-can-mint    (~(has in minters.meta) caller-id)
       =/  below-cap          (gth cap.meta (add supply.meta ~(wyt in items.args)))
