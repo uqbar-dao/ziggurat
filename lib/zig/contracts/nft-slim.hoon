@@ -20,9 +20,10 @@
     ::  TODO invert order
         %give
       =/  item=grain  -:~(val by grains.inp)
-      ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
+      ?>  &(=(lord.item me.cart) ?=(%& -.germ.item))
       ?>  =(caller-id holder.item)
-      ?>  transferrable.item
+      =/  item-data  ;;(^item data.p.germ.item)
+      ?>  transferrable.item-data
       =.  holder.item  to.args
       [%& (malt ~[[id.item item]]) ~ ~]
     ::
