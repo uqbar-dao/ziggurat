@@ -6,7 +6,6 @@
   /+  *zig-sys-smart
 /=  nft  /lib/zig/contracts/lib/nft-slim
 =,  nft
-::  TODO we are definitely removing accounts for simplicity
 |_  =cart
 ++  write
   |=  inp=embryo
@@ -18,6 +17,7 @@
   ++  process
     |=  [args=action caller-id=id]
     ?-    -.args
+    ::  TODO invert order
         %give
       =/  item=grain  -:~(val by grains.inp)
       ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
@@ -56,20 +56,11 @@
       ::  c) update the supply/cap/mintable as per old logic
     ::
         %deploy
-      ::  no rice expected as input, only arguments
-      ::  if mintable, enforce minter set not empty
-      ?>  ?:(mintable.args ?=(^ minters.args) %.y)
-      ::  if !mintable, enforce distribution adds up to cap
-      ::  otherwise, enforce distribution < cap
-      =/  distribution-total=@ud 
-        ~(wyt in items.distribution.args)
-      ?>  ?:  mintable.args
-            (gth cap.args distribution-total)
-          =(cap.args distribution-total)
+      ?>  ?=(^ minters.args)
       ::  generate salt
       =/  salt  (sham (cat 3 caller-id symbol.args))
       ::  create metadata
-      =/  metadata-grain  ^-  grain
+      =/  metadata-grain=grain
         :*  (fry-rice me.cart me.cart town-id.cart salt)
             me.cart
             me.cart
@@ -78,18 +69,15 @@
             ^-  collection-metadata
             :*  name.args
                 symbol.args
-                supply=distribution-total
-                ?:(mintable.args `cap.args ~)
-                mintable.args
+                supply=0
+                cap.args
                 minters.args
                 deployer=caller-id
-                salt
         ==  ==
       [%& ~ (malt ~[[id.metadata-grain metadata-grain]]) ~]
     ==
   --
 ::
-::  TODO 
 ++  read
   |_  args=path
   ++  json
@@ -103,11 +91,12 @@
       ?>  ?=(%& -.germ.g)
       ;;(collection-metadata data.p.germ.g)
     ::
-        [%account-data ~]
+        [%mintable ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
-      ;;(nft-account data.p.germ.g)
+      =/  meta  ;;(collection-metadata data.p.germ.g)
+      (lth supply.meta cap.meta)
     ==
   --
 --

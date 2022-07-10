@@ -1,17 +1,17 @@
+::  TODO rename collection-metadata to something shorter? collection-data, nft-metadata
+::  TODO rename item to nft? nft-item?
+::
   /+  *zig-sys-smart
 |%
 +$  collection-metadata
   $:  name=@t
       symbol=@t
       supply=@ud
-      cap=(unit @ud)  ::  (~ if mintable is false)
-      mintable=?      ::  automatically set to %.n if supply == cap
+      cap=@ud
       minters=(set id)
       deployer=id
-      salt=@          ::  is this the same as the grain salt? what does it do
   ==
 ::
-::  The NFT type
 +$  item  [meta=id item-num=@ud item-contents]
 +$  item-contents
   $:  data=(set [@t @t])  ::  do we need this?
@@ -20,19 +20,9 @@
       transferrable=?
   ==
 ::
-+$  mint
-  $:  to=id  :: what if we just minted directly to ourselves and only thru caller was the nft ever changed
-      items=(set item-contents)
-  ==
-::
 +$  action
-  $%  [%give to=id]
-      [%mint meta=id mints=(set mint)]
-      $:  %deploy
-          minters=(set id)
-          name=@t
-          symbol=@t
-          cap=@ud
-          mintable=?
-  ==  ==
+  $%  [%deploy name=@t symbol=@t cap=@ud minters=(set id)]  ::  expects no grains
+      [%mint meta=id items=(set item-contents)]             ::  expects metadata grain in owns.cart  / cont-grains
+      [%give to=id]                                         ::  expects the item grain in grains.inp / my-grains 
+  ==
 --

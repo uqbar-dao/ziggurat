@@ -22,7 +22,6 @@
               mintable=%.n
               minters=~
               deployer=0x0
-              salt=`@`'salt'
       ==  ==
     ::
     ++  item-1  ^-  item
