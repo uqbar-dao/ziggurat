@@ -62,7 +62,7 @@
         $(items-list t.items-list)
       ::
       =.  data.p.germ.meta-grain  new-meta
-      [%& new-issued (malt ~[[id.meta-grain meta-grain]]) ~]
+      [%& (malt ~[[id.meta-grain meta-grain]]) new-issued ~]
     ::
         %deploy
       ?>  ?=(^ minters.args)
