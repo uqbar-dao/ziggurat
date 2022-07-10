@@ -28,33 +28,41 @@
       [%& (malt ~[[id.item item]]) ~ ~]
     ::
         %mint
-      ::  expects token metadata in owns.cart
-      =/  tok=grain  (~(got by owns.cart) meta.args)
-      ?>  &(=(lord.tok me.cart) ?=(%& -.germ.tok))
-      =/  meta  ;;(collection-metadata data.p.germ.tok)
-      ::  first, make sure token is mintable
-      ?>  &(mintable.meta ?=(^ cap.meta) ?=(^ minters.meta))
-      ?>  (~(has in minters.meta) caller-id)
-      ::  make sure mint won't surpass supply cap
-      ?>  (gth u.cap.meta (add supply.meta ~(wyt in mints.args)))
-      ::  cleared to execute!
-      =/  next-item-id  supply.meta
-      ::  TODO a further simplification could be to only allow 1 mint per tx.
-      =/  mints         ~(tap in mints.args)
-      =/  issued-items  *(map id grain)
-      |-
-      ?~  mints
-        =.  data.p.germ.tok
-          %=  meta
-            supply    next-item-id
-            mintable  (lth supply.meta u.cap.meta)
+      =/  meta-grain=grain  (~(got by owns.cart) meta.args)
+      ?>  &(=(lord.meta-grain me.cart) ?=(%& -.germ.meta-grain))
+      =/  meta               ;;(collection-metadata data.p.germ.meta-grain)
+      =/  mintable           (lth supply.meta cap.meta)
+      =/  caller-can-mint    (~(has in minters.meta) caller-id)
+      =/  below-cap          (gth cap.meta (add supply.meta ~(wyt in items.args)))
+      ?>  &(mintable caller-can-mint below-cap)
+      ::  cleared to mint!
+      =/  items-list  ~(tap in items.args)
+      =|  issued=(map id grain)
+      =/  [new-issued=(map id grain) new-meta=collection-metadata]
+        |-
+        ?~  items-list
+          [issued meta]
+        =/  contents  i.items-list
+        =/  next-id   supply.meta
+        =/  salt      (sham (cat 3 next-id id.meta-grain))
+        =/  new-item=grain
+          :*  (fry-rice me.cart caller-id town-id.cart salt)
+              lord=me.cart
+              holder=caller-id
+              town-id.cart
+              :+  %&  salt
+              ^-  item
+              :*  id.meta-grain
+                  next-id
+                  contents
+              ==
           ==
-        [%& ~ issued-items ~]
-      *chick
-      ::  basically, we need to recurse over mints and
-      ::  a) create item grains for all items in items.i.mints
-      ::  b) make sure their holder is set to to.i.mints
-      ::  c) update the supply/cap/mintable as per old logic
+        =.  supply.meta  +(supply.meta)
+        =.  issued       (~(put by issued) id.new-item new-item)
+        $(items-list t.items-list)
+      ::
+      =.  data.p.germ.meta-grain  new-meta
+      [%& new-issued (malt ~[[id.meta-grain meta-grain]]) ~]
     ::
         %deploy
       ?>  ?=(^ minters.args)
