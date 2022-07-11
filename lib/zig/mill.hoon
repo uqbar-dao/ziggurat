@@ -404,6 +404,7 @@
                 &(?=(%& -.germ.grain) =(salt.p.germ.u.old salt.p.germ.grain))
               =(%| -.germ.grain)
               =(id id.grain)
+              =(lord.grain lord.u.old)
               =(lord lord.u.old)
           ==
         ::
@@ -434,6 +435,7 @@
           ?&  ?=(^ old)
               =(id id.grain)
               !(~(has by changed.res) id)
+              =(lord.grain lord.u.old)
               =(lord lord.u.old)
               !=(zigs.from id)
           ==

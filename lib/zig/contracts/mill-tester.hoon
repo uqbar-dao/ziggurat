@@ -44,6 +44,13 @@
     =.  salt.p.germ.dummy  `@`'some-new-salt'
     (result [dummy ~] ~ ~ ~)
   ::
+      %change-lord
+    ::  call with dummy grain
+    =/  dummy=grain  +.-:grains.inp
+    ::  try to make sneaky grain
+    =.  lord.dummy  zigs-wheat-id
+    (result [dummy ~] ~ ~ ~)
+  ::
       %changed-issued-overlap
     (result [new-grain ~] [new-grain ~] ~ ~)
   ::
@@ -99,6 +106,13 @@
     ::  call with zigs account in grains.inp
     =/  not-mine=grain  +.-:grains.inp
     (result ~ ~ [not-mine ~] ~)
+  ::
+      %burn-change-lord
+    ::  call with dummy grain
+    =/  dummy=grain  +.-:grains.inp
+    ::  try to make sneaky grain
+    =.  lord.dummy  zigs-wheat-id
+    (result ~ ~ [dummy ~] ~)
   ==
 ::
 ++  read
