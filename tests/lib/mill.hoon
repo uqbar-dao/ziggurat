@@ -18,7 +18,6 @@
 ::
 /-  zink
 /+  *test, mill=zig-mill, *zig-sys-smart, *sequencer
-/=  zigsur          /lib/zig/contracts/lib/zigs
 /*  smart-lib-noun  %noun  /lib/zig/compiled/smart-lib/noun
 /*  zink-cax-noun   %noun  /lib/zig/compiled/hash-cache/noun
 /*  zigs-contract   %noun  /lib/zig/compiled/zigs/noun
@@ -436,10 +435,84 @@
     !>([[%hello ~] ~])  !>(crow.res)
   ::  assert that fee paid correctly
     %+  expect-eq
-     !>(299.993)
+      !>(299.993)
     =+  (~(got by p.land.res) id:beef-account:zigs)
     ?>  ?=(%& -.germ.-)
     !>(-.data.p.germ.-)
+  ==
+::
+++  test-mill-zigs-send-pass
+  =/  amt  169
+  =/  yok=yolk
+    :+  `[%give to=0xdead account=`0x1.dead amount=amt]
+      (silt ~[id:beef-account:zigs])
+    (silt ~[id:dead-account:zigs])
+  =/  shel=shell
+    [caller-1 fake-sig ~ zigs-wheat-id 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call succeeded
+    %+  expect-eq
+    !>(%0)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert that fee paid correctly
+    %+  expect-eq
+      !>((sub 300.000 (add set-fee amt)))
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert send went through
+    %+  expect-eq
+      !>((add 200.000 amt))
+    =+  (~(got by p.land.res) id:dead-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert that diff is good
+    %+  expect-eq
+      !>(~(key by p.land.res))
+    !>((silt ~[id:beef-account:zigs id:dead-account:zigs]))
+  ==
+::
+++  test-mill-zigs-send-fail-too-many
+  =/  amt  250.000
+  =/  yok=yolk
+    :+  `[%give to=0xdead account=`0x1.dead amount=amt]
+      (silt ~[id:beef-account:zigs])
+    (silt ~[id:dead-account:zigs])
+  =/  shel=shell
+    [caller-1 fake-sig ~ zigs-wheat-id 1 100.000 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call succeeded
+    %+  expect-eq
+    !>(%6)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert that fee paid correctly
+    %+  expect-eq
+      !>((sub 300.000 set-fee))
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert that diff is good
+    %+  expect-eq
+      !>(~(key by p.land.res))
+    !>((silt ~[id:beef-account:zigs]))
   ==
 ::
 ::  tests for harvest (validation checks on contract outputs)
@@ -470,7 +543,7 @@
     !>(~)  !>(crow.res)
   ::  assert that fee paid correctly
     %+  expect-eq
-     !>(299.993)
+      !>(299.993)
     =+  (~(got by p.land.res) id:beef-account:zigs)
     ?>  ?=(%& -.germ.-)
     !>(-.data.p.germ.-)
@@ -889,7 +962,7 @@
     !>(status.p.+.-.processed.res)
   ::  assert fee paid
     %+  expect-eq
-     !>(299.993)
+      !>(299.993)
     =+  (~(got by p.land.res) id:beef-account:zigs)
     ?>  ?=(%& -.germ.-)
     !>(-.data.p.germ.-)
@@ -974,6 +1047,50 @@
   ::  assert fees received correctly
     %+  expect-eq
      !>((add 1.000.000 expected-cost))
+    =+  (~(got by p.land.res) id:miller-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
+::
+++  test-mill-all-two-parallel-eggs
+  =/  yok-1=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash-1=@ux  `@ux`(sham yok-1)
+  =/  shel-1=shell
+    [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  =/  yok-2=yolk
+    [`[%random-command ~] ~ ~]
+  =/  hash-2=@ux  `@ux`(sham yok-2)
+  =/  shel-2=shell
+    [caller-2 fake-sig ~ id:triv-wheat 1 333 town-id 0]
+  ::
+  =/  res=state-transition
+    %^    ~(mill-all mil miller town-id init-now)
+        fake-land
+      ~[[hash-1 [shel-1 yok-1]] [hash-2 [shel-2 yok-2]]]
+    1  ::  two calls must occur in parallel to work
+  ;:  weld
+  ::  assert that our calls went through
+    %+  expect-eq
+      !>(%.y)
+    !>  %+  levy  processed.res
+        |=  [@ux =egg]
+        =(status.p.egg %0)
+  ::  assert fee paid
+    %+  expect-eq
+      !>(299.993)
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert fee paid
+    %+  expect-eq
+     !>(199.993)
+    =+  (~(got by p.land.res) id:dead-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ::  assert fees received correctly
+    %+  expect-eq
+     !>(1.000.014)
     =+  (~(got by p.land.res) id:miller-account:zigs)
     ?>  ?=(%& -.germ.-)
     !>(-.data.p.germ.-)

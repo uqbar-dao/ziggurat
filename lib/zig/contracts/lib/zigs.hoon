@@ -1,4 +1,4 @@
-/+  *zig-sys-smart
+::  /+  *zig-sys-smart
 |%
 ++  sur
   |%

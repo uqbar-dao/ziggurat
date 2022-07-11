@@ -1,4 +1,4 @@
-/+  *zig-sys-smart
+::  /+  *zig-sys-smart
 |%
 +$  token-metadata
   ::  will be automatically inserted into town state
