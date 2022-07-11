@@ -112,34 +112,35 @@
                 deployer=caller-id
                 salt
         ==  ==
+      ::  TODO distribution
       [%& ~ (~(put by *(map id grain)) id.metadata-grain metadata-grain) ~]
     ==
   --
 ::
 ++  read
   |_  args=path
-  ++  json  ~
-    :: ^-  ^json
-    :: ?+    args  !!
-    ::     [%rice-data ~]
-    ::   ?>  =(1 ~(wyt by owns.cart))
-    ::   =/  g=grain  -:~(val by owns.cart)
-    ::   ?>  ?=(%& -.germ.g)
-    ::   ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
-    ::     (account:enjs:lib ;;(account:sur data.p.germ.g))
-    ::   (collection-metadata:enjs:lib ;;(collection-metadata:sur data.p.germ.g))
-    :: ::
-    ::     [%rice-data @ ~]
-    ::   =/  data  (cue (slav %ud i.t.args))
-    ::   ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
-    ::     (account:enjs:lib ;;(account:sur data))
-    ::   %-  collection-metadata:enjs:lib
-    ::   ;;(collection-metadata:sur data)
-    :: ::
-    ::     [%egg-args @ ~]
-    ::   %-  arguments:enjs:lib
-    ::   ;;(arguments:sur (cue (slav %ud i.t.args)))
-    :: ==
+  ++  json
+    ^-  ^json
+    ?+    args  !!
+        [%rice-data ~]
+      ?>  =(1 ~(wyt by owns.cart))
+      =/  g=grain  -:~(val by owns.cart)
+      ?>  ?=(%& -.germ.g)
+      ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
+        (item:enjs:lib ;;(item:sur data.p.germ.g))
+      (collection-metadata:enjs:lib ;;(collection-metadata:sur data.p.germ.g))
+    ::
+        [%rice-data @ ~]
+      =/  data  (cue (slav %ud i.t.args))
+      ?.  ?=([@ @ ?(~ ^) @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+        (item:enjs:lib ;;(item:sur data))
+      %-  collection-metadata:enjs:lib
+      ;;(collection-metadata:sur data)
+    ::
+        [%egg-args @ ~]
+      %-  arguments:enjs:lib
+      ;;(arguments:sur (cue (slav %ud i.t.args)))
+    ==
   ::
   ++  noun
     ~
