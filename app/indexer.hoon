@@ -450,31 +450,26 @@
         :_  state(capitol capitol.update)
         :_  ~
         %+  fact:io
-          [%sequencer-capitol-update !>(`capitol-update:seq`update)]
+          :-  %sequencer-capitol-update
+          !>(`capitol-update:seq`update)
         ~[rollup-capitol-path]
       ::
           %new-peer-root
         =*  town-id  town-id.update
-        ?~  town-q=(~(get by sequencer-update-queue) town-id)
+        =/  indexer-update
+          ^-  (unit [eggs=(list [@ux egg:smart]) =town:seq])
+          %.  root.update
+          %~  get  by
+          %+  ~(gut by sequencer-update-queue)  town-id
+          *(map @ux [(list [@ux egg:smart]) town:seq])
+        ?~  indexer-update
           :-  ~
           %=  state
               town-update-queue
             %+  ~(put by town-update-queue)  town-id
             %+  %~  put  by
-              ?~  inner-queue=(~(get by town-update-queue) town-id)
+                %+  ~(gut by town-update-queue)  town-id
                 *(map batch-id=@ux timestamp=@da)
-              u.inner-queue
-            root.update  timestamp.update
-          ==
-        ?~  indexer-update=(~(get by u.town-q) root.update)
-          :-  ~
-          %=  state
-              town-update-queue
-            %+  ~(put by town-update-queue)  town-id
-            %+  %~  put  by
-              ?~  inner-queue=(~(get by town-update-queue) town-id)
-                *(map batch-id=@ux timestamp=@da)
-              u.inner-queue
             root.update  timestamp.update
           ==
         =^  cards  state
@@ -483,13 +478,14 @@
               eggs.u.indexer-update
               town.u.indexer-update
               timestamp.update
+              %.y
           ==
         :-  cards
         %=  state
             sequencer-update-queue
           %+  ~(jab by sequencer-update-queue)  town-id
           |=  town-queue=(map @ux [(list [@ux egg:smart]) town:seq])
-          %-  ~(del by town-queue)  root.update
+          (~(del by town-queue) root.update)
         ==
       ==
     ::
@@ -520,20 +516,19 @@
       ::
           %update
         =*  town-id  town-id.hall.town.update
-        =/  town-queue=(unit (map @ux @da))
-          (~(get by town-update-queue) town-id)
         =/  timestamp=(unit @da)
-          ?~  town-queue  ~
-          (~(get by u.town-queue) root.update)
+          %.  root.update
+          %~  get  by
+          %+  ~(gut by town-update-queue)  town-id
+          *(map @ux @da)
         ?~  timestamp
           :-  ~
           %=  state
               sequencer-update-queue
             %+  ~(put by sequencer-update-queue)  town-id
             %+  %~  put  by
-                ?~  town-q=(~(get by sequencer-update-queue) town-id)
-                  *(map @ux [(list [@ux egg:smart]) town:seq])
-                u.town-q
+                %+  ~(gut by sequencer-update-queue)  town-id
+                *(map @ux [(list [@ux egg:smart]) town:seq])
               root.update
             [eggs.update town.update]
           ==
@@ -543,6 +538,7 @@
               eggs.update
               town.update
               u.timestamp
+              %.y
           ==
         :-  cards
         %=  state
@@ -551,27 +547,7 @@
           %.  root.update
           ~(del by (~(got by town-update-queue) town-id))
         ==
-        :: (consume-batch root.update eggs.update town.update)
-      ::
-      ::  add %chunk handling? see e.g.
-      ::  https://github.com/uqbar-dao/ziggurat/blob/da1d37adf538ee908945557a68387d3c87e1c32e/app/uqbar-indexer.hoon#L923
       ==
-    ::
-    :: ++  gas-ja
-    ::   |=  $:  index=(map town-id=@ux (jar @ux location:ui))
-    ::           new=(list [hash=@ux =location:ui])
-    ::           town-id=id:smart
-    ::       ==
-    ::   %+  ~(put by index)  town-id
-    ::   =/  town-index=(jar @ux location:ui)
-    ::     ?~(ti=(~(get by index) town-id) ~ u.ti)
-    ::   |-
-    ::   ?~  new  town-index
-    ::   %=  $
-    ::       new  t.new
-    ::       town-index
-    ::     (~(add ja town-index) hash.i.new location.i.new)
-    ::   ==
     ::
     ++  gas-ja-egg
       |=  $:  index=(map town-id=@ux (jar @ux egg-location:ui))
@@ -612,7 +588,7 @@
           ==
       %+  ~(put by index)  town-id
       =/  town-index=(jar @ux second-order-location:ui)
-        ?~(ti=(~(get by index) town-id) ~ u.ti)
+        (~(gut by index) town-id ~)
       |-
       ?~  new  town-index
       %=  $
@@ -626,17 +602,12 @@
               eggs=(list [@ux egg:smart])
               =town:seq
               timestamp=@da
+              should-update-subs=?
           ==
       ^-  (quip card _state)
       =*  town-id  town-id.hall.town
       =+  ^=  [egg from grain grain-eggs holder lord to]
           (parse-batch root town-id eggs land.town)
-      :: =:  egg-index     (gas-ja egg-index egg town-id)
-      ::     from-index    (gas-ja from-index from town-id)
-      ::     grain-index   (gas-ja grain-index grain town-id)
-      ::     holder-index  (gas-ja holder-index holder town-id)
-      ::     lord-index    (gas-ja lord-index lord town-id)
-      ::     to-index      (gas-ja to-index to town-id)
       =:  egg-index         (gas-ja-egg egg-index egg town-id)
           from-index        (gas-ja-second-order from-index from town-id)
           grain-index       (gas-ja-batch grain-index grain town-id)
@@ -653,7 +624,8 @@
         (~(put by batches.u.b) root [timestamp eggs town])
       ==
       |^
-      [make-all-sub-cards state]
+      :_  state
+      ?.(should-update-subs ~ make-all-sub-cards)
       ::
       ++  make-sub-paths
         ^-  (jug @tas path)
@@ -1022,28 +994,6 @@
   ?.  ?=(%grain -.update)  ~
   ~(tap by grains.update)
 ::
-:: ++  combine-updates-to-map
-::   |=  [updates=(list update:ui) type=?(%batch %egg %grain)]
-::   =/  map-type
-::     %+  map  id:smart
-::     :-  @da
-::     ?-  type
-::       %batch  [town-location:ui batch:ui]
-::       %egg    [egg-location:ui egg:smart]
-::       %grain  [batch-location:ui grain:smart]
-::     ==
-::   ^-  map-type
-::   ?~  updates  ~
-::   =/  combined=map-type
-::     %-  ~(gas by *map-type)
-::     %-  zing
-::     %+  turn  updates
-::     |=  =update:ui
-::     ?~  update            ~
-::     ?.  =(type -.update)  ~  ::  TODO: works? if yes, get rid of +combine-*-updates-to-map
-::     ~(tap by +.update)
-::   combined
-::
 ++  combine-updates
   |=  $:  batch-updates=(list update:ui)
           egg-updates=(list update:ui)
@@ -1061,12 +1011,6 @@
     (combine-egg-updates-to-map egg-updates)
   =/  combined-grain=(jar id:smart [@da batch-location:ui grain:smart])
     (combine-grain-updates-to-jar grain-updates)
-  :: =/  combined-batch=(map id:smart [@da town-location:ui batch:ui])
-  ::   (combine-updates-to-map batch-updates %batch)
-  :: =/  combined-egg=(map id:smart [@da egg-location:ui egg:smart])
-  ::   (combine-updates-to-map egg-updates %egg)
-  :: =/  combined-grain=(map id:smart [@da batch-location:ui grain:smart])
-  ::   (combine-updates-to-map grain-updates %grain)
   ?:  ?&  ?=(~ combined-batch)
           ?=(~ combined-egg)
           ?=(~ combined-grain)
