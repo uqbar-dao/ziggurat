@@ -60,14 +60,14 @@
   ::  parallel "pass", depending on sequencer parameters.
   ::
   ++  mill-all
-    |=  [=land basket=(list [@ux =egg]) passes=@ud]
-    ^-  state-transition
+    |=  [=land =basket passes=@ud]
+    ^-  [state-transition rejected=carton]
     |^
     ::
     =/  pending
       ::  sort in REVERSE since each pass will reconstruct by appending
       ::  rejected to front, so need to +flop before each pass
-      %+  sort  basket
+      %+  sort  ~(tap in basket)
       |=  [a=[@ux =egg] b=[@ux =egg]]
       (lth rate.p.egg.a rate.p.egg.b)
     ::
@@ -78,9 +78,9 @@
             =(0 passes)
         ==
       ::  create final state transition
-      final(land land)
+      [final(land land) pending]
     ::  otherwise, perform a pass
-    =/  [passed=state-transition rejected=(list [@ux egg])]
+    =/  [passed=state-transition rejected=carton]
       (pass land (flop pending))
     %=  $
       land             land.passed
@@ -93,11 +93,11 @@
     ==
     ::
     ++  pass
-      |=  [=^land pending=(list [@ux =egg])]
-      ^-  [state-transition rejected=(list [@ux egg])]
+      |=  [=^land pending=carton]
+      ^-  [state-transition rejected=carton]
       =|  callers=(set id)  ::  so that we immediately send repeat callers to next pass
-      =|  processed=(list [@ux egg])
-      =|  rejected=(list [@ux egg])
+      =|  processed=carton
+      =|  rejected=carton
       =|  all-diffs=granary
       =|  lis-hits=(list (list hints))
       =|  crows=(list crow)

@@ -177,10 +177,10 @@
       =/  addr  p.sequencer.hall.town
       =+  /(scot %p our.bowl)/wallet/(scot %da now.bowl)/account/(scot %ux addr)/(scot %ux town-id.hall.town)/noun
       =+  .^(account:smart %gx -)
-      =/  new=state-transition
+      =/  [new=state-transition rejected=carton]
         %^    ~(mill-all mil - town-id.hall.town now.bowl)
             land.town
-          ~(tap in `^basket`basket.state)
+          basket.state
         1  ::  number of parallel "passes"
       =/  new-root      `@ux`(sham land.new)
       =/  diff-hash     `@ux`(sham ~[diff.new])
@@ -191,7 +191,8 @@
       =/  sig
         (ecdsa-raw-sign:secp256k1:secp:crypto `@uvI`new-root u.private-key.state)
       ::  3. poke rollup
-      :_  state(proposed-batch `[basket.state land.new diff-hash new-root], basket ~)
+      ::  return rejected (not enough passes to cover them) to our basket
+      :_  state(proposed-batch `[basket.state land.new diff-hash new-root], basket (silt rejected))
       =-  [%pass /batch-submit/(scot %ux new-root) %agent [u.rollup.state %rollup] %poke -]~
       :-  %rollup-action
       !>  :-  %receive-batch
