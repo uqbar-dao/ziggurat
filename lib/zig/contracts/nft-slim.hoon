@@ -16,12 +16,14 @@
   ::
   ++  process
     |=  [args=action caller-id=id]
+    =,  enjs:format
     ?-    -.args
         %deploy
       ?>  ?=(^ minters.args)
       =/  salt  (sham (cat 3 caller-id symbol.args))
+      =/  gid   (fry-rice me.cart me.cart town-id.cart salt)
       =/  metadata-grain=grain
-        :*  (fry-rice me.cart me.cart town-id.cart salt)
+        :*  gid
             me.cart
             me.cart
             town-id.cart
@@ -34,7 +36,8 @@
                 minters.args
                 deployer=caller-id
         ==  ==
-      [%& ~ (malt ~[[id.metadata-grain metadata-grain]]) ~]
+      =/  =crow  [%deployed (numb gid)]~
+      [%& ~ (malt ~[[id.metadata-grain metadata-grain]]) crow]
     ::
         %mint
       =/  meta-grain=grain  -:~(val by owns.cart)
@@ -72,7 +75,9 @@
         $(items-list t.items-list)
       ::
       =.  data.p.germ.meta-grain  new-meta
-      [%& (malt ~[[id.meta-grain meta-grain]]) new-issued ~]
+      =/  minted-ids  (turn ~(tap in ~(key by new-issued)) numb)
+      =/  =crow        [%minted a+minted-ids]~
+      [%& (malt ~[[id.meta-grain meta-grain]]) new-issued crow]
     ::
         %give
       =/  item=grain  -:~(val by grains.inp)
@@ -81,7 +86,8 @@
       =/  item-data  ;;(^item data.p.germ.item)
       ?>  transferrable.item-data
       =.  holder.item  to.args
-      [%& (malt ~[[id.item item]]) ~ ~]
+      =/  =crow  [%gave o+(malt ~[['from' (numb caller-id)] ['to' (numb to.args)]])]~
+      [%& (malt ~[[id.item item]]) ~ crow]
     ==
   --
 ::
