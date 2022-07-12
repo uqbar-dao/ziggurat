@@ -119,15 +119,15 @@
 ::
 ::  tests for %set-allowance
 ::
-++  set-allowance  ~
+++  test-set-allowance  ~
 ::
-++  revoke-allowance  ~
+++  test-revoke-allowance  ~
 ::
 ::  tests for %take
 ::
-++  take  ~
+++  test-take  ~
 ::
-++  take-not-approved  ~
+++  test-take-not-approved  ~
 ::
 ::  tests for %mint
 ::
@@ -135,4 +135,45 @@
 ::
 ::  tests for %deploy
 ::
+
+::
+::  read
+::
+++  test-read-collection-metadata
+  =/  =path  /rice-data
+  =/  =cart
+    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`metadata-1 metadata-1]])]
+  =/  meme  ~(json ~(read cont cart) path)
+  ~&  >>  meme
+  ~
+++  test-read-item-metadata
+  =/  =path  /rice-data
+  =/  =cart
+    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`nft-1 nft-1]])]
+  =/  meme  ~(json ~(read cont cart) path)
+  ~&  >>  meme
+  ~
+++  test-read-arguments
+  =/  =path  [%egg-args %give ~]
+  =/  =cart
+    [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`nft-1 nft-1]])]
+  =/  meme  ~(json ~(read cont cart) path)
+  ~&  >>  meme
+  ~
+++  test-read-item-metadata-atom
+  =/  meme  (numb:enjs:format (jam nft-1))
+  =/  meme-2  p.+.meme
+
+  :: =/  =path  [%rice-data meme-2 ~]
+  ~&  >>  meme-2  
+  :: ~&  >>  i.-.+.path
+
+  :: TODO: how do you jam an atom to a ta? e.g. 123.123 to '123.123' instead of whatever retardation is default
+  :: =/  asdf  (slav %ta meme-2)
+  :: ~&  >>  meme
+  :: =/  =cart
+  ::   [`@ux`'nft' init-now 0x1 (malt ~[[id:`grain`nft-1 nft-1]])]
+  :: =/  meme  ~(json ~(read cont cart) path)
+  :: ~&  >>  meme
+  ~
 --

@@ -12,7 +12,6 @@
         minters=(set id)
         deployer=id
         salt=@
-        :: TODO: base-uri=@t and other on-chain data compression
     ==
   ::
   ::  item id is # in collection (<=supply)
@@ -114,11 +113,6 @@
             [%to %s (scot %ux to.a)]
           [%item-contents (item-contents item-contents.a)]
         ~
-        ::   %mint  ~
-        :: %-  pairs
-        :: :+  [%token %s (scot %ux token.a)]
-        ::   [%mints (mints mints.a)]
-        :: ~
       ::
           %deploy
         %-  pairs
@@ -131,26 +125,6 @@
             [%mintable %b mintable.a]
         ==
       ==
-      ::
-  ::     ++  set-allowance-items
-  ::       |=  items=(map @ud ?)
-  ::       ^-  json
-  ::       %-  pairs
-  ::       %+  turn  ~(tap by items)
-  ::       |=  [nft=@ud allowed=?]
-  ::       [(scot %ud nft) %b allowed]
-  ::     ::
-  ::     ++  mints
-  ::       |=  mints=(set mint:sur)
-  ::       ^-  json
-  ::       :-  %a
-  ::       %+  turn  ~(tap in mints)
-  ::       |=  m=mint:sur
-  ::       %-  pairs
-  ::       :^    [%to %s (scot %ux to.m)]
-  ::           [%account ?~(account.m ~ [%s (scot %ux u.account.m)])]
-  ::         [%items (set-item-contents items.m)]
-  ::       ~
       ::
       ++  distribution
         |=  distribution=(jug id item-contents:sur)
