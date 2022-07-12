@@ -407,9 +407,70 @@
     !>(~)  !>(p.land.res)
   ==
 ::
-++  test-mill-germinate-only-take-lorded-grains  (expect !>(%.y))
+++  test-mill-germinate-only-take-lorded-grains
+  =/  yok=yolk
+    :+  `[%germinate-test ~]
+      ~
+    (silt ~[id:dummy-grain id:beef-account:zigs])
+  =/  shel=shell
+    [caller-1 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call succeeded
+    %+  expect-eq
+    !>(%0)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert we get crow
+    %+  expect-eq
+      !>([[%id [%s (scot %ux id:dummy-grain)]] ~])
+    !>(crow.res)
+  ::  assert that fee paid correctly
+    %+  expect-eq
+      !>(299.993)
+    =+  (~(got by p.land.res) id:beef-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
 ::
-++  test-mill-fertilize-only-take-held-grains  (expect !>(%.y))
+++  test-mill-fertilize-only-take-held-grains
+  =/  yok=yolk
+    :+  `[%fertilize-test ~]
+      (silt ~[id:dummy-grain id:beef-account:zigs])
+    ~
+  =/  shel=shell
+    [caller-2 fake-sig ~ id:mill-tester 1 333 town-id 0]
+  =/  res=mill-result
+    %+  ~(mill mil miller town-id init-now)
+    fake-land  [shel yok]
+  ::
+  ;:  weld
+  ::  assert that our call succeeded
+    %+  expect-eq
+    !>(%0)  !>(errorcode.res)
+  ::  assert no burns created
+    %+  expect-eq
+    !>(~)  !>(burned.res)
+  ::  assert fee is full
+    %+  expect-eq
+    !>(set-fee)  !>(fee.res)
+  ::  assert we get empty crow
+    %+  expect-eq
+    !>(~)  !>(crow.res)
+  ::  assert that fee paid correctly
+    %+  expect-eq
+      !>(199.993)
+    =+  (~(got by p.land.res) id:dead-account:zigs)
+    ?>  ?=(%& -.germ.-)
+    !>(-.data.p.germ.-)
+  ==
 ::
 ++  test-mill-trivial-pass
   =/  yok=yolk

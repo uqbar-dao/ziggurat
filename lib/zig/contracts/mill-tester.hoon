@@ -113,6 +113,26 @@
     ::  try to make sneaky grain
     =.  lord.dummy  zigs-wheat-id
     (result ~ ~ [dummy ~] ~)
+  ::
+      %germinate-test
+    ::  call with dummy grain and a non-lord grain,
+    ::  make an event for each grain in owns.cart
+    =/  =crow
+      %+  turn  ~(tap by owns.cart)
+      |=  [=id =grain]
+      [%id [%s (scot %ux id)]]
+    ::  crow should only have dummy grain
+    (result ~ ~ ~ crow)
+  ::
+      %fertilize-test
+    ::  call as non-holder of dummy grain,
+    ::  make an event for each grain in grains.inp
+    =/  =crow
+      %+  turn  ~(tap by grains.inp)
+      |=  [=id =grain]
+      [%id [%s (scot %ux id)]]
+    ::  crow should be empty
+    (result ~ ~ ~ crow)
   ==
 ::
 ++  read
