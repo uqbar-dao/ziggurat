@@ -14,7 +14,7 @@
 ::
 +$  item  [meta=id item-num=@ud item-contents]
 +$  item-contents
-  $:  data=(set [@t @t])  ::  do we need this?
+  $:  data=(set [@t @t])
       desc=@t
       uri=@t
       transferrable=?

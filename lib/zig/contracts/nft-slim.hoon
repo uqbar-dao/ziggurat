@@ -19,7 +19,8 @@
     =,  enjs:format
     ?-    -.args
         %deploy
-      ?>  ?=(^ minters.args)
+      ?>  ?=(^ minters.args)  ::  minters must not be empty
+      ?>  (gth cap.args 0)    ::  cap cannot be 0
       =/  salt  (sham (cat 3 caller-id symbol.args))
       =/  gid   (fry-rice me.cart me.cart town-id.cart salt)
       =/  metadata-grain=grain
