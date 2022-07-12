@@ -542,6 +542,7 @@
         :: $(epochs rest.epoch, cards new-cards, state new-state)
       ::
           %update
+        ?>  =(root.update (sham land.town.update))
         =*  town-id  town-id.hall.town.update
         =/  timestamp=(unit @da)
           %.  root.update
