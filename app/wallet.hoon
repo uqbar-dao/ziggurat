@@ -115,9 +115,9 @@
     ::
         %derive-new-address
       ::  if hdpath input is empty, use address-index+1 to get next
-      =+  (from-seed:bip32 [64 (to-seed:bip39 (trip mnem.seed.state) (trip pass.seed.state))])
+      =/  new-seed  (to-seed:bip39 (trip mnem.seed.state) (trip pass.seed.state))
       =/  core
-        %-  derive-path:-
+        %-  derive-path:(from-seed:bip32 [64 new-seed])
         ?:  !=("" hdpath.act)  hdpath.act
         (weld "m/44'/60'/0'/0/" (scow %ud address-index.seed.state))
       =+  addr=(address-from-prv:key:ethereum prv:core)
@@ -203,7 +203,7 @@
           :*  %pass  /submit-tx/(scot %ux egg-hash)
               %agent  [our.bowl %uqbar]
               %poke  %uqbar-write
-              !>([%submit egg.p])
+              !>(`write:uqbar`[%submit egg.p])
           ==
       ==
     ::
@@ -213,7 +213,7 @@
       =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
       =/  =caller:smart  :+  from.act  +(nonce)
                          (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
-      =/  =yolk:smart    [caller `q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
+      =/  =yolk:smart    [`q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
       =/  keypair        (~(got by keys.state) from.act)
       =/  =egg:smart
         :_  yolk
@@ -221,7 +221,7 @@
             ?~  priv.keypair
               [0 0 0]
             %+  ecdsa-raw-sign:secp256k1:secp:crypto
-              (sham (jam yolk))
+              (sham yolk)
             u.priv.keypair
             ~
             to.act
@@ -234,7 +234,7 @@
         ::  if we don't have private key for this address, set as pending
         ::  and allow frontend to sign with HW wallet or otherwise
         ~&  >>  "%wallet: storing unsigned tx"
-        `state(pending `[(sham (jam yolk)) egg [%custom args.act]])
+        `state(pending `[(sham yolk) egg [%custom args.act]])
       ::  if we have key, use signature and submit
       =+  egg-hash=(hash-egg egg)
       =/  our-txs
@@ -250,7 +250,7 @@
           :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
               %agent  [our.bowl %uqbar]
               %poke  %uqbar-write
-              !>([%submit egg])
+              !>(`write:uqbar`[%submit egg])
           ==
       ==
     ::
@@ -306,16 +306,16 @@
           %custom  !!
         ==
       =/  keypair       (~(got by keys.state) from.act)
-      =/  =yolk:smart   [caller args.formatted our-grains.formatted cont-grains.formatted]
+      =/  =yolk:smart   [args.formatted our-grains.formatted cont-grains.formatted]
       =/  sig           ?~  priv.keypair
                           [0 0 0]
-                        (ecdsa-raw-sign:secp256k1:secp:crypto (sham (jam yolk)) u.priv.keypair)
+                        (ecdsa-raw-sign:secp256k1:secp:crypto (sham yolk) u.priv.keypair)
       =/  =egg:smart    [[caller sig ~ to.act rate.gas.act bud.gas.act town.act status=%100] yolk]
       ?~  priv.keypair
         ::  if we don't have private key for this address, set as pending
         ::  and allow frontend to sign with HW wallet or otherwise
         ~&  >>  "%wallet: storing unsigned tx"
-        `state(pending `[(shax (jam yolk)) egg args.act])
+        `state(pending `[(sham yolk) egg args.act])
       ::  if we have key, use signature and submit
       =+  egg-hash=(hash-egg egg)
       =/  our-txs
@@ -331,7 +331,7 @@
           :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
               %agent  [our.bowl %uqbar]
               %poke  %uqbar-write
-              !>([%submit egg])
+              !>(`write:uqbar`[%submit egg])
           ==
       ==
     ==

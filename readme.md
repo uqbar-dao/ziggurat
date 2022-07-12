@@ -48,22 +48,37 @@ To run all tests, enter `-test ~[/=zig=/tests]`, or `-test ~[/=zig=/tests/contra
 We'll use a pubkey/seed combo here that has tokens pre-minted for us.
 Enter these commands in dojo after following the setup instructions above:
 ```
+.smart-lib/noun +zig!mk-smart
 :rollup|activate
-:sequencer|init our 0x0 <PRIVATE_KEY>
+:sequencer|init our 0x0 <PRIVATE_KEY> 
+:indexer &set-sequencer [our %sequencer]
+:indexer &set-rollup [our %rollup]
 :uqbar|set-sources our 0x0 our
 :wallet &zig-wallet-poke [%populate <SEED>]
 ```
+(can use seed `0xbeef` and private key `0xf3b2.f5ab.92df.a29d.5e8e.fe70.98cb.ed99.3856.949b.fb4f.5cfb.7bca.4a45.0ae7.0e50` for testing)
+
 
 ---
+**To index on an existing testnet:**
 
-**To join an existing testnet:**
+First make sure you're on the whitelist for the ship hosting the rollup simulator. Then, if `~zod` was that host:
+```
+.smart-lib/noun +zig!mk-smart
+:indexer &set-sequencer [~zod %sequencer]
+:indexer &set-rollup [~zod %rollup]
+:uqbar|set-sources our 0x0 our
+```
+---
+
+**To sequence on an existing testnet:**
 
 First make sure you're on the whitelist for the ship hosting the rollup simulator. Then, if `~zod` was that host:
 ```
 :sequencer|init ~zod <YOUR_TOWN_ID> <PRIVATE_KEY>
 :uqbar|set-sources ~zod <YOUR_TOWN_ID> our
 ```
-Then, use the wallet app to generate a wallet appropriate for you. The default town generator spawns "zigs" for the following 3 seed/key pairs:
+Then, use the wallet app to generate a wallet appropriate for you. The default town generator (`/gen/sequencer/init.hoon`) spawns "zigs" for the following 3 seed/key pairs:
 ```
 seed: 0xbeef  public key: 0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c
 seed: 0xdead  public key: 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5
@@ -155,9 +170,8 @@ Example pokes that will work upon chain initialization in dojo):
 :wallet &zig-wallet-poke [%submit 0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c 0xcafe.babe 1 [1 10.000] [%give 32.770.263.103.071.854 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 1]]
 
 #  CUSTOM TRANSACTION
-:wallet &zig-wallet-poke [%submit-custom from=0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c to=0x74.6361.7274.6e6f.632d.7367.697a town=0x0 gas=[1 1.000] args='[%give 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 `0x532c.d5cf.befc.5c0f.e5dd.3910.8f23.79fd 777 1.000]' my-grains=(silt ~[0x532c.d5cf.befc.5c0f.975c.8e60.c3f6.fcac]) cont-grains=(silt ~[0x532c.d5cf.befc.5c0f.e5dd.3910.8f23.79fd])]
+:wallet &zig-wallet-poke [%submit-custom from=0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c to=0x74.6361.7274.6e6f.632d.7367.697a town=0x0 gas=[1 1.000.000] args='[%give 0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5 69.000]' my-grains=(silt ~[0xe490.ad5c.feed.fd8f.532c.d5cf.befc.5c0f.ec2e.701b.c218.6018.975c.8e60.c3f6.fcac]) cont-grains=~]
 ```
-
 ---
 
 ### DAO set up

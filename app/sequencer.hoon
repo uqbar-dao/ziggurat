@@ -21,7 +21,7 @@
       status=?(%available %off)
   ==
 +$  inflated-state-0  [state-0 =mil smart-lib-vase=vase]
-+$  mil  $_  ~(mill mill !>(0) *(map * @))
++$  mil  $_  ~(mill mill !>(0) *(map * @) %.y)
 --
 ::
 =|  inflated-state-0
@@ -37,7 +37,7 @@
   =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
   =/  mil
     %~  mill  mill
-    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun)) %.y]
   :-  ~
   %_    this
       state
@@ -53,7 +53,7 @@
   =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
   =/  mil
     %~  mill  mill
-    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun)) %.y]
   `this(state [!<(state-0 old-vase) mil smart-lib])
 ::
 ++  on-watch
@@ -95,7 +95,7 @@
       ::  poke rollup ship with params of new town
       ::  (will be rejected if id is taken)
       =/  =land  ?~(starting-state.act [~ ~] u.starting-state.act)
-      =/  new-root  (shax (jam land))
+      =/  new-root  `@ux`(sham land)
       =/  =^town
         :-  land
         :*  town-id.act
@@ -105,7 +105,7 @@
             [new-root]~
         ==
       =/  sig
-        (ecdsa-raw-sign:secp256k1:secp:crypto new-root private-key.act)
+        (ecdsa-raw-sign:secp256k1:secp:crypto `@uvI`new-root private-key.act)
       :_  %=  state
             rollup       `rollup-host.act
             private-key  `private-key.act
@@ -144,7 +144,7 @@
       :-  %+  turn  ~(tap in eggs.act)
           |=  =egg:smart
           ^-  card
-          =/  hash  (shax (jam q.egg))
+          =/  hash  (sham q.egg)
           =/  usig  (ecdsa-raw-sign:secp256k1:secp:crypto hash (need private-key.state))
           =+  [%uqbar-write !>([%receipt `@ux`hash (sign:sig our.bowl now.bowl hash) usig])]
           [%pass /submit-transaction/(scot %ux hash) %agent [src.bowl %uqbar] %poke -]
@@ -152,7 +152,7 @@
       ^+  basket
       %-  ~(run in eggs.act)
       |=  =egg:smart
-      [`@ux`(shax (jam q.egg)) egg]
+      [`@ux`(sham q.egg) egg]
     ::
     ::  batching
     ::
@@ -177,20 +177,22 @@
       =/  addr  p.sequencer.hall.town
       =+  /(scot %p our.bowl)/wallet/(scot %da now.bowl)/account/(scot %ux addr)/(scot %ux town-id.hall.town)/noun
       =+  .^(account:smart %gx -)
-      =/  new=state-transition
-        %+  ~(mill-all mil - town-id.hall.town now.bowl)
-          land.town
-        (turn ~(tap in `^basket`basket.state) tail)
-      =/  new-root      (shax (jam land.new))
-      =/  diff-hash     (shax (jam ~[diff.new]))
+      =/  [new=state-transition rejected=carton]
+        %^    ~(mill-all mil - town-id.hall.town now.bowl)
+            land.town
+          basket.state
+        1  ::  number of parallel "passes"
+      =/  new-root      `@ux`(sham land.new)
+      =/  diff-hash     `@ux`(sham ~[diff.new])
       ::  2. generate our signature
       ::  (address sig, that is)
       ?~  private-key.state
         ~|("%sequencer: error: no signing key found" !!)
       =/  sig
-        (ecdsa-raw-sign:secp256k1:secp:crypto new-root u.private-key.state)
+        (ecdsa-raw-sign:secp256k1:secp:crypto `@uvI`new-root u.private-key.state)
       ::  3. poke rollup
-      :_  state(proposed-batch `[basket.state land.new diff-hash new-root], basket ~)
+      ::  return rejected (not enough passes to cover them) to our basket
+      :_  state(proposed-batch `[basket.state land.new diff-hash new-root], basket (silt rejected))
       =-  [%pass /batch-submit/(scot %ux new-root) %agent [u.rollup.state %rollup] %poke -]~
       :-  %rollup-action
       !>  :-  %receive-batch

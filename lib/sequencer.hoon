@@ -51,7 +51,7 @@
   ?.  =(~(wyt by owns) (lent contract-rice))
     ``noun+!>(~)
   ::  TODO swap this with +zebra when able?
-  =/  cart     [id now town-id owns]
+  =/  cart     [id from=[0x0 0] now town-id owns]
   =/  payload  .*(q.library pay.cont)
   =/  battery  .*([q.library payload] bat.cont)
   =/  dor      [-:!>(*contract:smart) battery]

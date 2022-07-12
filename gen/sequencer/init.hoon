@@ -1,6 +1,6 @@
 /-  *sequencer
 /+  smart=zig-sys-smart, ethereum
-/*  zigs-contract     %noun  /lib/zig/compiled/zigs/noun
+/*  zigs-contract     %noun  /lib/zig/compiled/zigs-parallel/noun
 /*  nft-contract      %noun  /lib/zig/compiled/nft/noun
 /*  publish-contract  %noun  /lib/zig/compiled/publish/noun
 /*  trivial-contract  %noun  /lib/zig/compiled/trivial/noun
@@ -125,14 +125,14 @@
   =/  grains=(list:smart (pair:smart id:smart grain:smart))
     :~  [id.zigs-wheat-grain zigs-wheat-grain]
         [id.zigs-metadata-grain zigs-metadata-grain]
-        [id.nft-wheat-grain nft-wheat-grain]
-        [id.nft-metadata-grain nft-metadata-grain]
-        [id.publish-grain publish-grain]
-        [id.trivial-grain trivial-grain]
+        :: [id.nft-wheat-grain nft-wheat-grain]
+        :: [id.nft-metadata-grain nft-metadata-grain]
+        :: [id.publish-grain publish-grain]
+        :: [id.trivial-grain trivial-grain]
         [zigs-1 beef-zigs-grain]
         [zigs-2 dead-zigs-grain]
         [zigs-3 cafe-zigs-grain]
-        [nft-acc-id nft-acc-grain]
+        :: [nft-acc-id nft-acc-grain]
     ==
   (~(gas by:smart *(map:smart id:smart grain:smart)) grains)
 =/  fake-populace
