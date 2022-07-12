@@ -28,7 +28,7 @@
 ::  I will heavily comment this contract in order to make it a good example
 ::  for others to use.
 ::
-:: /+  *zig-sys-smart
+::  /+  *zig-sys-smart
 /=  fungible  /lib/zig/contracts/lib/fungible
 =,  fungible
 |_  =cart
@@ -36,8 +36,8 @@
   |=  inp=embryo
   ^-  chick
   |^
-  ?~  args.inp  !!
-  (process ;;(arguments:sur u.args.inp) (pin caller.inp))
+  ?~  action.inp  !!
+  (process ;;(arguments:sur u.action.inp) id.from.cart)
   ::
   ::  the actual execution arm. branches on argument type and returns final result
   ::  note that many of these lines will crash with bad input. this is good,
@@ -59,9 +59,9 @@
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver 0]]]
         ::  continuation call: %give to rice we issued
         :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%give to.args `id.new amount.args] (silt ~[id.giv]) (silt ~[id.new])]
-        [~ (malt ~[[id.new new]]) ~]
+          :~  [me.cart town-id.cart `[%give to.args `id.new amount.args] (silt ~[id.giv]) (silt ~[id.new])]
+          ==
+        [~ (malt ~[[id.new new]]) ~ ~]
       ::  giving account in embryo, and receiving one in owns.cart
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  ?=(%& -.germ.rec)
@@ -73,7 +73,7 @@
           data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
       ==
       ::  return the result: two changed grains
-      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
+      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~ ~]
     ::
         %take
       ::  %take expects the account that will be taken from in owns.cart
@@ -93,9 +93,11 @@
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]
         ::  continuation call: %take to rice found in book
         :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%take to.args `id.new id.giv amount.args] ~ (silt ~[id.giv id.new])]
-        [~ (malt ~[[id.new new]]) ~]
+          :~  :+  me.cart
+                town-id.cart
+              [`[%take to.args `id.new id.giv amount.args] ~ (silt ~[id.giv id.new])]
+          ==
+        [~ (malt ~[[id.new new]]) ~ ~]
       ::  direct send
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  ?=(%& -.germ.rec)
@@ -109,7 +111,7 @@
           allowances  (~(jab by allowances.giver) caller-id |=(old=@ud (sub old amount.args)))
         == 
       ==
-      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
+      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~ ~]
     ::
         %take-with-sig
       ::  %take-with-sig allows for gasless approvals for transferring tokens
@@ -142,9 +144,11 @@
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [amount.args ~ metadata.giver 0]]]
         ::  continuation call: %take to rice found in book
         :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%take-with-sig to.args `id.new id.giv amount.args nonce.args deadline.args sig.args] ~ (silt ~[id.giv id.new])]
-        [~ (malt ~[[id.new new]]) ~]
+          :~  :+  me.cart  
+                town-id.cart
+              [`[%take-with-sig to.args `id.new id.giv amount.args nonce.args deadline.args sig.args] ~ (silt ~[id.giv id.new])]
+          ==
+        [~ (malt ~[[id.new new]]) ~ ~]
       ::  direct send
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  ?=(%& -.germ.rec)
@@ -157,7 +161,7 @@
           nonce  .+(nonce.giver)
         == 
       ==
-      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~]
+      [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~ ~]
     ::
         %set-allowance
       ::  let some pubkey spend tokens on your behalf
@@ -170,7 +174,7 @@
       =.  data.p.germ.acc
         account(allowances (~(put by allowances.account) who.args amount.args))
       ::  return single changed rice
-      [%& (malt ~[[id.acc acc]]) ~ ~]
+      [%& (malt ~[[id.acc acc]]) ~ ~ ~]
     ::
         %mint
       ::  expects token metadata in owns.cart
@@ -204,14 +208,16 @@
       ?~  mints
         ::  finished minting, return chick
         ?~  issued-rice
-          [%& changed-rice ~ ~]
+          [%& changed-rice ~ ~ ~]
         ::  finished but need to mint to newly-issued rices
         =/  call-grains=(set id)
           ~(key by `(map id grain)`issued-rice)
         :+  %|
-          :+  me.cart  town-id.cart
-          [caller.inp `[%mint token.args next-mints] ~ call-grains]
-        [changed-rice issued-rice ~]
+          :~  :+  me.cart
+                town-id.cart
+              [`[%mint token.args next-mints] ~ call-grains]
+          ==
+        [changed-rice issued-rice ~ ~]
       ::
       ?~  account.i.mints
         ::  need to issue
@@ -276,7 +282,7 @@
         :-  -
         [- me.cart id town-id.cart [%& salt [bal ~ id.metadata-grain 0]]]
       ::  big ol issued map
-      [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~]
+      [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~ ~]
     ==
   --
 ::
