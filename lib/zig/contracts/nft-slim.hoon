@@ -15,13 +15,13 @@
   (process ;;(action u.args.inp) (pin caller.inp))
   ::
   ++  process
-    |=  [args=action caller-id=id]
+    |=  [=action caller-id=id]
     =,  enjs:format
-    ?-    -.args
+    ?-    -.action
         %deploy
-      ?>  ?=(^ minters.args)  ::  minters must not be empty
-      ?>  (gth cap.args 0)    ::  cap cannot be 0
-      =/  salt  (sham (cat 3 caller-id symbol.args))
+      ?>  ?=(^ minters.action)  ::  minters must not be empty
+      ?>  (gth cap.action 0)    ::  cap cannot be 0
+      =/  salt  (sham (cat 3 caller-id symbol.action))
       =/  gid   (fry-rice me.cart me.cart town-id.cart salt)
       =/  collection-grain=grain
         :*  gid
@@ -30,11 +30,11 @@
             town-id.cart
             :+  %&  salt
             ^-  collection
-            :*  name.args
-                symbol.args
+            :*  name.action
+                symbol.action
                 supply=0
-                cap.args
-                minters.args
+                cap.action
+                minters.action
                 deployer=caller-id
         ==  ==
       =/  =crow  [%deployed (numb gid)]~
@@ -47,10 +47,10 @@
       ::  pre-mint checks
       =/  mintable           (lth supply.collect cap.collect)
       =/  caller-can-mint    (~(has in minters.collect) caller-id)
-      =/  below-cap          (gte cap.collect (add supply.collect ~(wyt in items.args)))
+      =/  below-cap          (gte cap.collect (add supply.collect ~(wyt in items.action)))
       ?>  &(mintable caller-can-mint below-cap)
       ::  cleared to mint!
-      =/  items-list  ~(tap in items.args)
+      =/  items-list  ~(tap in items.action)
       =|  issued=(map id grain)
       =/  [new-issued=(map id grain) new-collect=collection]
         |-
@@ -86,8 +86,8 @@
       ?>  =(caller-id holder.item)
       =/  item-data  ;;(^item data.p.germ.item)
       ?>  transferrable.item-data
-      =.  holder.item  to.args
-      =/  =crow  [%gave o+(malt ~[['from' (numb caller-id)] ['to' (numb to.args)]])]~
+      =.  holder.item  to.action
+      =/  =crow  [%gave o+(malt ~[['from' (numb caller-id)] ['to' (numb to.action)]])]~
       [%& (malt ~[[id.item item]]) ~ crow]
     ==
   --
