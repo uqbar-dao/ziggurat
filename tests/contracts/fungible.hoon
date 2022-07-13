@@ -22,6 +22,22 @@
               deployer=0x0
               salt=`@`'salt'
       ==  ==
+      ++  metadata-mintable  ^-  grain
+      :*  `@ux`'simple'
+          `@ux`'fungible'
+          `@ux`'holder'
+          town-id=0x1
+          :+  %&  `@`'salt'
+          :*  name='Simple Token'
+              symbol='ST'
+              decimals=0
+              supply=100
+              cap=`1.000
+              mintable=%.y
+              minters=(silt ~[pub-1])
+              deployer=0x0
+              salt=`@`'salt'
+      ==  ==
     ::
     ++  priv-1  0xbeef.beef.beef.beef.beef.beef.beef.beef.beef.beef
     ++  pub-1  (address-from-prv:key:ethereum priv-1)
@@ -328,35 +344,35 @@
 ::
 ++  test-mint-unknown-receiver  ^-  tang
   =/  =embryo
-    :-  `[%mint `@ux`'simple' (silt ~[[0xffff ~ 50]])]
+    :-  `[%mint `@ux`'simple' (silt ~[[pub-1 ~ 50]])]
     ~
   =/  =cart
-    [`@ux`'fungible' [pub-1 0] init-now 0x1 (malt ~[[id:metadata-1 metadata-1]])]
-  =/  new-id  (fry-rice 0xffff `@ux`'fungible' 0x1 `@`'salt')
+    [`@ux`'fungible' [pub-1 0] init-now 0x1 (malt ~[[id:metadata-mintable metadata-mintable]])]
+  =/  new-id  (fry-rice pub-1 `@ux`'fungible' 0x1 `@`'salt')
   =/  new=grain
     :*  new-id
       `@ux`'fungible'
-      0xffff
+      pub-1
       0x1
-      [%& `@`'salt' [0 ~ `@ux`'simple']]
+      [%& `@`'salt' [0 ~ `@ux`'simple' 0]]
     ==
   =/  issued-rice=(map id grain)
     (malt ~[[new-id new]])
   =/  next-mints=(set mint:sur:cont-lib)
-    (silt ~[[0xffff `new-id 50]])
+    (silt ~[[pub-1 `new-id 50]])
   =/  updated-1=grain
     :*  `@ux`'simple'
         `@ux`'fungible'
         `@ux`'holder'
-        0x1  ::  town-id
+        0x1
         :+  %&  `@`'salt'
         :*  name='Simple Token'
             symbol='ST'
             decimals=0
             supply=150
             cap=`1.000
-            mintable=%.n
-            minters=(silt ~[0xbeef])
+            mintable=%.y
+            minters=(silt ~[pub-1])
             deployer=0x0
             salt=`@`'salt'
     ==  ==
