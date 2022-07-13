@@ -1,6 +1,6 @@
   /+  *zig-sys-smart
 |%
-+$  collection-metadata
++$  collection
   $:  name=@t
       symbol=@t
       supply=@ud
@@ -9,7 +9,7 @@
       deployer=id
   ==
 ::
-+$  item  [meta=id item-num=@ud item-contents]
++$  item  [collection=id item-num=@ud item-contents]
 +$  item-contents
   $:  data=(map @t @t)
       desc=@t
@@ -19,7 +19,7 @@
 ::
 +$  action
   $%  [%deploy name=@t symbol=@t cap=@ud minters=(set id)]  ::  expects no grains
-      [%mint items=(set item-contents)]                     ::  expects metadata grain in owns.cart  / cont-grains
+      [%mint items=(set item-contents)]                     ::  expects collection grain in owns.cart  / cont-grains
       [%give to=id]                                         ::  expects the item grain in grains.inp / my-grains 
   ==
 --
