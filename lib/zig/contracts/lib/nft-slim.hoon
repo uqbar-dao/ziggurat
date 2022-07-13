@@ -1,6 +1,3 @@
-::  TODO rename collection-metadata to something shorter? collection-data, nft-metadata
-::  TODO rename item to nft? nft-item?
-::
   /+  *zig-sys-smart
 |%
 +$  collection-metadata

@@ -47,7 +47,7 @@
       ::  pre-mint checks
       =/  mintable           (lth supply.meta cap.meta)
       =/  caller-can-mint    (~(has in minters.meta) caller-id)
-      =/  below-cap          (gth cap.meta (add supply.meta ~(wyt in items.args)))
+      =/  below-cap          (gte cap.meta (add supply.meta ~(wyt in items.args)))
       ?>  &(mintable caller-can-mint below-cap)
       ::  cleared to mint!
       =/  items-list  ~(tap in items.args)
@@ -57,7 +57,8 @@
         ?~  items-list
           [issued meta]
         =/  contents  i.items-list
-        =/  next-id   supply.meta
+        =.  supply.meta  +(supply.meta)
+        =*  next-id      supply.meta
         =/  salt      (sham (cat 3 next-id id.meta-grain))
         =/  new-item=grain
           :*  (fry-rice me.cart caller-id town-id.cart salt)
@@ -71,7 +72,6 @@
                   contents
               ==
           ==
-        =.  supply.meta  +(supply.meta)
         =.  issued       (~(put by issued) id.new-item new-item)
         $(items-list t.items-list)
       ::
