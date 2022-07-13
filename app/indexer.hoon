@@ -90,6 +90,11 @@
 ::
 ::    ##  Pokes
 ::
+::    %indexer-catchup:
+::      Get historical state from target indexer.
+::      WARNING: Overwrites current state, so should
+::      only be used when bootstrapping a new indexer.
+::
 ::    %set-sequencer:
 ::      Subscribe to sequencer for new batches.
 ::
@@ -158,40 +163,15 @@
   ++  on-load
     |=  =old=vase
     =/  old  !<(versioned-state old-vase)
-    |^
-    ?-  -.old
-      %0  `this(state inflate-state)
-    ==
-    ::
-    ++  inflate-state
-      ^-  _state
-      =.  state  [old *indices-0]
-      =/  batches-by-town-list=(list [@ux =batches:ui batch-order:ui])
-        ~(tap by batches-by-town)
-      |-
-      ?~  batches-by-town-list  state
-      =/  batches-list=(list [root=@ux timestamp=@da =batch:ui])
-        ~(tap by batches.i.batches-by-town-list)
-      %=  $
-          batches-by-town-list  t.batches-by-town-list
-          state                 (inflate-town batches-list)
+    ?-    -.old
+        %0
+      :-  ~
+      %=  this
+          state
+        :-  old
+        (inflate-state ~(tap by batches-by-town.old))
       ==
-    ::
-    ++  inflate-town
-      |=  batches-list=(list [root=@ux timestamp=@da =batch:ui])
-      ^-  _state
-      |-
-      ?~  batches-list  state
-      =^  cards  state  ::  will throw away cards (empty)
-        %:  consume-batch
-            root.i.batches-list
-            transactions.batch.i.batches-list
-            +.batch.i.batches-list
-            timestamp.i.batches-list
-            %.n
-        ==
-      $(batches-list t.batches-list)
-    --
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -217,6 +197,13 @@
         !<(dock vase)
       rollup-root-path
     ::
+        %indexer-catchup
+      :_  this
+      %^    set-watch-target:ic
+          indexer-catchup-wire
+        !<(dock vase)
+      indexer-catchup-path
+    ::
     ::  TODO: add %consume-update and %serve-update pokes
     ::  https://github.com/uqbar-dao/ziggurat/blob/da1d37adf538ee908945557a68387d3c87e1c32e/app/uqbar-indexer.hoon#L138
     ==
@@ -233,6 +220,15 @@
       :: %-  fact:io
       :: :_  ~
       :: [%indexer-update !>(`update:ui`update)]
+    ::
+        [%indexer-catchup ~]
+      :_  this
+      %-  fact-init-kick:io
+      [%indexer-catchup !>(`batches-by-town:ui`batches-by-town)]
+      :: :_  ~
+      :: %-  fact:io
+      :: :_  ~
+      :: [%indexer-catchup !>(`batches-by-town:ui`batches-by-town)]
     ::
         [%capitol-updates ~]
       :_  this
@@ -289,10 +285,13 @@
     ?+    path  (on-leave:def path)
         $?  [%grain *]
             :: [%hash @ ~]
+            [%grain-eggs *]
             [%holder *]
             [%id *]
             [%lord *]
             [%town *]
+            [%capitol-updates ~]
+            [%indexer-catchup ~]
         ==
       `this
     ==
@@ -406,7 +405,6 @@
     ?+    wire  (on-agent:def wire sign)
         ?([%rollup-capitol-update ~] [%rollup-root-update ~])
       ?+    -.sign  (on-agent:def wire sign)
-      ::
           %kick
         :_  this
         =/  old-source=(unit dock)
@@ -429,7 +427,6 @@
     ::
         [%sequencer-update ~]
       ?+    -.sign  (on-agent:def wire sign)
-      ::
           %kick
         :_  this
         =/  old-source=(unit dock)
@@ -448,19 +445,27 @@
         [cards this]
       ==
     ::
-    ::     [%epochs-catchup ~]
-    ::   ?+    -.sign  (on-agent:def wire sign)
-    ::   ::
-    ::       %kick
-    ::     `this
-    ::   ::
-    ::       %fact
-    ::     =^  cards  state
-    ::       %-  consume-ziggurat-update
-    ::       !<(update:zig q.cage.sign)
-    ::     [cards this]
-    ::   ::
-    ::   ==
+        [%indexer-catchup-update ~]
+      ?+    -.sign  (on-agent:def wire sign)
+          %fact
+        =.  town-update-queue
+          %-  ~(gas by town-update-queue)
+          %+  turn  ~(tap by capitol)
+          |=  [town-id=id:smart =hall:seq]
+          :-  town-id
+          %-  %~  gas  by
+              (~(gut by town-update-queue) town-id *(map @ux @da))
+          %+  turn  roots.hall
+          |=  root=@ux
+          [root now.bowl]  ::  TODO: improve initial timestamping
+        =.  batches-by-town
+          !<(batches-by-town:ui q.cage.sign)
+        :-  ~
+        %=  this
+            +.state
+          (inflate-state ~(tap by batches-by-town))
+        ==
+      ==
     ==
     ::
     :: +consume-indexer-update:
@@ -520,27 +525,6 @@
       |=  update=indexer-update:seq
       ^-  (quip card _state)
       ?-    -.update
-        :: ~|  "indexer: not consuming unexpected update {<-.update>}"
-        :: !!
-        ::   %epochs-catchup
-        :: =/  =epochs:zig  epochs.update
-        :: =|  cards=(list card)
-        :: |-
-        :: ?~  epochs  [cards state]
-        :: =/  epoch  (pop:poc:zig epochs)
-        :: =*  epoch-num         num.val.head.epoch
-        :: =*  epoch-start-time  start-time.val.head.epoch
-        :: =/  =slots:zig  slots.val.head.epoch
-        :: =+  ^=  [new-cards new-state]
-        ::     |-
-        ::     ?~  slots  [cards state]
-        ::     =/  slot  (pop:sot:zig slots)
-        ::     =+  ^=  [new-cards new-state]
-        ::         %^  consume-slot  epoch-num  epoch-start-time
-        ::         val.head.slot
-        ::     $(slots rest.slot, cards new-cards, state new-state)
-        :: $(epochs rest.epoch, cards new-cards, state new-state)
-      ::
           %update
         ?>  =(root.update (sham land.town.update))
         =*  town-id  town-id.hall.town.update
@@ -585,10 +569,6 @@
 |_  =bowl:gall
 +*  io  ~(. agentio bowl)
 ::
-++  epochs-catchup-wire
-  ^-  wire
-  /epochs-catchup
-::
 ++  rollup-capitol-wire
   ^-  wire
   /rollup-capitol-update
@@ -600,6 +580,10 @@
 ++  sequencer-wire
   ^-  wire
   /sequencer-update
+::
+++  indexer-catchup-wire
+  ^-  wire
+  /indexer-catchup-update
 ::
 ++  rollup-capitol-path
   ^-  path
@@ -613,11 +597,9 @@
   ^-  path
   /indexer/updates
 ::
-++  get-epoch-catchup
-  |=  d=dock
-  ^-  card
-  %+  ~(watch pass:io epochs-catchup-wire)
-  d  /validator/epoch-catchup/0
+++  indexer-catchup-path
+  ^-  path
+  /indexer-catchup
 ::
 ++  watch-target
   |=  [w=wire d=dock p=path]
@@ -640,7 +622,6 @@
   =/  watch-card=card  (watch-target w d p)
   =/  leave-card=(unit card)  (leave-wire w)
   ?~  leave-card
-    :: ~[(get-epoch-catchup d) watch-card]
     ~[watch-card]
   ~[u.leave-card watch-card]
 ::
@@ -755,6 +736,36 @@
       ==
     ~
   [%hash combined-batch combined-egg combined-grain]
+::
+++  inflate-state
+  |=  batches-by-town-list=(list [@ux =batches:ui batch-order:ui])
+  ^-  indices-0
+  =|  temporary-state=_state
+  |^
+  |-
+  ?~  batches-by-town-list  +.temporary-state
+  =/  batches-list=(list [root=@ux timestamp=@da =batch:ui])
+    ~(tap by batches.i.batches-by-town-list)
+  %=  $
+      batches-by-town-list  t.batches-by-town-list
+      temporary-state       (inflate-town batches-list)
+  ==
+  ::
+  ++  inflate-town
+    |=  batches-list=(list [root=@ux timestamp=@da =batch:ui])
+    ^-  _state
+    |-
+    ?~  batches-list  temporary-state
+    =^  cards  temporary-state  ::  throw away cards (empty)
+      %:  consume-batch(state temporary-state)
+          root.i.batches-list
+          transactions.batch.i.batches-list
+          +.batch.i.batches-list
+          timestamp.i.batches-list
+          %.n
+      ==
+    $(batches-list t.batches-list)
+  --
 ::
 ++  serve-update
   |=  [=query-type:ui =query-payload:ui]
