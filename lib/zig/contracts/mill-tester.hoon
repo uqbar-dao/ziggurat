@@ -17,13 +17,12 @@
 ++  write
   |=  inp=embryo
   ^-  chick
-  ?~  action.inp  !!
   =/  grain-id=id
     (fry-rice id.from.cart me.cart town-id.cart 'salt')
   =/  new-grain=grain
     =+  [%& 'salt' 'data']
     [grain-id me.cart id.from.cart town-id.cart -]
-  ?+    -.u.action.inp  !!
+  ?+    -.action.inp  !!
       %change-nonexistent
     (result [new-grain ~] ~ ~ ~)
   ::

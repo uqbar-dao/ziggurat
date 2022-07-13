@@ -73,7 +73,7 @@
 ::
 ++  test-give-known-receiver  ^-  tang
   =/  =embryo
-    :-  `[%give 10 holder-2 `0x1.dead 30]
+    :-  [%give 10 holder-2 30]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-2 account-2]])]
@@ -99,7 +99,7 @@
 ::
 ++  test-give-unknown-receiver  ^-  tang
   =/  =embryo
-    :-  `[%give 10 0xffff ~ 30]
+    :-  [%give 10 0xffff 30]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id ~]
@@ -115,13 +115,13 @@
     (~(write cont cart) embryo)
   =/  correct=chick
     %+  continuation
-      ~[(call me.cart town-id.cart [%give 10 0xffff `new-id 30] ~[0x1.beef] ~[new-id])]
+      ~[(call me.cart town-id.cart [%give 10 0xffff 30] ~[0x1.beef] ~[new-id])]
     (result ~ [new ~] ~ ~)
   (expect-eq !>(correct) !>(res))
 ::
 ++  test-give-not-enough  ^-  tang
   =/  =embryo
-    :-  `[%give 10 holder-2 `0x1.dead 51]
+    :-  [%give 10 holder-2 51]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-2 account-2]])]
@@ -131,7 +131,7 @@
 ::
 ++  test-give-high-budget  ^-  tang
   =/  =embryo
-    :-  `[%give 31 holder-2 `0x1.dead 20]
+    :-  [%give 31 holder-2 20]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-2 account-2]])]
@@ -141,7 +141,7 @@
 ::
 ++  test-give-exact-budget  ^-  tang
   =/  =embryo
-    :-  `[%give 30 holder-2 `0x1.dead 20]
+    :-  [%give 30 holder-2 20]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -167,7 +167,7 @@
 ::
 ++  test-give-metadata-mismatch  ^-  tang
   =/  =embryo
-    :-  `[%give 10 holder-4 `0x1.face 10]
+    :-  [%give 10 holder-4 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-4 account-4]])]
@@ -184,7 +184,7 @@
         [%& salt [50 ~ zigs-wheat-id]]
     ==
   =/  =embryo
-    :-  `[%give 10 holder-4 `0x1.face 10]
+    :-  [%give 10 holder-4 10]
     (malt ~[[id:account-1 bad-account]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-4 account-4]])]
@@ -194,7 +194,7 @@
 ::
 ++  test-give-wrong-giver-grain-2  ^-  tang
   =/  =embryo
-    :-  `[%give 10 holder-4 `0x1.face 10]
+    :-  [%give 10 holder-4 10]
     (malt ~[[id:metadata-grain metadata-grain]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-4 account-4]])]
@@ -204,7 +204,7 @@
 ::
 ++  test-give-wrong-receiver-grain  ^-  tang
   =/  =embryo
-    :-  `[%give 10 holder-2 `0x1.dead 10]
+    :-  [%give 10 holder-2 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-3 account-3]])]
@@ -214,7 +214,7 @@
 ::
 ++  test-give-wrong-receiver-grain-2  ^-  tang
   =/  =embryo
-    :-  `[%give 10 holder-2 `0x1.cafe 10]
+    :-  [%give 10 holder-2 10]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-3 account-3]])]
@@ -226,7 +226,7 @@
 ::
 ++  test-take-simple
   =/  =embryo
-    :-  `[%take holder-1 `0x1.beef 0x1.dead 10]
+    :-  [%take holder-1 `0x1.beef 0x1.dead 10]
     ~
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
@@ -252,7 +252,7 @@
 ::
 ++  test-take-send-third
   =/  =embryo
-    :-  `[%take holder-3 `0x1.cafe 0x1.dead 10]
+    :-  [%take holder-3 `0x1.cafe 0x1.dead 10]
     ~
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
@@ -278,7 +278,7 @@
 ::
 ++  test-take-send-mismatching-account
   =/  =embryo
-    :-  `[%take holder-1 `0x1.cafe 0x1.dead 10]
+    :-  [%take holder-1 `0x1.cafe 0x1.dead 10]
     ~
   =/  =cart
     [zigs-wheat-id [holder-3 0] init-now town-id (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
@@ -288,7 +288,7 @@
 ::
 ++  test-take-send-new-account
   =/  =embryo
-    :-  `[%take 0xffff ~ 0x1.dead 10]
+    :-  [%take 0xffff ~ 0x1.dead 10]
     ~
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-2 account-2]])]
@@ -317,7 +317,7 @@
 ::
 ++  test-take-over-allowance
   =/  =embryo
-    :-  `[%take holder-1 `0x1.beef 0x1.dead 20]
+    :-  [%take holder-1 `0x1.beef 0x1.dead 20]
     ~
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-3 account-3] [id:account-2 account-2]])]
@@ -327,7 +327,7 @@
 ::
 ++  test-take-over-balance
   =/  =embryo
-    :-  `[%take holder-2 `0x1.dead 0x1.beef 60]
+    :-  [%take holder-2 `0x1.dead 0x1.beef 60]
     ~
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
@@ -337,7 +337,7 @@
 ::
 ++  test-take-no-allowance
   =/  =embryo
-    :-  `[%take holder-2 `0x1.dead 0x1.beef 60]
+    :-  [%take holder-2 `0x1.dead 0x1.beef 60]
     ~
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-1 account-1] [id:account-2 account-2]])]
@@ -349,7 +349,7 @@
 ::
 ++  test-set-allowance-simple
   =/  =embryo
-    :-  `[%set-allowance holder-3 100]
+    :-  [%set-allowance holder-3 100]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -368,7 +368,7 @@
 ::
 ++  test-set-allowance-again
   =/  =embryo
-    :-  `[%set-allowance holder-2 100]
+    :-  [%set-allowance holder-2 100]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -387,7 +387,7 @@
 ::
 ++  test-set-allowance-zero
   =/  =embryo
-    :-  `[%set-allowance holder-2 0]
+    :-  [%set-allowance holder-2 0]
     (malt ~[[id:account-1 account-1]])
   =/  updated-1=grain
     :*  0x1.beef
@@ -406,7 +406,7 @@
 ::
 ++  test-set-allowance-self
   =/  =embryo
-    :-  `[%set-allowance holder-1 100]
+    :-  [%set-allowance holder-1 100]
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id ~]

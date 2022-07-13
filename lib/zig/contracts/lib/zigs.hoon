@@ -24,7 +24,7 @@
     ==
   ::
   +$  action
-    $%  [%give budget=@ud to=id account=(unit id) amount=@ud]
+    $%  [%give budget=@ud to=id amount=@ud]
         [%take to=id account=(unit id) from-account=id amount=@ud]
         [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
     ==
@@ -96,7 +96,6 @@
         %-  pairs
         :~  [%budget (numb budget.a)]
             [%to %s (scot %ux to.a)]
-            [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]
             [%amount (numb amount.a)]
         ==
       ::

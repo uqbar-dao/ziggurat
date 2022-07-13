@@ -141,7 +141,7 @@
   ==
 ::  yolk that's been "fertilized" with data by execution engine
 +$  embryo
-  $:  action=(unit *)
+  $:  action=*
       grains=(map id grain)
   ==
 ::
@@ -150,6 +150,21 @@
 ::
 +$  rooster  [changed=(map id grain) issued=(map id grain) burned=(map id grain) =crow]
 +$  hen      [next=(list [to=id town-id=id =yolk]) =rooster]
+::
++$  iota                                                ::  typed path segment
+  $~  [%n ~]
+  $@  @tas
+  $%  [%ub @ub]  [%uc @uc]  [%ud @ud]  [%ui @ui]
+      [%ux @ux]  [%uv @uv]  [%uw @uw]
+      [%sb @sb]  [%sc @sc]  [%sd @sd]  [%si @si]
+      [%sx @sx]  [%sv @sv]  [%sw @sw]
+      [%da @da]  [%dr @dr]
+      [%f ?]     [%n ~]
+      [%if @if]  [%is @is]
+      [%t @t]    [%ta @ta]  ::  @tas
+      [%p @p]    [%q @q]
+      [%rs @rs]  [%rd @rd]  [%rh @rh]  [%rq @rq]
+  ==
 ::
 ::  JSON, from lull.hoon and zuse.hoon
 ::  allows read arm of contracts to perform enjs operations

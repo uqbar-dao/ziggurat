@@ -505,7 +505,7 @@
 ++  test-mill-zigs-send-pass
   =/  amt  169
   =/  yok=yolk
-    :+  `[%give to=0xdead account=`0x1.dead amount=amt]
+    :+  `[%give to=0xdead amount=amt]
       (silt ~[id:beef-account:zigs])
     (silt ~[id:dead-account:zigs])
   =/  shel=shell
@@ -1041,9 +1041,9 @@
   =/  hash=@ux  `@ux`(sham yok)
   =/  shel=shell
     [caller-1 fake-sig ~ id:triv-wheat 1 300.001 town-id 0]
-  =/  res=state-transition
+  =/  [res=state-transition rej=carton]
     %^  ~(mill-all mil miller town-id init-now)
-    fake-land  ~[[hash [shel yok]]]  1.024
+    fake-land  (silt ~[[hash [shel yok]]])  1.024
   ;:  weld
   ::  assert that our call failed with correct errorcode
     %+  expect-eq
@@ -1061,9 +1061,9 @@
   =/  hash=@ux  `@ux`(sham yok)
   =/  shel=shell
     [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
-  =/  res=state-transition
+  =/  [res=state-transition rej=carton]
     %^  ~(mill-all mil miller town-id init-now)
-    fake-land  ~[[hash [shel yok]]]  1.024
+    fake-land  (silt ~[[hash [shel yok]]])  1.024
   ;:  weld
   ::  assert that our call went through
     %+  expect-eq
@@ -1089,13 +1089,14 @@
   =/  hash=@ux  `@ux`(sham yok)
   =/  shel=shell
     [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
-  =/  bask
+  =/  bask=basket
+    %-  silt
     %+  turn  (gulf 1 20)
     |=  n=@ud
     :-  hash
     :_  yok
     shel(rate (sub 21 n), from [id:caller-1 n zigs:caller-1])
-  =/  res=state-transition
+  =/  [res=state-transition rej=carton]
     %^  ~(mill-all mil miller town-id init-now)
     fake-land  bask  1.024
   =/  expected-cost
@@ -1127,19 +1128,20 @@
     [`[%random-command ~] ~ ~]
   =/  hash=@ux  `@ux`(sham yok)
   =/  shel=shell
-    [caller-1 fake-sig ~ id:triv-wheat 1 333 town-id 0]
-  =/  bask
+    [caller-1 fake-sig ~ id:triv-wheat 1 2.000 town-id 0]
+  =/  bask=basket
+    %-  silt
     %+  turn  (gulf 1 100)
     |=  n=@ud
     :-  hash
     :_  yok
     shel(rate (sub 101 n), from [id:caller-1 n zigs:caller-1])
-  =/  res=state-transition
+  =/  [res=state-transition rej=carton]
     %^  ~(mill-all mil miller town-id init-now)
     fake-land  bask  1.024
   =/  expected-cost
     ::  rates 20-1 all * 7
-    (reel (turn (gulf 1 100) |=(a=@ (mul a 7))) add)
+    (reel (turn (gulf 1 100) |=(a=@ (mul a set-fee))) add)
   ;:  weld
   ::  assert that our calls went through
     %+  expect-eq
@@ -1173,10 +1175,10 @@
   =/  shel-2=shell
     [caller-2 fake-sig ~ id:triv-wheat 1 333 town-id 0]
   ::
-  =/  res=state-transition
+  =/  [res=state-transition rej=carton]
     %^    ~(mill-all mil miller town-id init-now)
         fake-land
-      ~[[hash-1 [shel-1 yok-1]] [hash-2 [shel-2 yok-2]]]
+      (silt ~[[hash-1 [shel-1 yok-1]] [hash-2 [shel-2 yok-2]]])
     1  ::  two calls must occur in parallel to work
   ;:  weld
   ::  assert that our calls went through

@@ -13,24 +13,24 @@
 ++  write
   |=  inp=embryo
   ^-  chick
-  ?~  action.inp  !!
-  =/  act  ;;(action:sur u.action.inp)
+  =/  act  ;;(action:sur action.inp)
   ?-    -.act
       %give
     =/  giv=grain  +.-:grains.inp
     ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
     =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
     ?>  (gte balance.giver (add amount.act budget.act))
-    ?~  account.act
-      ::  if receiver doesn't have an account, must produce one for them
+    ?:  ?=(~ owns.cart)
+      ::  if receiver doesn't have an account, try to produce one for them
       =/  =id  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
       =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
-      =/  =action:sur  [%give budget.act to.act `id.new amount.act]
-      =+  (call me.cart town-id.cart action ~[id.giv] ~[id.new])
-      (continuation ~[-] (result ~ issued=[new ~] ~ ~))
+      =/  =action:sur  [%give budget.act to.act amount.act]
+      %+  continuation
+        (call me.cart town-id.cart action ~[id.giv] ~[id.new])^~
+      (result ~ issued=[new ~] ~ ~)
     ::  otherwise, add to the existing account for that pubkey
-    =/  rec=grain  (~(got by owns.cart) u.account.act)
+    =/  rec=grain  +.-:owns.cart
     ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
     =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
     ?>  =(metadata.receiver metadata.giver)
@@ -51,8 +51,9 @@
       =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%take to.act `id.new id.giv amount.act]
-      =+  (call me.cart town-id.cart action ~ ~[id.giv id.new])
-      (continuation ~[-] (result ~ issued=[new ~] ~ ~))
+      %+  continuation
+        (call me.cart town-id.cart action ~ ~[id.giv id.new])^~
+      (result ~ issued=[new ~] ~ ~)
     =/  rec=grain  (~(got by owns.cart) u.account.act)
     ?>  &(=(holder.rec to.act) ?=(%& -.germ.rec))
     =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)

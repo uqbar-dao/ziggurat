@@ -176,17 +176,12 @@
       ~&  >>  "expected {<+((~(gut by q.land) id.from.p.egg 0))>}, got {<nonce.from.p.egg>}"
       [0 [~ q.land] ~ %3 ~ ~]  ::  bad nonce
     ::
-    =/  [valid=? updated-zigs-action=(unit *)]
-      (~(audit tax p.land) egg)
-    ?.  valid
+    ?.  (~(audit tax p.land) egg)
       ~&  >>>  "mill: tx rejected; account balance less than budget"
       [0 [~ q.land] ~ %4 ~ ~]  ::  can't afford gas
-    =?  action.q.egg  ?=(^ updated-zigs-action)
-      updated-zigs-action
     ::
     =/  res  (~(work farm p.land) egg)
     =/  fee=@ud
-      %+  mul  rate.p.egg
       (sub budget.p.egg rem.res)
     =/  new-land
       :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
@@ -207,26 +202,17 @@
       ==
     ::  +audit: evaluate whether a caller can afford gas,
     ::  and appropriately set budget for any zigs transactions
+    ::  maximum possible charge is full budget * rate
     ++  audit
       |=  =egg
-      ^-  [? action=(unit *)]
-      ?.  ?=(account from.p.egg)                    [%.n ~]
-      ?~  zigs=(~(get by granary) zigs.from.p.egg)  [%.n ~]
-      ?.  =(id.from.p.egg holder.u.zigs)            [%.n ~]
-      ?.  =(zigs-wheat-id lord.u.zigs)              [%.n ~]
-      ?.  ?=(%& -.germ.u.zigs)                      [%.n ~]
-      =/  acc     (hole token-account data.p.germ.u.zigs)
-      ::  maximum possible charge is full budget * rate
-      =/  max  (mul budget.p.egg rate.p.egg)
-      =/  enough  (gth balance.acc max)
-      ?.  =(zigs-wheat-id to.p.egg)  [enough ~]
-      ::  if egg contains a %give via the zigs contract,
-      ::  we insert budget at the beginning of the action. this is
-      ::  to prevent zigs transactions from spoofing correct budget.
-      =*  a  action.q.egg
-      ?~  a  [%.n ~]
-      ?.  ?=(%give -.u.a)  [enough ~]
-      [enough `[-.u.a max +.u.a]]
+      ^-  ?
+      ?.  ?=(account from.p.egg)                    %.n
+      ?~  zigs=(~(get by granary) zigs.from.p.egg)  %.n
+      ?.  =(id.from.p.egg holder.u.zigs)            %.n
+      ?.  =(zigs-wheat-id lord.u.zigs)              %.n
+      ?.  ?=(%& -.germ.u.zigs)                      %.n
+      =/  acc  (hole token-account data.p.germ.u.zigs)
+      (gte balance.acc (mul budget.p.egg rate.p.egg))
     ::  +charge: extract gas fee from caller's zigs balance
     ::  returns a single modified grain to be inserted into a diff
     ::  cannot crash after audit, as long as zigs contract adequately
@@ -255,7 +241,7 @@
         [id zigs-wheat-id id.miller town-id [%& `@`'zigs' token-account]]
       ::  use existing account
       ::
-      ?.  ?=(%& -.germ.u.zigs)                  granary
+      ?.  ?=(%& -.germ.u.zigs)  granary
       =/  acc  (hole token-account data.p.germ.u.zigs)
       ?.  =(`@ux`'zigs-metadata' metadata.acc)  granary
       =.  balance.acc  (add balance.acc total)
@@ -287,11 +273,16 @@
         ~&  >>>  "mill: failed to germinate"
         [~ ~ ~ ~ budget.p.egg %5]
       (grow from u.stalk embryo egg hits burned)
-      ::  +fertilize: take yolk (contract arguments) and populate with granary data
+      ::  +fertilize: take yolk (contract arguments) and populate with granary data,
+      ::  and iff the action is to the zigs contract, insert budget.
       ++  fertilize
         |=  [from=id =yolk]
         ^-  embryo
-        :-  action.yolk
+        :-  ?~  action.yolk  ~
+            ?:  =(zigs-wheat-id to.p.egg)
+              ?@  u.action.yolk  ~
+              [-.u.action.yolk (mul budget.p.egg rate.p.egg) +.u.action.yolk]
+            u.action.yolk
         %-  ~(gas by *(map id grain))
         %+  murn  ~(tap in my-grains.yolk)
         |=  =id
@@ -374,7 +365,8 @@
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]
         =/  res
-          (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))^(sub budget 7)
+          :-  (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))
+          (sub budget (mul rate.p.egg 7))
         ?:  ?=(%| -.-.res)
           ::  error in contract execution
           [~ ~ +.res %6]
