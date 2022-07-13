@@ -11,7 +11,7 @@
 ::
 +$  item  [meta=id item-num=@ud item-contents]
 +$  item-contents
-  $:  data=(set [@t @t])
+  $:  data=(map @t @t)
       desc=@t
       uri=@t
       transferrable=?

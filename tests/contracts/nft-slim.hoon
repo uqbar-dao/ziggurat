@@ -25,11 +25,11 @@
       ==  ==
     ::
     ++  item-1  ^-  item
-      [id:collection-1 1 (silt ~[['hair' 'red'] ['eyes' 'blue'] ['mouth' 'smile']]) 'a smiling face' 'ipfs://fake1' %.y]
+      [id:collection-1 1 (malt ~[['hair' 'red'] ['eyes' 'blue'] ['mouth' 'smile']]) 'a smiling face' 'ipfs://fake1' %.y]
     ++  item-2  ^-  item
-      [id:collection-1 2 (silt ~[['hair' 'brown'] ['eyes' 'green'] ['mouth' 'frown']]) 'a frowny face' 'ipfs://fake2' %.y]
+      [id:collection-1 2 (malt ~[['hair' 'brown'] ['eyes' 'green'] ['mouth' 'frown']]) 'a frowny face' 'ipfs://fake2' %.y]
     ++  item-3  ^-  item
-      [id:collection-1 3 (silt ~[['hair' 'grey'] ['eyes' 'black'] ['mouth' 'squiggle']]) 'a weird face' 'ipfs://fake3' %.n]
+      [id:collection-1 3 (malt ~[['hair' 'grey'] ['eyes' 'black'] ['mouth' 'squiggle']]) 'a weird face' 'ipfs://fake3' %.n]
     ::
     ++  owner-1  ^-  account
       [0xbeef 0 0x1234.5678]
