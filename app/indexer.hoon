@@ -225,10 +225,6 @@
       :_  this
       %-  fact-init-kick:io
       [%indexer-catchup !>(`batches-by-town:ui`batches-by-town)]
-      :: :_  ~
-      :: %-  fact:io
-      :: :_  ~
-      :: [%indexer-catchup !>(`batches-by-town:ui`batches-by-town)]
     ::
         [%capitol-updates ~]
       :_  this
