@@ -72,7 +72,7 @@
           `@ux`'fungible'
           pub-3
           0x1
-          [%& `@`'salt' [20 ~ `@ux`'simple' 0]]
+          [%& `@`'salt' [20 (malt ~[[0xffff 100]]) `@ux`'simple' 0]]
       ==
     ::
     ++  account-4  ^-  grain
@@ -186,23 +186,23 @@
 ::
 ++  test-take-send-new-account  ^-  tang
   =/  =embryo
-    :-  `[%take 0xffff ~ 0x1.dead 10]
+    :-  `[%take 0xffff ~ 0x1.cafe 10]
     ~
   =/  =cart
-    [`@ux`'fungible' [pub-1 0] init-now 0x1 (malt ~[[id:account-2 account-2]])]
+    [`@ux`'fungible' [0xffff 0] init-now 0x1 (malt ~[[id:account-3 account-3]])]
   =/  new-id=id  (fry-rice 0xffff `@ux`'fungible' 0x1 `@ux`'salt')
   =/  new=grain
     :*  new-id
         `@ux`'fungible'
         0xffff
         0x1
-        [%& `@`'salt' [10 ~ `@ux`'simple']]
+        [%& `@`'salt' [10 ~ `@ux`'simple' 0]]
     ==
   =/  correct=chick
     :+  %|
       :~  :+  me.cart
             town-id.cart
-          [`[%take 0xffff `new-id 0x1.dead 10] ~ (silt ~[0x1.dead new-id])]
+          [`[%take 0xffff `new-id 0x1.cafe 10] ~ (silt ~[0x1.cafe new-id])]
       ==
     [~ (malt ~[[new-id new]]) ~ ~]
   =/  res=chick
@@ -297,44 +297,44 @@
 ::
 ++  test-mint-known-receivers  ^-  tang
   =/  =embryo
-    :-  `[%mint `@ux`'simple' (silt ~[[0xdead `0x1.dead 50] [0xcafe `0x1.cafe 10]])]
+    :-  `[%mint `@ux`'simple' (silt ~[[pub-1 `0x1.dead 50] [pub-2 `0x1.cafe 10]])]
     ~
   =/  =cart
     :*  `@ux`'fungible'
         [pub-1 0]
         init-now
         0x1
-        (malt ~[[id:metadata-1 metadata-1] [id:account-2 account-2] [id:account-3 account-3]])
+        (malt ~[[id:metadata-mintable metadata-mintable] [id:account-2 account-2] [id:account-3 account-3]])
     ==
   =/  updated-1=grain
     :*  `@ux`'simple'
         `@ux`'fungible'
         `@ux`'holder'
-        0x1  ::  town-id
+        0x1
         :+  %&  `@`'salt'
         :*  name='Simple Token'
             symbol='ST'
             decimals=0
             supply=160
             cap=`1.000
-            mintable=%.n
-            minters=(silt ~[0xbeef])
+            mintable=%.y
+            minters=(silt ~[pub-1])
             deployer=0x0
             salt=`@`'salt'
     ==  ==
   =/  updated-2=grain
     :*  0x1.dead
         `@ux`'fungible'
-        0xdead
+        pub-2
         0x1
-        [%& `@`'salt' [80 (malt ~[[0xbeef 10]]) `@ux`'simple']]
+        [%& `@`'salt' [80 ~ `@ux`'simple' 0]]
     ==
   =/  updated-3=grain
     :*  0x1.cafe
         `@ux`'fungible'
-        0xcafe
+        pub-3
         0x1
-        [%& `@`'salt' [30 ~ `@ux`'simple']]
+        [%& `@`'salt' [30 (malt ~[[0xffff 100]]) `@ux`'simple' 0]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
