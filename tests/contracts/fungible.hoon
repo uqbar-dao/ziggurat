@@ -374,9 +374,9 @@
 ::
 ++  test-deploy  ^-  tang
   =/  token-salt
-    (sham (cat 3 0xbeef 'TC'))
+    (sham (cat 3 pub-1 'TC'))
   =/  account-rice
-    (fry-rice 0xdead `@ux`'fungible' 0x1 token-salt)
+    (fry-rice pub-1 `@ux`'fungible' 0x1 token-salt)
   =/  new-token-metadata=grain
     :*  (fry-rice `@ux`'fungible' `@ux`'fungible' 0x1 token-salt)
         `@ux`'fungible'
@@ -389,28 +389,29 @@
             900
             `1.000
             %.y
-            (silt ~[0xdead])
-            0xbeef
+            (silt ~[pub-1])
+            pub-1
             token-salt
     ==  ==
   =/  updated-account=grain
     :*  account-rice
         `@ux`'fungible'
-        0xdead
+        pub-1
         0x1
         :+  %&  token-salt
         :*  900
             ~
             id.new-token-metadata
+            0
     ==  ==
   =/  =embryo
-    :-  `[%deploy (silt ~[[0xdead 900]]) (silt ~[0xdead]) 'Test Coin' 'TC' 0 1.000 %.y]
+    :-  `[%deploy (silt ~[[pub-1 900]]) (silt ~[pub-1]) 'Test Coin' 'TC' 0 1.000 %.y]
     ~
   =/  cart
     [`@ux`'fungible' [pub-1 0] init-now 0x1 ~]
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
-    [%& ~ (malt ~[[account-rice updated-account] [[[id.new-token-metadata new-token-metadata]]]]) ~ ~]
+    [%& ~ (malt ~[[account-rice updated-account] [id.new-token-metadata new-token-metadata]]) ~ ~]
   (expect-eq !>(res) !>(correct))
 --
