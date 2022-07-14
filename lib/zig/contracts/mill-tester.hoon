@@ -9,7 +9,7 @@
 ::      0xeeee.eeee
 ::      holder-1:zigs
 ::      town-id
-::      [%& `@`'some-salt' ['some' 'random' 'data']]
+::      [%& `@`'some-salt' %some-label ['some' 'random' 'data']]
 ::  ==
 ::
 ::  /+  *zig-sys-smart

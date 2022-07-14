@@ -237,13 +237,13 @@
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
-      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
+      ?:  ?=(%account label.p.germ.g)
         (account:enjs:lib ;;(account:sur data.p.germ.g))
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%rice-data @ ~]
       =/  data  (cue (slav %ud i.t.path))
-      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+      ?:  ?=(%account label.p.germ.g)
         (account:enjs:lib ;;(account:sur data))
       (token-metadata:enjs:lib ;;(token-metadata:sur data))
     ::
