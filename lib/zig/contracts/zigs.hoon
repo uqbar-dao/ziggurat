@@ -24,9 +24,9 @@
     ?:  ?=(~ owns.cart)
       ::  if receiver doesn't have an account, try to produce one for them
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
-      =/  new=grain    [id me.cart to.act town-id.cart rice]
-      =/  =action:sur  [%give to.act amount.act]
+      =/  rice       [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
+      =/  new=grain  [id me.cart to.act town-id.cart rice]
+      =/  action     [%give to.act amount.act]
       %+  continuation
         (call me.cart town-id.cart action ~[id.giv] ~[id.new])^~
       (result ~ issued=[new ~] ~ ~)

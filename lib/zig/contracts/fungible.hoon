@@ -31,7 +31,6 @@
 ++  write
   |=  inp=embryo
   ^-  chick
-  |^
   =/  act  ;;(action:sur action.inp)
   ::
   ::  the execution arm. branches on argument type and returns final result.
@@ -48,7 +47,7 @@
     ?:  ?=(~ owns.cart)
       ::  if receiver doesn't have an account, try to produce one for them
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
+      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%give to.act amount.act]
       ::  continuation call: %give to rice we issued
@@ -83,7 +82,7 @@
     ?~  account.act
       ::  create new rice for reciever and add it to state
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
+      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%take to.act `id.new id.giv amount.act]
       ::  continuation call: %take to rice found in book
@@ -133,7 +132,7 @@
     ::  first, check if token is mintable
     ?>  &(mintable.meta ?=(^ cap.meta) ?=(^ minters.meta))
     ::  check if caller is permitted to mint
-    ?>  (~(has in minters.meta) id.from.cart)
+    ?>  (~(has in `(set id)`minters.meta) id.from.cart)
     ::  for accounts which we know rice of, find in owns.cart
     ::  and alter. for others, generate id and add to c-call
     =/  mints  ~(tap in mints.act)
@@ -150,14 +149,14 @@
           supply    new-supply
           mintable  ?:(=(u.cap.meta new-supply) %.y %.n)
         ==
-      ?~  issued-rice
+      ?~  to-issue
         ::  no new accounts to issue
         (result [tok changed] ~ ~ ~)
       ::  finished but need to mint to newly-issued rices
       =/  =action:sur  [%mint token.act next-mints]
       %+  continuation
-        (call me.cart town-id.cart action ~ to-issue)
-      (result changed-rice to-issue ~ ~)
+        (call me.cart town-id.cart action ~ (turn to-issue |=(=grain id.grain)))^~
+      (result changed to-issue ~ ~)
     ::
     ?~  account.i.mints
       ::  need to issue
@@ -224,16 +223,16 @@
       |=  [=id bal=@ud]
       =+  (fry-rice me.cart id town-id.cart salt)
       :-  -
-      [- me.cart id town-id.cart [%& salt [bal ~ id.metadata-grain]]]
+      [- me.cart id town-id.cart [%& salt %account [bal ~ id.metadata-grain]]]
     ::  big ol issued map
-    [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~]
+    [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~ ~]
   ==
 ::
 ++  read
-  |_  args=path
+  |_  =path
   ++  json
     ^-  ^json
-    ?+    args  !!
+    ?+    path  !!
         [%rice-data ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
@@ -243,14 +242,14 @@
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%rice-data @ ~]
-      =/  data  (cue (slav %ud i.t.act))
+      =/  data  (cue (slav %ud i.t.path))
       ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
         (account:enjs:lib ;;(account:sur data))
       (token-metadata:enjs:lib ;;(token-metadata:sur data))
     ::
         [%egg-args @ ~]
-      %-  arguments:enjs:lib
-      ;;(arguments:sur (cue (slav %ud i.t.act)))
+      %-  action:enjs:lib
+      ;;(action:sur (cue (slav %ud i.t.path)))
     ==
   ::
   ++  noun

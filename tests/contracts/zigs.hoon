@@ -19,7 +19,7 @@
           zigs-wheat-id
           zigs-wheat-id
           town-id
-          :+  %&  salt
+          :^  %&  salt  %metadata
           :*  name='Zigs: UQ| Tokens'
               symbol='ZIG'
               decimals=18
@@ -36,7 +36,7 @@
           zigs-wheat-id
           holder-1
           town-id
-          [%& salt [50 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
+          [%& salt %account [50 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
       ==
     ::
     ++  account-2  ^-  grain
@@ -44,7 +44,7 @@
           zigs-wheat-id
           holder-2
           town-id
-          [%& salt [30 (malt ~[[holder-1 10]]) zigs-wheat-id]]
+          [%& salt %account [30 (malt ~[[holder-1 10]]) zigs-wheat-id]]
       ==
     ::
     ++  account-3  ^-  grain
@@ -52,7 +52,7 @@
           zigs-wheat-id
           holder-3
           town-id
-          [%& salt [20 (malt ~[[holder-1 10] [holder-2 20]]) zigs-wheat-id]]
+          [%& salt %account [20 (malt ~[[holder-1 10] [holder-2 20]]) zigs-wheat-id]]
       ==
     ::
     ++  account-4  ^-  grain
@@ -60,7 +60,7 @@
           `@ux`'fungible'
           holder-4
           town-id
-          [%& `@`'diff' [20 (malt ~[[holder-1 10]]) `@ux`'different!']]
+          [%& `@`'diff' %account [20 (malt ~[[holder-1 10]]) `@ux`'different!']]
       ==
     --
 ::  testing arms
@@ -82,14 +82,14 @@
         zigs-wheat-id
         holder-1
         town-id
-        [%& salt [20 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
+        [%& salt %account [20 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         zigs-wheat-id
         holder-2
         town-id
-        [%& salt [60 (malt ~[[holder-1 10]]) zigs-wheat-id]]
+        [%& salt %account [60 (malt ~[[holder-1 10]]) zigs-wheat-id]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
@@ -109,13 +109,13 @@
         zigs-wheat-id
         0xffff
         town-id
-        [%& salt [0 ~ zigs-wheat-id]]
+        [%& salt %account [0 ~ zigs-wheat-id]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
   =/  correct=chick
     %+  continuation
-      ~[(call me.cart town-id.cart [%give 10 0xffff 30] ~[0x1.beef] ~[new-id])]
+      ~[(call me.cart town-id.cart [%give 0xffff 30] ~[0x1.beef] ~[new-id])]
     (result ~ [new ~] ~ ~)
   (expect-eq !>(correct) !>(res))
 ::
@@ -148,14 +148,14 @@
         zigs-wheat-id
         holder-1
         town-id
-        [%& salt [30 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
+        [%& salt %account [30 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         zigs-wheat-id
         holder-2
         town-id
-        [%& salt [50 (malt ~[[holder-1 10]]) zigs-wheat-id]]
+        [%& salt %account [50 (malt ~[[holder-1 10]]) zigs-wheat-id]]
     ==
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-2 account-2]])]
@@ -181,7 +181,7 @@
         zigs-wheat-id
         0x8888
         town-id
-        [%& salt [50 ~ zigs-wheat-id]]
+        [%& salt %account [50 ~ zigs-wheat-id]]
     ==
   =/  =embryo
     :-  [%give 10 holder-4 10]
@@ -235,14 +235,14 @@
         zigs-wheat-id
         holder-1
         town-id
-        [%& salt [60 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
+        [%& salt %account [60 (malt ~[[holder-2 1.000]]) zigs-wheat-id]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         zigs-wheat-id
         holder-2
         town-id
-        [%& salt [20 (malt ~[[holder-1 0]]) zigs-wheat-id]]
+        [%& salt %account [20 (malt ~[[holder-1 0]]) zigs-wheat-id]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
@@ -261,14 +261,14 @@
         zigs-wheat-id
         holder-3
         town-id
-        [%& salt [30 (malt ~[[holder-1 10] [holder-2 20]]) zigs-wheat-id]]
+        [%& salt %account [30 (malt ~[[holder-1 10] [holder-2 20]]) zigs-wheat-id]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         zigs-wheat-id
         holder-2
         town-id
-        [%& salt [20 (malt ~[[holder-1 0]]) zigs-wheat-id]]
+        [%& salt %account [20 (malt ~[[holder-1 0]]) zigs-wheat-id]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
@@ -298,14 +298,14 @@
         zigs-wheat-id
         0xffff
         town-id
-        [%& salt [0 ~ zigs-wheat-id]]
+        [%& salt %account [0 ~ zigs-wheat-id]]
     ==
   =/  updated-2=grain
     :*  0x1.dead
         zigs-wheat-id
         holder-2
         town-id
-        [%& salt [20 (malt ~[[holder-1 0]]) zigs-wheat-id]]
+        [%& salt %account [20 (malt ~[[holder-1 0]]) zigs-wheat-id]]
     ==
   =/  res=chick
     (~(write cont cart) embryo)
@@ -356,7 +356,7 @@
         zigs-wheat-id
         holder-1
         town-id
-        [%& salt [50 (malt ~[[holder-2 1.000] [holder-3 100]]) zigs-wheat-id]]
+        [%& salt %account [50 (malt ~[[holder-2 1.000] [holder-3 100]]) zigs-wheat-id]]
     ==
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id ~]
@@ -375,7 +375,7 @@
         zigs-wheat-id
         holder-1
         town-id
-        [%& salt [50 (malt ~[[holder-2 100]]) zigs-wheat-id]]
+        [%& salt %account [50 (malt ~[[holder-2 100]]) zigs-wheat-id]]
     ==
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id ~]
@@ -394,7 +394,7 @@
         zigs-wheat-id
         holder-1
         town-id
-        [%& salt [50 (malt ~[[holder-2 0]]) zigs-wheat-id]]
+        [%& salt %account [50 (malt ~[[holder-2 0]]) zigs-wheat-id]]
     ==
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id ~]

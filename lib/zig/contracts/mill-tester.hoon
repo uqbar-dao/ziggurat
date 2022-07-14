@@ -20,7 +20,7 @@
   =/  grain-id=id
     (fry-rice me.cart id.from.cart town-id.cart 'salt')
   =/  new-grain=grain
-    =+  [%& 'salt' 'data']
+    =+  [%& 'salt' %label 'data']
     [grain-id me.cart id.from.cart town-id.cart -]
   ?+    -.action.inp  !!
       %change-nonexistent
