@@ -5,7 +5,6 @@
 ++  grab
   |%
   ++  noun  update:ui
-  ++  json  update:dejs:ui-lib
   --
 ::
 ++  grow

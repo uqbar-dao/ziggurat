@@ -5,19 +5,19 @@
 ::  +fry: hash lord+town+germ to make contract grain pubkey
 ::
 ++  fry-contract
-  |=  [lord=id town=@ud bat=*]
+  |=  [lord=id town-id=id bat=*]
   ^-  id
   =+  (jam bat)
-  `@ux`(sham (cat 3 lord (cat 3 town -))) 
+  `@ux`(sham (cat 3 lord (cat 3 town-id -)))
 ::
 ++  fry-rice
-  |=  [holder=id lord=id town=@ud salt=@]
+  |=  [holder=id lord=id town-id=id salt=@]
   ::  TODO remove town from this possibly, for cross-town transfers
   ^-  id
   ^-  @ux
   %^  cat  3
     (end [3 8] (sham holder))
-  (end [3 8] (sham (cat 3 town (cat 3 lord salt))))
+  (end [3 8] (sham (cat 3 town-id (cat 3 lord salt))))
 ::
 ::  +pin: get ID from caller
 ::
@@ -28,7 +28,9 @@
 ::
 ::  smart contract types
 ::
-+$  id             @ux  ::  pubkey
++$  id       @ux            ::  pubkey
++$  address  @ux            ::  42-char hex address, ETH compatible
++$  sig      [v=@ r=@ s=@]  ::  ETH compatible ECDSA signature
 ++  zigs-wheat-id  `@ux`'zigs-contract'  ::  hardcoded "native" token contract
 ::
 +$  account    [=id nonce=@ud zigs=id]
@@ -38,7 +40,7 @@
 ::
 ::  a grain holds either rice (data) or wheat (functions)
 ::
-+$  grain  [=id lord=id holder=id town-id=@ud =germ]
++$  grain  [=id lord=id holder=id town-id=id =germ]
 +$  germ   (each rice wheat)
 ::
 +$  rice   [salt=@ data=*]
@@ -46,17 +48,12 @@
 +$  wheat  [cont=(unit [bat=* pay=*]) owns=(set id)]
 +$  crop   [cont=[bat=* pay=*] owns=(map id grain)]  ::  wheat that's been processed by mill.hoon
 ::
-+$  granary   (map id grain)
-+$  populace  (map id @ud)
-+$  town      (pair granary populace)
-+$  land      (map @ud town)
-::
 ::  cart: state accessible by contract
 ::
 +$  cart
   $:  me=id
-      block=@ud
-      town-id=@ud
+      now=@da
+      town-id=id
       owns=(map id grain)
   ==
 ::
@@ -96,21 +93,22 @@
       %5  ::  5: couldn't find contract
       %6  ::  6: crash in contract execution
       %7  ::  7: validation of changed/issued rice failed
+      %8  ::  8: ran out of gas while executing
   ==
 ::
 +$  egg  (pair shell yolk)
 +$  shell
   $:  from=caller
-      sig=[v=@ r=@ s=@]  ::  sig on either hash of yolk or eth-hash
+      =sig               ::  sig on either hash of yolk or eth-hash
       eth-hash=(unit @)  ::  if transaction signed with eth wallet, use this to verify signature
       to=id
       rate=@ud
       budget=@ud
-      town-id=@ud
+      town-id=id
       status=@ud  ::  error code
   ==
 +$  yolk
-  $:  =caller
+  $:  =caller  ::  TODO remove, redundant
       args=(unit *)
       my-grains=(set id)
       cont-grains=(set id)
@@ -123,9 +121,10 @@
   ==
 ::
 +$  chick    (each rooster hen)
-::  new: crow, emit information about transaction to be picked up by interested parties
-+$  rooster  [changed=(map id grain) issued=(map id grain) crow=(list [@tas json])]
-+$  hen      [next=[to=id town-id=@ud args=yolk] roost=rooster]
++$  crow     (list [@tas json])
+::
++$  rooster  [changed=(map id grain) issued=(map id grain) =crow]
++$  hen      [next=[to=id town-id=id args=yolk] roost=rooster]
 ::
 ::  JSON, from lull.hoon and zuse.hoon
 ::  allows read arm of contracts to perform enjs operations
@@ -138,7 +137,7 @@
       [%o p=(map @t json)]                              ::  object
       [%n p=@ta]                                        ::  number
       [%s p=@t]                                         ::  string
-  == 
+  ==
 ++  format  ^?
   |%
   ++  enjs  ^?                                          ::  json encoders

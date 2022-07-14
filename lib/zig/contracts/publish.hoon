@@ -1,4 +1,4 @@
-::  publish.hoon  [uqbar-dao]
+::  publish.hoon  [UQ| DAO]
 ::
 ::  Smart contract that processes deployment and upgrades
 ::  for other smart contracts. Automatically (?) inserted
@@ -24,7 +24,7 @@
     ?-    -.args
         %deploy
       ::  0x0 denotes immutable contract
-      =/  lord=id  ?.(mutable.args 0x0 caller-id)
+      =/  lord=id  ?.(mutable.args 0x0 me.cart)
       =+  our-id=(fry-contract lord town-id.cart bat.cont.args)
       ::  generate grains out of new rice we spawn
       =/  produced=(map id grain)
@@ -36,15 +36,14 @@
         [- [- our-id our-id town-id.cart [%& rice]]]
       ::
       =/  our-grain=grain
-        [our-id lord lord town-id.cart [%| `cont.args ~(key by produced)]]
+        [our-id lord caller-id town-id.cart [%| `cont.args ~(key by produced)]]
       [%& ~ (~(put by produced) our-id our-grain) ~]
     ::
         %upgrade
-      ::  expect wheat of contract-to-upgrade in grains.input
-      ::  caller must be lord and holder
-      =/  contract  (~(got by grains.inp) to-upgrade.args)
-      ?>  ?&  =(lord.contract caller-id)
-              =(holder.contract caller-id)
+      ::  expect wheat of contract-to-upgrade in owns.cart
+      ::  caller must be holder
+      =/  contract  (~(got by owns.cart) to-upgrade.args)
+      ?>  ?&  =(holder.contract caller-id)
               ?=(%| -.germ.contract)
           ==
       =.  cont.p.germ.contract  `new-nok.args

@@ -1,4 +1,4 @@
-::  zigs.hoon [uqbar-dao]
+::  zigs.hoon [UQ| DAO]
 ::
 ::  Contract for 'zigs' (official name TBD) token, the gas-payment
 ::  token for the Uqbar network.
@@ -7,47 +7,23 @@
 ::  zig spends to be guaranteed not to underflow.
 ::
 ::  /+  *zig-sys-smart
+/=  zigs  /lib/zig/contracts/lib/zigs
+=,  zigs
 |_  =cart
 ++  write
   |=  inp=embryo
   ^-  chick
   |^
   ?~  args.inp  !!
-  (process ;;(arguments u.args.inp) (pin caller.inp))
-  ::
-  +$  token-metadata
-    ::  will be automatically inserted into town state
-    ::  at instantiation, along with this contract
-    $:  name=@t
-        symbol=@t
-        decimals=@ud
-        supply=@ud
-        cap=(unit @ud)
-        mintable=?  ::  will be unmintable, with zigs instead generated in mill
-        minters=(set id)
-        deployer=id  ::  will be 0x0
-        salt=@  ::  'zigs'
-    ==
-  ::
-  +$  account
-    $:  balance=@ud
-        allowances=(map sender=id @ud)
-        metadata=id
-    ==
-  ::
-  +$  arguments
-    $%  [%give to=id account=(unit id) amount=@ud budget=@ud]
-        [%take to=id account=(unit id) from-account=id amount=@ud]
-        [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
-    ==
+  (process ;;(arguments:sur u.args.inp) (pin caller.inp))
   ::
   ++  process
-    |=  [args=arguments caller-id=id]
+    |=  [args=arguments:sur caller-id=id]
     ?-    -.args
         %give
       =/  giv=grain  -:~(val by grains.inp)
       ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
-      =/  giver=account  ;;(account data.p.germ.giv)
+      =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
       ?>  (gte balance.giver (add amount.args budget.args))
       ?~  account.args
         ::  if receiver doesn't have an account, must produce one for them
@@ -61,7 +37,7 @@
       ::  otherwise, add to the existing account for that pubkey
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
-      =/  receiver=account  ;;(account data.p.germ.rec)
+      =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
       ?>  =(metadata.receiver metadata.giver)
       =:  data.p.germ.giv  giver(balance (sub balance.giver amount.args))
           data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
@@ -71,7 +47,7 @@
         %take
       =/  giv=grain  (~(got by owns.cart) from-account.args)
       ?>  ?=(%& -.germ.giv)
-      =/  giver=account  ;;(account data.p.germ.giv)
+      =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
       =/  allowance=@ud  (~(got by allowances.giver) caller-id)
       ?>  (gte balance.giver amount.args)
       ?>  (gte allowance amount.args)
@@ -85,7 +61,7 @@
         [~ (malt ~[[id.new new]]) ~]
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  &(=(holder.rec to.args) ?=(%& -.germ.rec))
-      =/  receiver=account  ;;(account data.p.germ.rec)
+      =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
       ?>  =(metadata.receiver metadata.giver)
       =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
           data.p.germ.giv
@@ -100,7 +76,7 @@
       =/  acc=grain  -:~(val by grains.inp)
       ?>  !=(who.args holder.acc)
       ?>  &(=(lord.acc me.cart) ?=(%& -.germ.acc))
-      =/  =account  ;;(account data.p.germ.acc)
+      =/  =account:sur  ;;(account:sur data.p.germ.acc)
       =.  data.p.germ.acc
         account(allowances (~(put by allowances.account) who.args amount.args))
       [%& (malt ~[[id.acc acc]]) ~ ~]
@@ -110,130 +86,27 @@
 ++  read
   |_  args=path
   ++  json
-    |^  ^-  ^json
+    ^-  ^json
     ?+    args  !!
         [%rice-data ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
       ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
-        (enjs-account ;;(account data.p.germ.g))
-      (enjs-token-metadata ;;(token-metadata data.p.germ.g))
+        (account:enjs:lib ;;(account:sur data.p.germ.g))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
+    ::
+        [%rice-data @ ~]
+      =/  data  (cue (slav %ud i.t.args))
+      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+        (account:enjs:lib ;;(account:sur data))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data))
     ::
         [%egg-args @ ~]
-      %-  enjs-arguments
-      ;;(arguments (cue (slav %ud i.t.args)))
+      %-  arguments:enjs:lib
+      ;;(arguments:sur (cue (slav %ud i.t.args)))
     ==
-    ::
-    ++  enjs-account
-      =,  enjs:format
-      |^
-      |=  acct=account
-      ^-  ^json
-      %-  pairs
-      :^    [%balance (numb balance.acct)]
-          [%allowances (allowances allowances.acct)]
-        [%metadata (metadata metadata.acct)]
-      ~
-      ::
-      ++  allowances
-        |=  a=(map id @ud)
-        ^-  ^json
-        %-  pairs
-        %+  turn  ~(tap by a)
-        |=  [i=id allowance=@ud]
-        [(scot %ux i) (numb allowance)]
-      ::
-      ++  metadata  ::  TODO: grab token-metadata?
-        |=  md-id=id
-        [%s (scot %ux md-id)]
-      --
-    ::
-    ++  enjs-token-metadata
-      =,  enjs:format
-      |^
-      |=  md=token-metadata
-      ^-  ^json
-      %-  pairs
-      :~  [%name %s name.md]
-          [%symbol %s symbol.md]
-          [%decimals (numb decimals.md)]
-          [%supply (numb supply.md)]
-          [%cap ?~(cap.md ~ (numb u.cap.md))]
-          [%mintable %b mintable.md]
-          [%minters (minters minters.md)]
-          [%deployer %s (scot %ux deployer.md)]
-          [%salt (numb salt.md)]
-      ==
-      ::
-      ++  minters
-        set-id
-      ::
-      ++  set-id
-        |=  set-id=(set id)
-        ^-  ^json
-        :-  %a
-        %+  turn  ~(tap in set-id)
-        |=  i=id
-        [%s (scot %ux i)]
-      --
-    ::
-    ++  enjs-arguments
-      =,  enjs:format
-      |=  a=arguments
-      ^-  ^json
-      %+  frond  -.a
-      ?-    -.a
-      ::
-          %give
-        %-  pairs
-        :~  [%to %s (scot %ux to.a)]
-            [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]
-            [%amount (numb amount.a)]
-            [%budget (numb budget.a)]
-        ==
-      ::
-          %take
-        %-  pairs
-        :~  [%to %s (scot %ux to.a)]
-            [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]
-            [%from-account %s (scot %ux from-account.a)]
-            [%amount (numb amount.a)]
-        ==
-      ::
-          %set-allowance
-        %-  pairs
-        :+  [%who %s (scot %ux who.a)]
-          [%amount (numb amount.a)]
-        ~
-      ==
-    ::
-    +$  token-metadata
-      ::  will be automatically inserted into town state
-      ::  at instantiation, along with this contract
-      $:  name=@t
-          symbol=@t
-          decimals=@ud
-          supply=@ud
-          cap=(unit @ud)
-          mintable=?  ::  will be unmintable, with zigs instead generated in mill
-          minters=(set id)
-          deployer=id  ::  will be 0x0
-          salt=@  ::  'zigs'
-      ==
-    ::
-    +$  account
-      $:  balance=@ud
-          allowances=(map sender=id @ud)
-          metadata=id
-      ==
-    ::
-    +$  arguments
-      $%  [%give to=id account=(unit id) amount=@ud budget=@ud]
-          [%take to=id account=(unit id) from-account=id amount=@ud]
-          [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
-      ==
-    --
+  ::
   ++  noun
     ~
   --

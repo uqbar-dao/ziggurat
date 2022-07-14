@@ -1,4 +1,4 @@
-::  fungible.hoon [uqbar-dao]
+::  fungible.hoon [UQ| DAO]
 ::
 ::  Fungible token standard. Any new token that wishes to use this standard
 ::  format can be issued through this contract. The contract uses an account
@@ -28,72 +28,29 @@
 ::  I will heavily comment this contract in order to make it a good example
 ::  for others to use.
 ::
-::  /+  *zig-sys-smart
+:: /+  *zig-sys-smart
+/=  fungible  /lib/zig/contracts/lib/fungible
+=,  fungible
 |_  =cart
 ++  write
   |=  inp=embryo
   ^-  chick
   |^
   ?~  args.inp  !!
-  (process ;;(arguments u.args.inp) (pin caller.inp))
-  ::
-  ::  molds used by writes to this contract
-  ::
-  +$  token-metadata
-    $:  name=@t           ::  the name of a token (not unique!)
-        symbol=@t         ::  abbreviation (also not unique)
-        decimals=@ud      ::  granularity, minimum 0, maximum 18
-        supply=@ud        ::  total amount of token in existence
-        cap=(unit @ud)    ::  supply cap (~ if mintable is false)
-        mintable=?        ::  whether or not more can be minted
-        minters=(set id)  ::  pubkeys permitted to mint, if any
-        deployer=id       ::  pubkey which first deployed token
-        salt=@            ::  data added to hash for rice IDs of this token
-                          ::  (currently hashed: symbol+deployer)
-    ==
-  ::
-  +$  account
-    $:  balance=@ud                     ::  the amount of tokens someone has
-        allowances=(map sender=id @ud)  ::  a map of pubkeys they've permitted to spend their tokens and how much
-        metadata=id                     ::  address of the rice holding this token's metadata
-    ==
-  ::
-  ::  patterns of arguments supported by this contract
-  ::  "args" in input must fit one of these molds
-  ::
-  +$  mint  [to=id account=(unit id) amount=@ud]  ::  helper type for mint
-  +$  arguments
-    $%  ::  token holder actions
-        ::
-        [%give to=id account=(unit id) amount=@ud]
-        [%take to=id account=(unit id) from-rice=id amount=@ud]
-        [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
-        ::  token management actions
-        ::
-        [%mint token=id mints=(set mint)]  ::  can only be called by minters, can't mint above cap
-        $:  %deploy
-            distribution=(set [id bal=@ud])  ::  sums to <= cap if mintable, == cap otherwise
-            minters=(set id)                 ::  ignored if !mintable, otherwise need at least one
-            name=@t
-            symbol=@t                        ::  size limit?
-            decimals=@ud                     ::  min 0, max 18
-            cap=@ud                          ::  is equivalent to total supply unless token is mintable
-            mintable=?
-        ==
-    ==
+  (process ;;(arguments:sur u.args.inp) (pin caller.inp))
   ::
   ::  the actual execution arm. branches on argument type and returns final result
   ::  note that many of these lines will crash with bad input. this is good,
   ::  because we don't want failing transactions to waste more gas than required
   ::
   ++  process
-    |=  [args=arguments caller-id=id]
+    |=  [args=arguments:sur caller-id=id]
     ?-    -.args
         %give
       ::  grab giver's rice from the input. it should be only rice in the map
       =/  giv=grain  -:~(val by grains.inp)
       ?>  &(=(lord.giv me.cart) ?=(%& -.germ.giv))
-      =/  giver=account  ;;(account data.p.germ.giv)
+      =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
       ?>  (gte balance.giver amount.args)
       ?~  account.args
         ::  create new rice for reciever and add it to state
@@ -108,7 +65,7 @@
       ::  giving account in embryo, and receiving one in owns.cart
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  ?=(%& -.germ.rec)
-      =/  receiver=account  ;;(account data.p.germ.rec)
+      =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
       ::  assert that tokens match
       ?>  =(metadata.receiver metadata.giver)
       ::  alter the two balances inside the grains
@@ -124,7 +81,7 @@
       ::  the address book should be there to find it, like in %give.
       =/  giv=grain  (~(got by owns.cart) from-rice.args)
       ?>  ?=(%& -.germ.giv)
-      =/  giver=account  ;;(account data.p.germ.giv)
+      =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
       =/  allowance=@ud  (~(got by allowances.giver) caller-id)
       ::  assert caller is permitted to spend this amount of token
       ?>  (gte balance.giver amount.args)
@@ -142,12 +99,9 @@
       ::  direct send
       =/  rec=grain  (~(got by owns.cart) u.account.args)
       ?>  ?=(%& -.germ.rec)
-      =/  receiver=account  ;;(account data.p.germ.rec)
+      =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
       ?>  =(metadata.receiver metadata.giver)
       ::  update the allowance of taker
-      =.  allowances.giver
-        %+  ~(jab by allowances.giver)  caller-id
-        |=(old=@ud (sub old amount.args))
       =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.args))
           data.p.germ.giv
         %=  giver
@@ -164,7 +118,7 @@
       ::  single rice expected, account
       =/  acc=grain  -:~(val by grains.inp)
       ?>  &(=(lord.acc me.cart) ?=(%& -.germ.acc))
-      =/  =account  ;;(account data.p.germ.acc)
+      =/  =account:sur  ;;(account:sur data.p.germ.acc)
       =.  data.p.germ.acc
         account(allowances (~(put by allowances.account) who.args amount.args))
       ::  return single changed rice
@@ -174,7 +128,7 @@
       ::  expects token metadata in owns.cart
       =/  tok=grain  (~(got by owns.cart) token.args)
       ?>  &(=(lord.tok me.cart) ?=(%& -.germ.tok))
-      =/  meta  ;;(token-metadata data.p.germ.tok)
+      =/  meta  ;;(token-metadata:sur data.p.germ.tok)
       ::  first, check if token is mintable
       ?>  &(mintable.meta ?=(^ cap.meta) ?=(^ minters.meta))
       ::  check if mint will surpass supply cap
@@ -183,7 +137,7 @@
         %.  add
         %~  rep  in
         ^-  (set @ud)  ::  non-optional cast
-        (~(run in mints.args) |=(=mint amount.mint))
+        (~(run in mints.args) |=(=mint:sur amount.mint))
       ?>  (gth u.cap.meta new-total)
       ::  cleared to execute!
       ::  update metadata token
@@ -197,7 +151,7 @@
       =/  changed-rice  (malt ~[[id.tok tok]])
       =/  issued-rice   *(map id grain)
       =/  mints         ~(tap in mints.args)
-      =/  next-mints    *(set mint)
+      =/  next-mints    *(set mint:sur)
       |-
       ?~  mints
         ::  finished minting, return chick
@@ -217,14 +171,14 @@
         =/  new=grain
           [- me.cart to.i.mints town-id.cart [%& salt.meta [0 ~ token.args]]]
         %=  $
-          mints   t.mints
+          mints        t.mints
           issued-rice  (~(put by issued-rice) id.new new)
           next-mints   (~(put in next-mints) [to.i.mints `id.new amount.i.mints])
         ==
       ::  have rice, can modify
       =/  =grain  (~(got by owns.cart) u.account.i.mints)
       ?>  &(=(lord.grain me.cart) ?=(%& -.germ.grain))
-      =/  acc  ;;(account data.p.germ.grain)
+      =/  acc  ;;(account:sur data.p.germ.grain)
       ?>  =(metadata.acc token.args)
       =.  data.p.germ.grain  acc(balance (add balance.acc amount.i.mints))
       $(mints t.mints, changed-rice (~(put by changed-rice) id.grain grain))
@@ -254,7 +208,7 @@
             me.cart
             town-id.cart
             :+  %&  salt
-            ^-  token-metadata
+            ^-  token-metadata:sur
             :*  name.args
                 symbol.args
                 decimals.args
@@ -281,185 +235,27 @@
 ++  read
   |_  args=path
   ++  json
-    |^  ^-  ^json
+    ^-  ^json
     ?+    args  !!
         [%rice-data ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
       ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
-        (enjs-account ;;(account data.p.germ.g))
-      (enjs-token-metadata ;;(token-metadata data.p.germ.g))
+        (account:enjs:lib ;;(account:sur data.p.germ.g))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
-        [%egg-args ~]
-      ~
+        [%rice-data @ ~]
+      =/  data  (cue (slav %ud i.t.args))
+      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
+        (account:enjs:lib ;;(account:sur data))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data))
+    ::
+        [%egg-args @ ~]
+      %-  arguments:enjs:lib
+      ;;(arguments:sur (cue (slav %ud i.t.args)))
     ==
-    ::
-    ++  enjs-account
-      =,  enjs:format
-      |^
-      |=  acct=account
-      ^-  ^json
-      %-  pairs
-      :^    [%balance (numb balance.acct)]
-          [%allowances (allowances allowances.acct)]
-        [%metadata (metadata metadata.acct)]
-      ~
-      ::
-      ++  allowances
-        |=  a=(map id @ud)
-        ^-  ^json
-        %-  pairs
-        %+  turn  ~(tap by a)
-        |=  [i=id allowance=@ud]
-        [(scot %ux i) (numb allowance)]
-      ::
-      ++  metadata  ::  TODO: grab token-metadata?
-        |=  md-id=id
-        [%s (scot %ux md-id)]
-      --
-    ::
-    ++  enjs-token-metadata
-      =,  enjs:format
-      |=  md=token-metadata
-      ^-  ^json
-      %-  pairs
-      :~  [%name %s name.md]
-          [%symbol %s symbol.md]
-          [%decimals (numb decimals.md)]
-          [%supply (numb supply.md)]
-          [%cap ?~(cap.md ~ (numb u.cap.md))]
-          [%mintable %b mintable.md]
-          [%minters (minters minters.md)]
-          [%deployer %s (scot %ux deployer.md)]
-          [%salt (numb salt.md)]
-      ==
-    ::
-    ++  enjs-arguments
-      =,  enjs:format
-      |=  a=arguments
-      |^
-      ^-  ^json
-      %+  frond  -.a
-      ?-    -.a
-          %give
-        (give-or-mint +.a)
-      ::
-          %take
-        %-  pairs
-        :~  [%to %s (scot %ux to.a)]
-            [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]
-            [%from-rice %s (scot %ux from-rice.a)]
-            [%amount (numb amount.a)]
-        ==
-      ::
-          %set-allowance
-        %-  pairs
-        :+  [%who %s (scot %ux who.a)]
-          [%amount (numb amount.a)]
-        ~
-      ::
-          %mint
-        %-  pairs
-        :+  [%token %s (scot %ux token.a)]
-          [%mints (mints mints.a)]
-        ~
-      ::
-          %deploy
-        %-  pairs
-        :~  [%distribution (distribution distribution.a)]
-            [%minters (minters minters.a)]
-            [%name %s name.a]
-            [%symbol %s symbol.a]
-            [%decimals (numb decimals.a)]
-            [%cap (numb cap.a)]
-            [%mintable %b mintable.a]
-        ==
-      ==
-      ::
-      ++  give-or-mint
-        |=  [to=id account=(unit id) amount=@ud]
-        %-  pairs
-        :^    [%to %s (scot %ux to)]
-            [%account ?~(account ~ [%s (scot %ux u.account)])]
-          [%amount (numb amount)]
-        ~
-      ::
-      ++  mints
-        |=  set-mint=(set mint)
-        ^-  ^json
-        :-  %a
-        %+  turn  ~(tap in set-mint)
-        |=  m=mint
-        (give-or-mint m)
-      ::
-      ++  distribution
-        |=  set-id-bal=(set [id @ud])
-        ^-  ^json
-        :-  %a
-        %+  turn  ~(tap in set-id-bal)
-        |=  [i=id bal=@ud]
-        %-  pairs
-        :+  [%id %s (scot %ux i)]
-          [%bal (numb bal)]
-        ~
-      --
-    ::
-    ++  minters
-      set-id
-    ::
-    ++  set-id
-      =,  enjs:format
-      |=  set-id=(set id)
-      ^-  ^json
-      :-  %a
-      %+  turn  ~(tap in set-id)
-      |=  i=id
-      [%s (scot %ux i)]
-    ::
-    +$  token-metadata
-      $:  name=@t           ::  the name of a token (not unique!)
-          symbol=@t         ::  abbreviation (also not unique)
-          decimals=@ud      ::  granularity, minimum 0, maximum 18
-          supply=@ud        ::  total amount of token in existence
-          cap=(unit @ud)    ::  supply cap (~ if mintable is false)
-          mintable=?        ::  whether or not more can be minted
-          minters=(set id)  ::  pubkeys permitted to mint, if any
-          deployer=id       ::  pubkey which first deployed token
-          salt=@            ::  data added to hash for rice IDs of this token
-                            ::  (currently hashed: symbol+deployer)
-      ==
-    ::
-    +$  account
-      $:  balance=@ud                     ::  the amount of tokens someone has
-          allowances=(map sender=id @ud)  ::  a map of pubkeys they've permitted to spend their tokens and how much
-          metadata=id                     ::  address of the rice holding this token's metadata
-      ==
-    ::
-    ::  patterns of arguments supported by this contract
-    ::  "args" in input must fit one of these molds
-    ::
-    +$  mint  [to=id account=(unit id) amount=@ud]  ::  helper type for mint
-    +$  arguments
-      $%  ::  token holder actions
-          ::
-          [%give to=id account=(unit id) amount=@ud]
-          [%take to=id account=(unit id) from-rice=id amount=@ud]
-          [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
-          ::  token management actions
-          ::
-          [%mint token=id mints=(set mint)]  ::  can only be called by minters, can't mint above cap
-          $:  %deploy
-              distribution=(set [id bal=@ud])  ::  sums to <= cap if mintable, == cap otherwise
-              minters=(set id)                 ::  ignored if !mintable, otherwise need at least one
-              name=@t
-              symbol=@t                        ::  size limit?
-              decimals=@ud                     ::  min 0, max 18
-              cap=@ud                          ::  is equivalent to total supply unless token is mintable
-              mintable=?
-          ==
-      ==
-    --
+  ::
   ++  noun
     ~
   --

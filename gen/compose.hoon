@@ -1,8 +1,7 @@
-/+  smart=zig-sys-smart
+/+  smart=zig-sys-smart, mill=zig-lib-mill
 /*  smart-lib-noun  %noun  /lib/zig/compiled/smart-lib/noun
 :-  %say
 |=  [[now=@da eny=@uvJ bek=beak] [=wheat:smart ~] ~]
-|^
 =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
 ::  goal: to take a bat=* and payload=* and produce runnable nock
 =/  cont  (need cont.wheat)
@@ -10,7 +9,7 @@
 =/  contract  .*([q.smart-lib payload] bat.cont)
 =/  dor  [-:!>(*contract:smart) contract]
 ::  for testing
-=/  =cart:smart  [me=0x74.6361.7274.6e6f.632d.7367.697a block=1 town-id=0 owns=~]
+=/  =cart:smart  [me=0x74.6361.7274.6e6f.632d.7367.697a now town-id=0x0 owns=~]
 =/  =embryo:smart
   :*  caller=[id=0xbeef nonce=1 zigs=0x1.beef]
       args=[~ [1.702.259.047 4.660 0 777 333]]
@@ -26,17 +25,4 @@
 ::
 :-  %noun
 ^-  chick:smart
-;;(chick:smart q:(shut dor %write !>(cart) !>(embryo)))
-::
-++  shut                                               ::  slam a door
-  |=  [dor=vase arm=@tas dor-sam=vase arm-sam=vase]
-  ^-  vase
-  %+  slap
-    (slop dor (slop dor-sam arm-sam))
-  ^-  hoon
-  :-  %cnsg
-  :^    [%$ ~]
-      [%cnsg [arm ~] [%$ 2] [%$ 6] ~]  ::  replace sample
-    [%$ 7]
-  ~
---
+;;(chick:smart q:(shut:mill dor %write !>(cart) !>(embryo)))

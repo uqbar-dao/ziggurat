@@ -68,7 +68,7 @@
   ++  make-signature
     |=  =yolk:smart
     %+  ecdsa-raw-sign:secp256k1:secp:crypto
-      (sham (jam yolk))
+      (sham yolk)
     private-key
   ::
   ++  caller-to-account
