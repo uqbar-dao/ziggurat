@@ -144,7 +144,7 @@
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
     [`@ux`'fungible' init-now 0x1 ~]
-  =/  new-id  (fry-rice 0xffff `@ux`'fungible' 0x1 `@`'salt')
+  =/  new-id  (fry-rice `@ux`'fungible' 0xffff 0x1 `@`'salt')
   =/  new=grain
     :*  new-id
         `@ux`'fungible'
@@ -219,7 +219,7 @@
     ~
   =/  =cart
     [`@ux`'fungible' 0 1 (malt ~[[id:account-2 account-2]])]
-  =/  new-id  (fry-rice 0xffff `@ux`'fungible' 1 `@ux`'salt')
+  =/  new-id  (fry-rice `@ux`'fungible' 0xffff 1 `@ux`'salt')
   =/  new
     :*  new-id
         `@ux`'fungible'
@@ -288,7 +288,7 @@
     ~
   =/  =cart
     [`@ux`'fungible' 0 1 (malt ~[[id:metadata-2 metadata-2]])]
-  =/  new-id  (fry-rice 0xffff `@ux`'fungible' 1 `@`'salt')
+  =/  new-id  (fry-rice `@ux`'fungible' 0xffff 1 `@`'salt')
   =/  new=grain
     :*  new-id
       `@ux`'fungible'
@@ -331,7 +331,7 @@
   =/  token-salt
     (sham (cat 3 0xbeef 'TC'))
   =/  account-rice
-    (fry-rice 0xdead `@ux`'fungible' 1 token-salt)
+    (fry-rice `@ux`'fungible' 0xdead 1 token-salt)
   =/  new-token-metadata=grain
     :*  (fry-rice `@ux`'fungible' `@ux`'fungible' 1 token-salt)
         `@ux`'fungible'

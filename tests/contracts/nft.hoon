@@ -112,7 +112,7 @@
     (malt ~[[id:`grain`account-1 account-1]])
   =/  =cart
     [`@ux`'nft' init-now 0x1 ~]
-  =/  new-id  (fry-rice 0xffff `@ux`'nft' 0x1 `@`'salt')
+  =/  new-id  (fry-rice `@ux`'nft' 0xffff 0x1 `@`'salt')
   =/  new
     :*  new-id
         `@ux`'nft'

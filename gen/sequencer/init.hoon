@@ -9,9 +9,9 @@
 =/  pubkey-1  0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c
 =/  pubkey-2  0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5
 =/  pubkey-3  0x435a.11af.b1f8.24b8.a1d7.de8a.c8c1.cce1.363c.6f3b
-=/  zigs-1  (fry-rice:smart pubkey-1 zigs-wheat-id:smart town-id `@`'zigs')
-=/  zigs-2  (fry-rice:smart pubkey-2 zigs-wheat-id:smart town-id `@`'zigs')
-=/  zigs-3  (fry-rice:smart pubkey-3 zigs-wheat-id:smart town-id `@`'zigs')
+=/  zigs-1  (fry-rice:smart zigs-wheat-id:smart  pubkey-1 town-id `@`'zigs')
+=/  zigs-2  (fry-rice:smart zigs-wheat-id:smart  pubkey-2 town-id `@`'zigs')
+=/  zigs-3  (fry-rice:smart zigs-wheat-id:smart  pubkey-3 town-id `@`'zigs')
 =/  beef-zigs-grain
   ^-  grain:smart
   :*  zigs-1
@@ -102,7 +102,7 @@
   ==  ==
 =/  item-1
   [1 (silt ~[['hair' 'red'] ['eyes' 'blue'] ['mouth' 'smile']]) 'a smiling monkey' 'ipfs://QmUbFVTm113tJEuJ4hZY2Hush4Urzx7PBVmQGjv1dXdSV9' %.y]
-=/  nft-acc-id  (fry-rice:smart pubkey-1 0xcafe.babe town-id `@`'nftsalt')
+=/  nft-acc-id  (fry-rice:smart 0xcafe.babe pubkey-1 town-id `@`'nftsalt')
 =/  nft-acc-grain
   :*  nft-acc-id
       0xcafe.babe

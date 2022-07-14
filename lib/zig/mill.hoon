@@ -53,11 +53,11 @@
   ::
   ::  +mill-all
   ::
-  ::  All eggs must be run through mill in parallel -- they should all operate against the
-  ::  same starting state passed through `land` at the beginning. Each run of mill should
-  ::  create a (validated) diff set, which can then be compared with an accumulated set of
-  ::  diffs. If there is overlap, that egg should be discarded or pushed into the next
-  ::  parallel "pass", depending on sequencer parameters.
+  ::  All eggs must be run through mill in parallel -- they should all operate against
+  ::  the same starting state passed through `land` at the beginning. Each run of mill
+  ::  should create a (validated) diff set, which can then be compared with an
+  ::  accumulated set of diffs. If there is overlap, that egg should be discarded or
+  ::  pushed into the next parallel "pass", depending on sequencer parameters.
   ::
   ++  mill-all
     |=  [=land =basket passes=@ud]
@@ -78,7 +78,11 @@
             =(0 passes)
         ==
       ::  create final state transition
-      [final(land land) pending]
+      ::  mark any remaining eggs as rejected
+      :-  final(land land)
+      %+  turn  pending
+      |=  [h=@ux =egg]
+      [h egg(status.p %9)]
     ::  otherwise, perform a pass
     =/  [passed=state-transition rejected=carton]
       (pass land (flop pending))
@@ -171,25 +175,24 @@
       ~&  >>>  "mill: signature mismatch"
       [0 [~ q.land] ~ %2 ~ ~]  ::  signed tx doesn't match account
     ::
-    ?.  =(nonce.from.p.egg +((~(gut by q.land) id.from.p.egg 0)))
-      ~&  >>>  "mill: tx rejected; bad nonce"
-      ~&  >>  "expected {<+((~(gut by q.land) id.from.p.egg 0))>}, got {<nonce.from.p.egg>}"
+    =/  expected-nonce  +((~(gut by q.land) id.from.p.egg 0))
+    ?.  =(nonce.from.p.egg expected-nonce)
+      ~&  >>>  "mill: expected nonce={<expected-nonce>}, got {<nonce.from.p.egg>}"
       [0 [~ q.land] ~ %3 ~ ~]  ::  bad nonce
     ::
     ?.  (~(audit tax p.land) egg)
       ~&  >>>  "mill: tx rejected; account balance less than budget"
       [0 [~ q.land] ~ %4 ~ ~]  ::  can't afford gas
     ::
-    =/  res  (~(work farm p.land) egg)
-    =/  fee=@ud
-      (sub budget.p.egg rem.res)
-    =/  new-land
+    =/  res      (~(work farm p.land) egg)
+    =/  fee=@ud  (sub budget.p.egg rem.res)
+    :+  fee
       :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
       ::  charge gas fee by including their designated zigs grain inside the diff
       ?:  =(0 fee)  ~
       %-  ~(put by (fall diff.res ~))
       (~(charge tax p.land) (fall diff.res ~) from.p.egg fee)
-    [fee new-land [burned errorcode hits crow]:res]
+    [burned errorcode hits crow]:res
   ::
   ::  +tax: manage payment for egg in zigs
   ::
@@ -222,6 +225,7 @@
       ^-  [id grain]
       =/  zigs=grain
         ::  find grain in diff, or fall back to full state
+        ::  got will never crash since +audit proved existence
         %+  ~(gut by diff)  zigs.payee
         (~(got by granary) zigs.payee)
       ?>  ?=(%& -.germ.zigs)
@@ -232,38 +236,43 @@
     ++  pay
       |=  total=@ud
       ^-  ^granary
-      ?~  zigs=(~(get by granary) zigs.miller)
-        ::  create a new account rice for the sequencer
-        ::
+      =/  acc=grain
+        %+  ~(gut by granary)  zigs.miller
+        ::  create a new account rice for the sequencer if needed
         =/  =token-account  [total ~ `@ux`'zigs-metadata']
-        =/  =id  (fry-rice id.miller zigs-wheat-id town-id `@`'zigs')
-        %+  ~(put by granary)  id
+        =/  =id  (fry-rice zigs-wheat-id id.miller town-id `@`'zigs')
         [id zigs-wheat-id id.miller town-id [%& `@`'zigs' token-account]]
-      ::  use existing account
-      ::
-      ?.  ?=(%& -.germ.u.zigs)  granary
-      =/  acc  (hole token-account data.p.germ.u.zigs)
-      ?.  =(`@ux`'zigs-metadata' metadata.acc)  granary
-      =.  balance.acc  (add balance.acc total)
-      =.  data.p.germ.u.zigs  acc
-      (~(put by granary) zigs.miller u.zigs)
+      ?.  ?=(%& -.germ.acc)  granary
+      =/  account  (hole token-account data.p.germ.acc)
+      ?.  =(`@ux`'zigs-metadata' metadata.account)  granary
+      =.  balance.account  (add balance.account total)
+      =.  data.p.germ.acc  account
+      (~(put by granary) id.acc acc)
     --
   ::
   ::  +farm: execute a call to a contract
   ::
   ++  farm
     |_  =granary
-    ::  +work: take egg and return diff granary, remaining budget, and errorcode (0=success)
+    +$  hatchling
+      $:  hits=(list hints)
+          diff=(unit ^granary)
+          burned=^granary
+          =crow
+          rem=@ud
+          =errorcode
+      ==     
+    ::  +work: take egg and return diff granary, remaining budget,
+    ::  and errorcode (0=success)
     ++  work
       |=  =egg
-      ^-  [hits=(list hints) diff=(unit ^granary) burned=^granary =crow rem=@ud =errorcode]
-      =/  hatchling
-        (incubate egg ~ ~)
-      hatchling(hits (flop hits.hatchling))
+      ^-  hatchling
+      =/  res  (incubate egg ~ ~)
+      res(hits (flop hits.res))
     ::  +incubate: fertilize and germinate, then grow
     ++  incubate
       |=  [=egg hits=(list hints) burned=^granary]
-      ^-  [hits=(list hints) diff=(unit ^granary) burned=^granary =crow rem=@ud =errorcode]
+      ^-  hatchling
       |^
       =/  from=[=id nonce=@ud]
         ?:  ?=(@ux from.p.egg)  [from.p.egg 0]
@@ -290,7 +299,8 @@
         ?.  =(holder.u.res from)        ~
         ?.  =(town-id.u.res town-id)    ~
         `[id u.res]
-      ::  +germinate: take contract-owned grains in egg and populate with granary data
+      ::  +germinate: take contract-owned grains in egg
+      ::  and populate with granary data
       ++  germinate
         |=  [find=id grains=(set id)]
         ^-  (unit crop)
@@ -307,10 +317,11 @@
         ?.  =(town-id.u.res town-id)    ~
         `[id u.res]
       --
-    ::  +grow: recursively apply any calls stemming from egg, return on rooster or failure
+    ::  +grow: recursively apply any calls stemming from egg,
+    ::  return on rooster or failure
     ++  grow
       |=  [from=[=id nonce=@ud] =crop =embryo =egg hits=(list hints) burned=^granary]
-      ^-  [(list hints) diff=(unit ^granary) burned=^granary =crow rem=@ud =errorcode]
+      ^-  hatchling
       |^
       =+  [hit chick rem err]=(weed to.p.egg budget.p.egg)
       ?~  chick  [hit^hits ~ ~ ~ rem err]
@@ -335,10 +346,8 @@
       =.  all-diffs  (~(uni by all-diffs) u.last-diff)
       ?~  next
         ::  all continuations complete
-        ::
         [hits `all-diffs all-burns (weld crows crow.rooster.p.u.chick) rem %0]
       ::  continue continuing
-      ::
       =/  inter
         %+  ~(incubate farm (~(dif by (~(uni by granary) all-diffs)) all-burns))
           egg(from.p to.p.egg, to.p to.i.next, budget.p rem, q yolk.i.next)
@@ -373,7 +382,8 @@
         [~ `p.-.res +.res %0]
       --
     ::
-    ::  +harvest: take a completed execution and validate all changes and additions to granary state
+    ::  +harvest: take a completed execution and validate all changes 
+    ::  and additions to granary state
     ::
     ++  harvest
       |=  [res=rooster lord=id from=caller]
@@ -409,9 +419,9 @@
           ?&  =(id id.grain)
               =(lord lord.grain)
               !(~(has by granary) id.grain)
-              ?:  ?=(%& -.germ.grain)
-                =(id (fry-rice holder.grain lord.grain town-id.grain salt.p.germ.grain))
-              =(id (fry-contract lord.grain town-id.grain cont.p.germ.grain))
+              ?:  ?=(%| -.germ.grain)
+                =(id (fry-contract lord town-id.grain cont.p.germ.grain))
+              =(id (fry-rice lord holder.grain town-id.grain salt.p.germ.grain))
           ==
         ::
           %-  ~(all in burned.res)

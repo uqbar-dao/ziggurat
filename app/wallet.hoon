@@ -200,7 +200,7 @@
       =/  our-nonces     (~(gut by nonces.state) from.act ~)
       =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
       =/  =caller:smart  :+  from.act  +(nonce)
-                         (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
+                         (fry-rice:smart `@ux`'zigs-contract' from.act town.act `@`'zigs')
       =/  =yolk:smart    [`q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
       =/  keypair        (~(got by keys.state) from.act)
       =/  =egg:smart
@@ -255,7 +255,7 @@
       ~|  "wallet: can't find tokens for that address!"
       =/  =book          (~(got by tokens.state) from.act)
       =/  =caller:smart  :+  from.act  +(nonce)
-                        (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
+                        (fry-rice:smart `@ux`'zigs-contract' from.act town.act `@`'zigs')
       ::  need to check transaction type and collect rice based on it
       ::  only supporting small subset of contract calls, for tokens and NFTs
       =/  formatted=[args=(unit *) our-grains=(set @ux) cont-grains=(set @ux)]
@@ -265,7 +265,7 @@
           =/  metadata  (~(got by metadata-store.state) salt.args.act)
           ~|  "wallet can't find our zigs account for that town!"
           =/  our-account=grain:smart  +:(~(got by book) [town.act to.act salt.metadata])
-          =/  their-account-id  (fry-rice:smart to.args.act to.act town.act salt.metadata)
+          =/  their-account-id  (fry-rice:smart to.act to.args.act town.act salt.metadata)
           ?~  exists=(scry:uqbar %grain their-account-id [our now]:bowl)
             ::  they don't have an account for this token
             ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
@@ -284,7 +284,7 @@
           =/  metadata  (~(got by metadata-store.state) salt.args.act)
           ~|  "wallet can't find our zigs account for that town!"
           =/  our-account=grain:smart  +:(~(got by book) [town.act to.act salt.metadata])
-          =/  their-account-id  (fry-rice:smart to.args.act to.act town.act salt.metadata)
+          =/  their-account-id  (fry-rice:smart to.act to.args.act town.act salt.metadata)
           ?~  exists=(scry:uqbar %grain their-account-id [our now]:bowl)
             [`[%give to.args.act ~ item-id.args.act] (silt ~[id.our-account]) ~]
           :+  `[%give to.args.act `their-account-id item-id.args.act]
@@ -456,7 +456,7 @@
     =/  pub  (slav %ux i.t.t.path)
     =/  town-id  (slav %ux i.t.t.t.path)
     =/  nonce  (~(gut by (~(gut by nonces.state) pub ~)) town-id 0)
-    =+  (fry-rice:smart pub `@ux`'zigs-contract' town-id `@`'zigs')
+    =+  (fry-rice:smart `@ux`'zigs-contract' pub town-id `@`'zigs')
     ``noun+!>(`account:smart`[pub nonce -])
   ::
       [%book ~]

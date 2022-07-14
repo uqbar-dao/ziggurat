@@ -18,7 +18,7 @@
   |=  inp=embryo
   ^-  chick
   =/  grain-id=id
-    (fry-rice id.from.cart me.cart town-id.cart 'salt')
+    (fry-rice me.cart id.from.cart town-id.cart 'salt')
   =/  new-grain=grain
     =+  [%& 'salt' 'data']
     [grain-id me.cart id.from.cart town-id.cart -]

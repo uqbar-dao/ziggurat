@@ -103,7 +103,7 @@
     (malt ~[[id:account-1 account-1]])
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id ~]
-  =/  new-id  (fry-rice 0xffff zigs-wheat-id town-id salt)
+  =/  new-id  (fry-rice zigs-wheat-id 0xffff town-id salt)
   =/  new=grain
     :*  new-id
         zigs-wheat-id
@@ -292,7 +292,7 @@
     ~
   =/  =cart
     [zigs-wheat-id [holder-1 1] init-now town-id (malt ~[[id:account-2 account-2]])]
-  =/  new-id  (fry-rice 0xffff zigs-wheat-id town-id salt)
+  =/  new-id  (fry-rice zigs-wheat-id 0xffff town-id salt)
   =/  new=grain
     :*  new-id
         zigs-wheat-id

@@ -123,9 +123,9 @@
       [%| dao-contract-wheat]  ::  germ
   ==
 ::
-=/  zigs-1  (fry-rice:smart pubkey-1 zigs-wheat-id:smart town-id `@`'zigs')
-=/  zigs-2  (fry-rice:smart pubkey-2 zigs-wheat-id:smart town-id `@`'zigs')
-=/  zigs-3  (fry-rice:smart pubkey-3 zigs-wheat-id:smart town-id `@`'zigs')
+=/  zigs-1  (fry-rice:smart zigs-wheat-id:smart pubkey-1 town-id `@`'zigs')
+=/  zigs-2  (fry-rice:smart zigs-wheat-id:smart pubkey-2 town-id `@`'zigs')
+=/  zigs-3  (fry-rice:smart zigs-wheat-id:smart pubkey-3 town-id `@`'zigs')
 =/  beef-zigs-grain  ::  ~zod
   ^-  grain:smart
   :*  zigs-1

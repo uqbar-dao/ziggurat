@@ -22,7 +22,7 @@
     ?>  (gte balance.giver (add amount.act budget.act))
     ?:  ?=(~ owns.cart)
       ::  if receiver doesn't have an account, try to produce one for them
-      =/  =id  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
+      =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
       =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%give budget.act to.act amount.act]
@@ -47,7 +47,7 @@
     ?>  (gte balance.giver amount.act)
     ?>  (gte allowance amount.act)
     ?~  account.act
-      =/  =id  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
+      =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
       =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%take to.act `id.new id.giv amount.act]

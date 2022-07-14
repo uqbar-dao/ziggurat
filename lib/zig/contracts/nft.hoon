@@ -24,7 +24,7 @@
       =/  =item:sur  (~(got by items.giver) item-id.args)
       ?>  transferrable.item  ::  asset item is transferrable
       ?~  account.args
-        =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
+        =+  (fry-rice me.cart to.args town-id.cart salt.p.germ.giv)
         =/  new=grain
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [metadata.giver ~ ~ ~]]]
         :+  %|
@@ -49,7 +49,7 @@
           ==
       =/  =item:sur  (~(got by items.giver) item-id.args)
       ?~  account.args
-        =+  (fry-rice to.args me.cart town-id.cart salt.p.germ.giv)
+        =+  (fry-rice me.cart to.args town-id.cart salt.p.germ.giv)
         =/  new=grain
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [metadata.giver ~ ~ ~]]]
         :+  %|
@@ -134,7 +134,7 @@
       ::
       ?~  account.i.mints
         ::  need to issue
-        =+  (fry-rice to.i.mints me.cart town-id.cart salt.meta)
+        =+  (fry-rice me.cart to.i.mints town-id.cart salt.meta)
         =/  new=grain
           [- me.cart to.i.mints town-id.cart [%& salt.meta [token.args ~ ~ ~]]]
         %=  $
@@ -216,7 +216,7 @@
             new-items      (~(put by new-items) -.- -)
             next-item-id   +(next-item-id)
           ==
-        =+  (fry-rice id me.cart town-id.cart salt)
+        =+  (fry-rice me.cart id town-id.cart salt)
         :-  -
         [- me.cart id town-id.cart [%& salt [id.metadata-grain new-items ~ ~]]]
       ::  big ol issued map

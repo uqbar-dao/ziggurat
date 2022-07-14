@@ -5,20 +5,18 @@
 ::  +fry: hash lord+town+germ to make contract grain pubkey
 ::
 ++  fry-contract
-  |=  [lord=id town-id=id cont=(unit [bat=* pay=*])]
+  |=  [lord=id town=id cont=(unit [bat=* pay=*])]
   ^-  id
   ^-  @ux
-  =+  (sham cont)
-  (shax (cat 3 lord (cat 3 town-id -)))
+  %-  shax
+  :((cury cat 3) lord town (sham cont))
 ::
 ++  fry-rice
-  |=  [holder=id lord=id town-id=id salt=@]
-  ::  TODO remove town from this possibly, for cross-town transfers
+  |=  [lord=id holder=id town=id salt=@]
   ^-  id
   ^-  @ux
-  %^  cat  3
-    (sham holder)
-  (sham (cat 3 town-id (cat 3 lord salt)))
+  %-  shax
+  :((cury cat 3) town lord holder salt)
 ::
 ::  +pin: get ID from caller
 ::
