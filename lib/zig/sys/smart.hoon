@@ -143,11 +143,26 @@
       grains=(map id grain)
   ==
 ::
++$  interface  (set action)
++$  action  (pair @tas lump)
+::  [%give [%pair %ux^0x1.beef %ud^10.000]]
+::
 +$  chick    (each rooster hen)
 +$  crow     (list [@tas json])
 ::
 +$  rooster  [changed=(map id grain) issued=(map id grain) burned=(map id grain) =crow]
 +$  hen      [next=(list [to=id town-id=id =yolk]) =rooster]
+::
++$  lump
+  $~  [%n ~]
+  $%  iota
+      [%list lump]
+      [%set lump]
+      [%map lump lump]
+      [%pair lump lump]
+      [%trel lump lump lump]
+      [%qual lump lump lump lump]
+  ==
 ::
 +$  iota                                                ::  typed path segment
   $~  [%n ~]
