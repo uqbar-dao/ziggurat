@@ -1,6 +1,6 @@
 /-  *sequencer
 /+  *zink-zink, *zig-sys-smart, ethereum
-|_  [library=vase zink-cax=(map * @) check-sigs=?]
+|_  [library=vase zink-cax=(map * @) test-mode=?]
 ::
 ++  verify-sig
   |=  =egg
@@ -171,7 +171,7 @@
     ^-  [fee=@ud ^land burned=granary =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [0 [~ q.land] ~ %1 ~ ~]
     ::  validate transaction signature
-    ?.  ?:(check-sigs (verify-sig egg) %.y)
+    ?.  ?:(test-mode (verify-sig egg) %.y)
       ~&  >>>  "mill: signature mismatch"
       [0 [~ q.land] ~ %2 ~ ~]  ::  signed tx doesn't match account
     ::
@@ -241,7 +241,7 @@
         ::  create a new account rice for the sequencer if needed
         =/  =token-account  [total ~ `@ux`'zigs-metadata']
         =/  =id  (fry-rice zigs-wheat-id id.miller town-id `@`'zigs')
-        [id zigs-wheat-id id.miller town-id [%& `@`'zigs' token-account]]
+        [id zigs-wheat-id id.miller town-id [%& 'zigs' %account token-account]]
       ?.  ?=(%& -.germ.acc)  granary
       =/  account  (hole token-account data.p.germ.acc)
       ?.  =(`@ux`'zigs-metadata' metadata.account)  granary
@@ -373,13 +373,31 @@
         =/  payload   .*(q.library pay.cont.crop)
         =/  battery   .*([q.library payload] bat.cont.crop)
         =/  dor=vase  [-:!>(*contract) battery]
-        =/  res
-          :-  (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))
-          (sub budget (mul rate.p.egg 7))
-        ?:  ?=(%| -.-.res)
+        ?:  test-mode
+          ::  run without zebra
+          =/  res
+            :-  (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))
+            (sub budget (mul rate.p.egg 7))
+          ?:  ?=(%| -.-.res)
+            ::  error in contract execution
+            [~ ~ +.res %6]
+          [~ `p.-.res +.res %0]
+        ::  generate ZK-proof hints with zebra
+        =/  gun
+          (ajar dor %write !>(cart) !>(embryo))
+        =/  =book
+          (zebra budget zink-cax gun)
+        ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
+        :-  hit.q.book
+        ?:  ?=(%| -.p.book)
           ::  error in contract execution
-          [~ ~ +.res %6]
-        [~ `p.-.res +.res %0]
+          ~&  p.book
+          [~ bud.q.book %6]
+        ::  chick result
+        ?~  p.p.book
+          ~&  >>>  "mill: ran out of gas"
+          [~ 0 %8]
+        [(hole (unit chick) p.p.book) bud.q.book %0]
       --
     ::
     ::  +harvest: take a completed execution and validate all changes 

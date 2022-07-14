@@ -1,4 +1,5 @@
-::  zigs.hoon [UQ| DAO]
+::  [UQ| DAO]
+::  zigs.hoon v0.8
 ::
 ::  Contract for 'zigs' (official name TBD) token, the gas-payment
 ::  token for the Uqbar network.
@@ -23,9 +24,9 @@
     ?:  ?=(~ owns.cart)
       ::  if receiver doesn't have an account, try to produce one for them
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
+      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
-      =/  =action:sur  [%give budget.act to.act amount.act]
+      =/  =action:sur  [%give to.act amount.act]
       %+  continuation
         (call me.cart town-id.cart action ~[id.giv] ~[id.new])^~
       (result ~ issued=[new ~] ~ ~)
@@ -48,7 +49,7 @@
     ?>  (gte allowance amount.act)
     ?~  account.act
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv [0 ~ metadata.giver]]
+      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%take to.act `id.new id.giv amount.act]
       %+  continuation

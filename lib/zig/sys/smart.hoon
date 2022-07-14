@@ -65,7 +65,7 @@
 +$  grain  [=id lord=id holder=id town-id=id =germ]
 +$  germ   (each rice wheat)
 ::
-+$  rice   [salt=@ data=*]
++$  rice   [salt=@ label=@tas data=*]
 ::  contract contains itself and every imported library in pay
 +$  wheat  [cont=(unit [bat=* pay=*]) owns=(set id)]
 +$  crop   [cont=[bat=* pay=*] owns=(map id grain)]  ::  wheat that's been processed by mill.hoon
@@ -162,6 +162,8 @@
       [%t @t]    [%ta @ta]  ::  @tas
       [%p @p]    [%q @q]
       [%rs @rs]  [%rd @rd]  [%rh @rh]  [%rq @rq]
+      ::  contract types
+      [%address @ux]  [%grain-id @ux]  [%grain grain]
   ==
 ::
 ::  JSON, from lull.hoon and zuse.hoon

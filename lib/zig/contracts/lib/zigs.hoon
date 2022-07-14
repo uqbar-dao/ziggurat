@@ -1,3 +1,6 @@
+::  [UQ| DAO]
+::  zigs.hoon v0.8
+::
 ::  /+  *zig-sys-smart
 |%
 ++  sur
@@ -53,7 +56,7 @@
         |=  [i=id allowance=@ud]
         [(scot %ux i) (numb allowance)]
       ::
-      ++  metadata  ::  TODO: grab token-metadata?
+      ++  metadata
         |=  md-id=id
         [%s (scot %ux md-id)]
       --
