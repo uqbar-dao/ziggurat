@@ -249,25 +249,8 @@
           ~&  >>  "%wallet: storing unsigned tx"
           `state(pending `[(sham yolk) egg [%custom args.act]])
         ::  if we have key, use signature and submit
-        
-        :: TODO: call gate defined in line 73-90 with egg, [%custom args.act]
-
-        =+  egg-hash=(hash-egg egg)
-        =/  our-txs
-          ?~  o=(~(get by transaction-store) from.act)
-            [(malt ~[[egg-hash [egg [%custom args.act]]]]) ~]
-          u.o(sent (~(put by sent.u.o) egg-hash [egg [%custom args.act]]))
-        ~&  >>  "%wallet: submitting tx"
-        :_  %=  state
-              transaction-store  (~(put by transaction-store) from.act our-txs)
-              nonces  (~(put by nonces) from.act (~(put by our-nonces) town.act +(nonce)))
-            ==
-        :~  (tx-update-card egg `[%custom args.act])
-            :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
-                %agent  [our.bowl %uqbar]
-                %poke  %uqbar-write
-                !>(`write:uqbar`[%submit egg])
-            ==
+        ::  submit the transaction
+        (submit-tx egg [%custom args.act])
         ==
       ::
           %submit
@@ -309,7 +292,6 @@
               `[%give to.args.act `their-account-id amount-or-id]
             (silt ~[id.our-account])
           (silt ~[their-account-id])
-        ==
         =/  keypair       (~(got by keys.state) from.act)
         =/  =yolk:smart   [caller args.formatted our-grains.formatted cont-grains.formatted]
         =/  sig           ?~  priv.keypair
@@ -322,29 +304,10 @@
           ~&  >>  "%wallet: storing unsigned tx"
           `state(pending `[(sham yolk) egg args.act])
         ::  if we have key, use signature and submit
-
-        :: TODO: call gate defined in line 73-90 with egg, args.act
-
-        =+  egg-hash=(hash-egg egg)
-        =/  our-txs
-          ?~  o=(~(get by transaction-store) from.act)
-            [(malt ~[[egg-hash [egg args.act]]]) ~]
-          u.o(sent (~(put by sent.u.o) egg-hash [egg args.act]))
-        ~&  >>  "wallet: submitting tx"
-        :_  %=  state
-              transaction-store  (~(put by transaction-store) from.act our-txs)
-              nonces  (~(put by nonces) from.act (~(put by our-nonces) town.act +(nonce)))
-            ==
-        :~  (tx-update-card egg `args.act)
-            :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
-                %agent  [our.bowl %uqbar]
-                %poke  %uqbar-write
-                !>(`write:uqbar`[%submit egg])
-            ==
+        ::  submit the transaction
+        (submit-tx egg args.act)
         ==
-      ==
-    ==
-  --
+    --
 ::
 ++  on-agent
   |=  [=wire =sign:agent:gall]
