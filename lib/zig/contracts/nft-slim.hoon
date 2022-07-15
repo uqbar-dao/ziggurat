@@ -99,12 +99,6 @@
   ::
   ++  noun
     ?+    args  !!
-        [%collection-data ~]
-      ?>  =(1 ~(wyt by owns.cart))
-      =/  g=grain  -:~(val by owns.cart)
-      ?>  ?=(%& -.germ.g)
-      ;;(collection data.p.germ.g)
-    ::
         [%mintable ~]
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
