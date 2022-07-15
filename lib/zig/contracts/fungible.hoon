@@ -47,7 +47,7 @@
     ?:  ?=(~ owns.cart)
       ::  if receiver doesn't have an account, try to produce one for them
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
+      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver 0]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%give to.act amount.act]
       ::  continuation call: %give to rice we issued
@@ -82,7 +82,7 @@
     ?~  account.act
       ::  create new rice for reciever and add it to state
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
+      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver 0]]
       =/  new=grain    [id me.cart to.act town-id.cart rice]
       =/  =action:sur  [%take to.act `id.new id.giv amount.act]
       ::  continuation call: %take to rice found in book
@@ -108,6 +108,54 @@
     ==
     (result [giv rec ~] ~ ~ ~)
   ::
+      %take-with-sig
+    ::  %take-with-sig allows for gasless approvals for transferring tokens
+    ::  the giver must sign the from-account id and the typed +$approve struct above
+    ::  and the taker will pass in the signature to take the tokens
+    =/  giv=grain  (~(got by owns.cart) from-account.act)
+    ?>  ?=(%& -.germ.giv)
+    =/  giver=account:sur  ;;(account:sur data.p.germ.giv)
+    ::  reconstruct the typed message and hash
+    =/  =typed-message
+      :-  (fry-rice me.cart holder.giv town-id.cart salt.p.germ.giv)
+      (sham [holder.giv to.act amount.act nonce.act deadline.act])
+    =/  signed-hash  (sham typed-message)
+
+    ::  recoer the address from the message and signature
+    =/  recovered-address
+      %-  address-from-pub
+      %-  serialize-point:secp256k1:secp:crypto-non-zuse
+      (ecdsa-raw-recover:secp256k1:secp:crypto-non-zuse signed-hash sig.act)
+    ::  assert the signature is valid
+    ?>  =(recovered-address holder.giv)
+    ?>  (gte deadline.act now.cart)
+    ?>  (gte balance.giver amount.act)
+    ?~  account.act
+    ::  create new rice for reciever and add it to state
+      =+  (fry-rice to.act me.cart town-id.cart salt.p.germ.giv)
+      =/  new=grain
+        [- me.cart to.act town-id.cart [%& salt.p.germ.giv %account [amount.act ~ metadata.giver 0]]]
+      ::  continuation call: %take to rice found in book
+      :+  %|
+        :~  :+  me.cart  
+              town-id.cart
+            [`[%take-with-sig to.act `id.new id.giv amount.act nonce.act deadline.act sig.act] ~ (silt ~[id.giv id.new])]
+        ==
+      [~ (malt ~[[id.new new]]) ~ ~]
+    ::  direct send
+    =/  rec=grain  (~(got by owns.cart) u.account.act)
+    ?>  ?=(%& -.germ.rec)
+    =/  receiver=account:sur  ;;(account:sur data.p.germ.rec)
+    ?>  =(metadata.receiver metadata.giver)
+    =:  data.p.germ.rec  receiver(balance (add balance.receiver amount.act))
+        data.p.germ.giv
+      %=  giver
+        balance  (sub balance.giver amount.act)
+        nonce  .+(nonce.giver)
+      == 
+    ==
+    [%& (malt ~[[id.giv giv] [id.rec rec]]) ~ ~ ~]
+    ::
       %set-allowance
     ::  let some pubkey spend tokens on your behalf
     ::  note that you can arbitrarily allow as much spend as you want,
@@ -161,7 +209,7 @@
     ?~  account.i.mints
       ::  need to issue
       =/  =id     (fry-rice me.cart to.i.mints town-id.cart salt.meta)
-      =/  rice    [%& salt.meta %account [0 ~ token.act]]
+      =/  rice    [%& salt.meta %account [0 ~ token.act 0]]
       =/  =grain  [id me.cart to.i.mints town-id.cart rice]
       %=  $
         mints        t.mints
@@ -223,7 +271,7 @@
       |=  [=id bal=@ud]
       =+  (fry-rice me.cart id town-id.cart salt)
       :-  -
-      [- me.cart id town-id.cart [%& salt %account [bal ~ id.metadata-grain]]]
+      [- me.cart id town-id.cart [%& salt %account [bal ~ id.metadata-grain 0]]]
     ::  big ol issued map
     [%& ~ (~(put by accounts) id.metadata-grain metadata-grain) ~ ~]
   ==
@@ -242,12 +290,13 @@
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%rice-data @ ~]
-      =/  data  (cue (slav %ud i.t.path))
+      =/  g  ;;(grain (cue (slav %ud i.t.path)))
+      ?>  ?=(%& -.germ.g)
       ?:  ?=(%account label.p.germ.g)
-        (account:enjs:lib ;;(account:sur data))
-      (token-metadata:enjs:lib ;;(token-metadata:sur data))
+        (account:enjs:lib ;;(account:sur data.p.germ.g))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
-        [%egg-args @ ~]
+        [%egg-act @ ~]
       %-  action:enjs:lib
       ;;(action:sur (cue (slav %ud i.t.path)))
     ==

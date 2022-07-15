@@ -53,6 +53,7 @@
 +$  id       @ux            ::  pubkey
 +$  address  @ux            ::  42-char hex address, ETH compatible
 +$  sig      [v=@ r=@ s=@]  ::  ETH compatible ECDSA signature
++$  typed-message  [domain=id message=@]  ::  message should be typed according to some mold specified by the wheat. Do we include the mold in the hash here or not?
 ++  zigs-wheat-id  `@ux`'zigs-contract'  ::  hardcoded "native" token contract
 ::
 +$  account    [=id nonce=@ud zigs=id]
@@ -224,6 +225,16 @@
       [%a (turn (wash [0 80] a) tape)]
     --  ::enjs
   --
+
+::
+::::  from ethereum.hoon
+::
+++  address-from-pub
+  =,  keccak:crypto-non-zuse
+  |=  pub=@
+  %+  end  [3 20]
+  %+  keccak-256  64
+  (rev 3 64 pub)
 ::
 ::  AMES from lull.hoon
 ::
