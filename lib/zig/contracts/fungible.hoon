@@ -126,7 +126,7 @@
       =/  signed-hash  (sham typed-message)
       
       ::  in production this won't work because we don't have access to zuse...
-      =,  secp256k1:secp:crypto
+      =,  secp256k1:secp:crypto-non-zuse
       ::  recoer the address from the message and signature
       =/  recovered-address
         %-  address-from-pub
