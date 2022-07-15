@@ -242,10 +242,11 @@
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%rice-data @ ~]
-      =/  data  (cue (slav %ud i.t.path))
+      =/  g  ;;(grain (cue (slav %ud i.t.path)))
+      ?>  ?=(%& -.germ.g)
       ?:  ?=(%account label.p.germ.g)
-        (account:enjs:lib ;;(account:sur data))
-      (token-metadata:enjs:lib ;;(token-metadata:sur data))
+        (account:enjs:lib ;;(account:sur data.p.germ.g))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%egg-args @ ~]
       %-  action:enjs:lib
