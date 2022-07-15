@@ -70,22 +70,21 @@
     =~
       |%
         ++  process-tx
-          |=  [args-in=supported-args formatted-in=*] :: TODO: make formatted an optional parameter
+          |=  [from=@ux to=@ux gas-rate=@ud gas-bud=@ud town=@ux my-grains=(set @ux) our-grains=(set @ux) cont-grains=(set @ux) tx-parms=* arguments=@ formatted-args=(unit *)] :: TODO: make certain parms optional
           ^-  *  ::  TODO: constrain output
           ::  get & build relevant data
-          =/  our-nonces     (~(gut by nonces.state) from.act ~)
-          =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
-          =/  =caller:smart  :+  from.act  +(nonce)
-                            (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
+          =/  our-nonces     (~(gut by nonces.state) from ~)
+          =/  nonce=@ud      (~(gut by our-nonces) town 0)
+          =/  =caller:smart  :+  from  +(nonce)
+                            (fry-rice:smart from `@ux`'zigs-contract' town `@`'zigs')
           =/  =yolk:smart
-          ::  check whether we called from submit-custom or submit
-          ?~  formatted-in
+          ::  TODO: check whether we called from submit-custom or submit
+          ?~  tx-parms
             ::  submit-custom
-            yolk=[caller `q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
+            yolk=[caller `q:(slap !>(+:(cue q.q.smart-lib)) (ream arguments)) my-grains cont-grains]
           ::  submit
-          yolk=[caller args.formatted-in our-grains.formatted-in cont-grains.formatted-in]
-          ::  do keypair
-          =/  keypair        (~(got by keys.state) from.act)
+          yolk=[caller formatted-args our-grains cont-grains]
+          =/  keypair        (~(got by keys.state) from)
           =/  =egg:smart
             :_  yolk
             :*  caller
@@ -95,30 +94,30 @@
                   (sham yolk)
                 u.priv.keypair
                 ~
-                to.act
-                rate.gas.act
-                bud.gas.act
-                town.act
+                to
+                gas-rate
+                gas-bud
+                town
                 status=%100
             ==
           ?~  priv.keypair
             ::  if we don't have private key for this address, set as pending
             ::  and allow frontend to sign with HW wallet or otherwise
             ~&  >>  "%wallet: storing unsigned tx"
-            `state(pending `[(sham yolk) egg args-in])
+            `state(pending `[(sham yolk) egg tx-parms])
           ::  submit the transaction
           =+  egg-hash=(hash-egg egg)
             =/  our-txs
-              ?~  o=(~(get by transaction-store) from.act)
-                [(malt ~[[egg-hash [egg args-in]]]) ~]
-              u.o(sent (~(put by sent.u.o) egg-hash [egg args-in]))
+              ?~  o=(~(get by transaction-store) from)
+                [(malt ~[[egg-hash [egg tx-parms]]]) ~]
+              u.o(sent (~(put by sent.u.o) egg-hash [egg tx-parms]))
             ~&  >>  "wallet: submitting tx"
             :_  %=  state
-                  transaction-store  (~(put by transaction-store) from.act our-txs)
-                  nonces  (~(put by nonces) from.act (~(put by our-nonces) town.act +(nonce)))
+                  transaction-store  (~(put by transaction-store) from our-txs)
+                  nonces  (~(put by nonces) from (~(put by our-nonces) town +(nonce)))
                 ==
-            :~  (tx-update-card egg `args-in)
-                :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
+            :~  (tx-update-card egg `tx-parms)
+                :*  %pass  /submit-tx/(scot %ux from)/(scot %ux egg-hash)
                     %agent  [our.bowl %uqbar]
                     %poke  %uqbar-write
                     !>(`write:uqbar`[%submit egg])
@@ -256,7 +255,7 @@
       ::
           %submit-custom      
         ::  process the transaction
-        (process-tx [%custom args.act]) :: TODO: make formatted an optional parameter
+        (process-tx from.act to.act rate.gas.act bud.gas.act town.act my-grains.act our-grains.formatted cont-grains.act [%custom args.act] args.act args.formatted)
         ==
       ::
           %submit
@@ -294,7 +293,7 @@
             (silt ~[id.our-account])
           (silt ~[their-account-id])
         ::  process the transaction
-        (process-tx args.act formatted)
+        (process-tx from.act to.act rate.gas.act bud.gas.act town.act my-grains.act our-grains.formatted cont-grains.act args.act args.act args.formatted)
         ==
     --
 ::
