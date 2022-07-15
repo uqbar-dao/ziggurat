@@ -135,6 +135,15 @@
 ::
 ::  tests for %deploy
 ::
+++  test-deploy  ^-  tang
+    =/  =embryo
+    :+  owner-1
+      :*  %deploy 0xdead
+          (silt ~[]) :: actually you need jug logic here
+
+      ==
+    (malt ~[[id:`grain`nft-1 nft-1]])
+  ~
 
 ::
 ::  read
