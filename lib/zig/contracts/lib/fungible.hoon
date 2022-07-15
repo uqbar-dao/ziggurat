@@ -1,7 +1,7 @@
 ::  UQ| token standard v0.1
 ::  last updated: 2022/07/14
 ::
-/+  *zig-sys-smart
+::  /+  *zig-sys-smart
 |%
 ++  sur
   |%

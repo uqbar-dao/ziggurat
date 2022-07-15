@@ -24,7 +24,7 @@
 ::  work in the wallet agent should implement the same structure for their
 ::  rice.
 ::
-/+  *zig-sys-smart
+::  /+  *zig-sys-smart
 /=  fungible  /lib/zig/contracts/lib/fungible
 =,  fungible
 |_  =cart
