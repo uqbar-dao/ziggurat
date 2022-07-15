@@ -24,9 +24,9 @@
     ?:  ?=(~ owns.cart)
       ::  if receiver doesn't have an account, try to produce one for them
       =/  =id  (fry-rice me.cart to.act town-id.cart salt.p.germ.giv)
-      =/  rice         [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
-      =/  new=grain    [id me.cart to.act town-id.cart rice]
-      =/  =action:sur  [%give to.act amount.act]
+      =/  rice       [%& salt.p.germ.giv %account [0 ~ metadata.giver]]
+      =/  new=grain  [id me.cart to.act town-id.cart rice]
+      =/  action     [%give to.act amount.act]
       %+  continuation
         (call me.cart town-id.cart action ~[id.giv] ~[id.new])^~
       (result ~ issued=[new ~] ~ ~)
@@ -94,15 +94,16 @@
       ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
-      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data.p.germ.g)
+      ?:  ?=(%account label.p.germ.g)
         (account:enjs:lib ;;(account:sur data.p.germ.g))
       (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%rice-data @ ~]
-      =/  data  (cue (slav %ud i.t.path))
-      ?.  ?=([@ @ @ @ ?(~ [~ @]) ? ?(~ ^) @ @] data)
-        (account:enjs:lib ;;(account:sur data))
-      (token-metadata:enjs:lib ;;(token-metadata:sur data))
+      =/  g  ;;(grain (cue (slav %ud i.t.path)))
+      ?>  ?=(%& -.germ.g)
+      ?:  ?=(%account label.p.germ.g)
+        (account:enjs:lib ;;(account:sur data.p.germ.g))
+      (token-metadata:enjs:lib ;;(token-metadata:sur data.p.germ.g))
     ::
         [%egg-action @ ~]
       %-  action:enjs:lib

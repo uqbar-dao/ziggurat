@@ -171,7 +171,7 @@
     ^-  [fee=@ud ^land burned=granary =errorcode hits=(list hints) =crow]
     ?.  ?=(account from.p.egg)  [0 [~ q.land] ~ %1 ~ ~]
     ::  validate transaction signature
-    ?.  ?:(test-mode (verify-sig egg) %.y)
+    ?.  ?:(!test-mode (verify-sig egg) %.y)
       ~&  >>>  "mill: signature mismatch"
       [0 [~ q.land] ~ %2 ~ ~]  ::  signed tx doesn't match account
     ::

@@ -30,7 +30,7 @@
   ::  "action" in input must fit one of these molds
   ::
   +$  mint  [to=id account=(unit id) amount=@ud]  ::  helper type for mint
-  +$  arguments
+  +$  action
     $%  ::  token holder actions
         ::
         [%give to=id amount=@ud]
@@ -94,8 +94,8 @@
           [%salt (numb salt.md)]
       ==
     ::
-    ++  arguments
-      |=  a=arguments:sur
+    ++  action
+      |=  a=action:sur
       |^
       ^-  json
       %+  frond  -.a

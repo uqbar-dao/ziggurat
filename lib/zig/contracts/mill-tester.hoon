@@ -9,7 +9,7 @@
 ::      0xeeee.eeee
 ::      holder-1:zigs
 ::      town-id
-::      [%& `@`'some-salt' ['some' 'random' 'data']]
+::      [%& `@`'some-salt' %some-label ['some' 'random' 'data']]
 ::  ==
 ::
 ::  /+  *zig-sys-smart
@@ -20,7 +20,7 @@
   =/  grain-id=id
     (fry-rice me.cart id.from.cart town-id.cart 'salt')
   =/  new-grain=grain
-    =+  [%& 'salt' 'data']
+    =+  [%& 'salt' %label 'data']
     [grain-id me.cart id.from.cart town-id.cart -]
   ?+    -.action.inp  !!
       %change-nonexistent

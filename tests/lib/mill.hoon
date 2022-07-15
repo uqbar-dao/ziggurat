@@ -35,7 +35,7 @@
   %~  mill  mill
   :+    ;;(vase (cue q.q.smart-lib-noun))
     ;;((map * @) (cue q.q.zink-cax-noun))
-  %.n
+  %.y
 ::
 +$  mill-result
   [fee=@ud =land burned=granary =errorcode hits=(list hints:zink) =crow]
@@ -58,7 +58,7 @@
         zigs-wheat-id
         0x1512.3341
         town-id
-        [%& `@`'zigs' [1.000.000 ~ `@ux`'zigs-metadata']]
+        [%& `@`'zigs' %account [1.000.000 ~ `@ux`'zigs-metadata']]
     ==
   ++  beef-account
     ^-  grain
@@ -66,7 +66,7 @@
         zigs-wheat-id
         holder-1
         town-id
-        [%& `@`'zigs' [300.000 ~ `@ux`'zigs-metadata']]
+        [%& `@`'zigs' %account [300.000 ~ `@ux`'zigs-metadata']]
     ==
   ++  dead-account
     ^-  grain
@@ -74,7 +74,7 @@
         zigs-wheat-id
         0xdead
         town-id
-        [%& `@`'zigs' [200.000 ~ `@ux`'zigs-metadata']]
+        [%& `@`'zigs' %account [200.000 ~ `@ux`'zigs-metadata']]
     ==
   ++  cafe-account
     ^-  grain
@@ -82,7 +82,7 @@
         zigs-wheat-id
         0xcafe
         town-id
-        [%& `@`'zigs' [100.000 ~ `@ux`'zigs-metadata']]
+        [%& `@`'zigs' %account [100.000 ~ `@ux`'zigs-metadata']]
     ==
   ++  wheat-grain
     ^-  grain
@@ -130,7 +130,7 @@
       0xeeee.eeee
       holder-1:zigs
       town-id
-      [%& `@`'some-salt' ['some' 'random' 'data']]
+      [%& `@`'some-salt' %some-label ['some' 'random' 'data']]
   ==
 ::
 ++  fake-granary
