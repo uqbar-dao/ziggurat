@@ -69,29 +69,63 @@
   ++  poke-wallet
     =~
       |%
-        ++  submit-tx
-          |=  [=egg-in:smart args-in=supported-args] ::come up with better type of args-in 
-          :: TODO: constrain output
-          ^-  *
-          =+  egg-hash=(hash-egg egg-in)
+        ++  process-tx
+          |=  [args-in=supported-args formatted-in=*] :: TODO: make formatted an optional parameter
+          ^-  *  ::  TODO: constrain output
+          ::  get & build relevant data
+          =/  our-nonces     (~(gut by nonces.state) from.act ~)
+          =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
+          =/  =caller:smart  :+  from.act  +(nonce)
+                            (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
+          =/  =yolk:smart
+          ::  check whether we called from submit-custom or submit
+          ?~  formatted-in
+            ::  submit-custom
+            yolk=[caller `q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
+          ::  submit
+          yolk=[caller args.formatted-in our-grains.formatted-in cont-grains.formatted-in]
+          ::  do keypair
+          =/  keypair        (~(got by keys.state) from.act)
+          =/  =egg:smart
+            :_  yolk
+            :*  caller
+                ?~  priv.keypair
+                  [0 0 0]
+                %+  ecdsa-raw-sign:secp256k1:secp:crypto
+                  (sham yolk)
+                u.priv.keypair
+                ~
+                to.act
+                rate.gas.act
+                bud.gas.act
+                town.act
+                status=%100
+            ==
+          ?~  priv.keypair
+            ::  if we don't have private key for this address, set as pending
+            ::  and allow frontend to sign with HW wallet or otherwise
+            ~&  >>  "%wallet: storing unsigned tx"
+            `state(pending `[(sham yolk) egg args-in])
+          ::  submit the transaction
+          =+  egg-hash=(hash-egg egg)
             =/  our-txs
               ?~  o=(~(get by transaction-store) from.act)
-                [(malt ~[[egg-hash [egg-in args-in]]]) ~]
-              u.o(sent (~(put by sent.u.o) egg-hash [egg-in args-in]))
+                [(malt ~[[egg-hash [egg args-in]]]) ~]
+              u.o(sent (~(put by sent.u.o) egg-hash [egg args-in]))
             ~&  >>  "wallet: submitting tx"
             :_  %=  state
                   transaction-store  (~(put by transaction-store) from.act our-txs)
                   nonces  (~(put by nonces) from.act (~(put by our-nonces) town.act +(nonce)))
                 ==
-            :~  (tx-update-card egg-in `args-in)
+            :~  (tx-update-card egg `args-in)
                 :*  %pass  /submit-tx/(scot %ux from.act)/(scot %ux egg-hash)
                     %agent  [our.bowl %uqbar]
                     %poke  %uqbar-write
-                    !>(`write:uqbar`[%submit egg-in])
+                    !>(`write:uqbar`[%submit egg])
                 ==
             ==
       --
-    
+
       |=  act=wallet-poke
       ^-  (quip card _state)
       ?>  =(src.bowl our.bowl)
@@ -220,37 +254,9 @@
             ==
         ==
       ::
-          %submit-custom
-        ::  submit a transaction, with frontend-defined everything
-        =/  our-nonces     (~(gut by nonces.state) from.act ~)
-        =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
-        =/  =caller:smart  :+  from.act  +(nonce)
-                          (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
-        =/  =yolk:smart    [caller `q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
-        =/  keypair        (~(got by keys.state) from.act)
-        =/  =egg:smart
-          :_  yolk
-          :*  caller
-              ?~  priv.keypair
-                [0 0 0]
-              %+  ecdsa-raw-sign:secp256k1:secp:crypto
-                (sham yolk)
-              u.priv.keypair
-              ~
-              to.act
-              rate.gas.act
-              bud.gas.act
-              town.act
-              status=%100
-          ==
-        ?~  priv.keypair
-          ::  if we don't have private key for this address, set as pending
-          ::  and allow frontend to sign with HW wallet or otherwise
-          ~&  >>  "%wallet: storing unsigned tx"
-          `state(pending `[(sham yolk) egg [%custom args.act]])
-        ::  if we have key, use signature and submit
-        ::  submit the transaction
-        (submit-tx egg [%custom args.act])
+          %submit-custom      
+        ::  process the transaction
+        (process-tx [%custom args.act]) :: TODO: make formatted an optional parameter
         ==
       ::
           %submit
@@ -261,12 +267,7 @@
         ::  'from' address, contract 'to' address, town select,
         ::  gas (rate & budget), transaction type (acquired from ABI..?)
         ::
-        =/  our-nonces     (~(gut by nonces.state) from.act ~)
-        =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
-        ~|  "wallet: can't find tokens for that address!"
         =/  =book          (~(got by tokens.state) from.act)
-        =/  =caller:smart  :+  from.act  +(nonce)
-                          (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
         ::  need to check transaction type and collect rice based on it
         ::  only supporting small subset of contract calls, for tokens and NFTs
         =/  formatted=[args=(unit *) our-grains=(set @ux) cont-grains=(set @ux)]
@@ -292,20 +293,8 @@
               `[%give to.args.act `their-account-id amount-or-id]
             (silt ~[id.our-account])
           (silt ~[their-account-id])
-        =/  keypair       (~(got by keys.state) from.act)
-        =/  =yolk:smart   [caller args.formatted our-grains.formatted cont-grains.formatted]
-        =/  sig           ?~  priv.keypair
-                            [0 0 0]
-                          (ecdsa-raw-sign:secp256k1:secp:crypto (sham yolk) u.priv.keypair)
-        =/  =egg:smart    [[caller sig ~ to.act rate.gas.act bud.gas.act town.act status=%100] yolk]
-        ?~  priv.keypair
-          ::  if we don't have private key for this address, set as pending
-          ::  and allow frontend to sign with HW wallet or otherwise
-          ~&  >>  "%wallet: storing unsigned tx"
-          `state(pending `[(sham yolk) egg args.act])
-        ::  if we have key, use signature and submit
-        ::  submit the transaction
-        (submit-tx egg args.act)
+        ::  process the transaction
+        (process-tx args.act formatted)
         ==
     --
 ::
