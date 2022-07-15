@@ -59,8 +59,7 @@
           [- me.cart to.args town-id.cart [%& salt.p.germ.giv [0 ~ metadata.giver 0]]]
         ::  continuation call: %give to rice we issued
         :+  %|
-          :~  [me.cart town-id.cart `[%give to.args `id.new amount.args] (silt ~[id.giv]) (silt ~[id.new])]
-          ==
+          [me.cart town-id.cart `[%give to.args `id.new amount.args] (silt ~[id.giv]) (silt ~[id.new])]^~
         [~ (malt ~[[id.new new]]) ~ ~]
       ::  giving account in embryo, and receiving one in owns.cart
       =/  rec=grain  (~(got by owns.cart) u.account.args)
@@ -123,7 +122,7 @@
       ::  reconstruct the typed message and hash
       =/  =typed-message
         :-  (fry-rice holder.giv me.cart town-id.cart salt.p.germ.giv)
-        (sham ;;(approve:sur [holder.giv to.args amount.args nonce.args deadline.args]))
+        (sham [holder.giv to.args amount.args nonce.args deadline.args])
       =/  signed-hash  (sham typed-message)
       
       ::  in production this won't work because we don't have access to zuse...
