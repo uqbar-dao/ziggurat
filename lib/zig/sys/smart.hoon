@@ -214,7 +214,7 @@
 ::::  copy pasted from lib/ethereum/hoon
 ::
 ++  address-from-pub
-  =,  keccak:crypto-non-zuse
+  =,  keccak:crypto
   |=  pub=@
   %+  end  [3 20]
   %+  keccak-256  64
