@@ -87,7 +87,7 @@
       =/  item-data  ;;(^item data.p.germ.item)
       ?>  transferrable.item-data
       =.  holder.item  to.action
-      =/  =crow  [%gave o+(malt ~[['from' (numb caller-id)] ['to' (numb to.action)]])]~
+      =/  =crow  [%gave o+(malt ~[['nft' (numb id.item)] ['from' (numb caller-id)] ['to' (numb to.action)]])]~
       [%& (malt ~[[id.item item]]) ~ crow]
     ==
   --
