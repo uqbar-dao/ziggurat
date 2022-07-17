@@ -58,8 +58,8 @@
           [issued collect]
         =/  contents        i.items-list
         =.  supply.collect  +(supply.collect)
-        =*  next-id         supply.collect
-        =/  salt            (sham (cat 3 next-id id.col-grain))
+        =*  next-num        supply.collect
+        =/  salt            (sham (cat 3 next-num id.col-grain))
         =/  new-item=grain
           :*  (fry-rice me.cart caller-id town-id.cart salt)
               lord=me.cart
@@ -68,7 +68,7 @@
               :+  %&  salt
               ^-  item
               :*  id.col-grain
-                  next-id
+                  next-num
                   contents
               ==
           ==
