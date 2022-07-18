@@ -41,6 +41,52 @@
   =/  gun  (~(mint ut typ) %noun gen)
   [[q.dor [q.dor-sam q.arm-sam]] q.gun]
 ::
+::  parsing and nest-checking lumps
+::
+::  from [type *] to (unit vase)
+++  nesting
+  |=  [typ=type raw=*]
+  ^-  (unit vase)
+  ?.  (levi -:!>(raw) typ)  ~
+  `[typ raw]
+::
+++  get-raw
+  |=  =lump
+  ^-  *
+  ?@  q.lump  q.lump
+  ?+    -.q.lump  !!
+      %n
+    ~
+  ::
+      $?  %ub  %uc  %ud  %ui
+          %ux  %uv  %uw
+          %sb  %sc  %sd  %si
+          %sx  %sv  %sw
+          %da  %dr
+          %f
+          %if  %is
+          %t   %ta
+          %p   %q
+          %rs  %rd  %rh  %rq
+          %address  %grain-id
+      ==
+    +.q.lump
+  ::
+      %list
+    [(get-raw )]
+  ==
+::
+++  type-lump
+  |=  =lump
+  ^-  type
+  :+  %face  p.lump
+  ?@  q.lump  [%atom %tas ~]
+  ?+    -.q.lump  !!
+      $?  %ud  %ux
+      ==
+    [%atom -.q.lump ~]
+  ==
+::
 ::  +hole: vase-checks your types for you
 ::
 ++  hole
@@ -273,54 +319,16 @@
     ++  incubate
       |=  [=egg hits=(list hints) burned=^granary]
       ^-  hatchling
-      |^
       =/  from=[=id nonce=@ud]
         ?:  ?=(@ux from.p.egg)  [from.p.egg 0]
         [id.from.p.egg nonce.from.p.egg]
-      =/  =embryo  (fertilize id.from q.egg)
-      ?~  stalk=(germinate to.p.egg cont-grains.q.egg)
-        ~&  >>>  "mill: failed to germinate"
-        [~ ~ ~ ~ budget.p.egg %5]
-      (grow from u.stalk embryo egg hits burned)
-      ::  +fertilize: take yolk (contract arguments) and populate with granary data,
-      ::  and iff the action is to the zigs contract, insert budget.
-      ++  fertilize
-        |=  [from=id =yolk]
-        ^-  embryo
-        :-  ?~  action.yolk  ~
-            ?:  =(zigs-wheat-id to.p.egg)
-              ?@  u.action.yolk  ~
-              [-.u.action.yolk (mul budget.p.egg rate.p.egg) +.u.action.yolk]
-            u.action.yolk
-        %-  ~(gas by *(map id grain))
-        %+  murn  ~(tap in my-grains.yolk)
-        |=  =id
-        ?~  res=(~(get by granary) id)  ~
-        ?.  =(holder.u.res from)        ~
-        ?.  =(town-id.u.res town-id)    ~
-        `[id u.res]
-      ::  +germinate: take contract-owned grains in egg
-      ::  and populate with granary data
-      ++  germinate
-        |=  [find=id grains=(set id)]
-        ^-  (unit crop)
-        ?~  gra=(~(get by granary) find)  ~
-        ?.  ?=(%| -.germ.u.gra)           ~
-        ?~  cont.p.germ.u.gra             ~
-        :+  ~
-          u.cont.p.germ.u.gra
-        %-  ~(gas by *(map id grain))
-        %+  murn  ~(tap in grains)
-        |=  =id
-        ?~  res=(~(get by granary) id)  ~
-        ?.  =(lord.u.res find)          ~
-        ?.  =(town-id.u.res town-id)    ~
-        `[id u.res]
-      --
+      ?~  gra=(~(get by granary) find)  [~ ~ ~ ~ budget.p.egg %5]
+      ?.  ?=(%| -.germ.u.gra)           [~ ~ ~ ~ budget.p.egg %5]
+      (grow p.germ.u.gra egg hits burned)
     ::  +grow: recursively apply any calls stemming from egg,
     ::  return on rooster or failure
     ++  grow
-      |=  [from=[=id nonce=@ud] =crop =embryo =egg hits=(list hints) burned=^granary]
+      |=  [from=[=id nonce=@ud] =wheat =egg hits=(list hints) burned=^granary]
       ^-  hatchling
       |^
       =+  [hit chick rem err]=(weed to.p.egg budget.p.egg)
@@ -350,7 +358,7 @@
       ::  continue continuing
       =/  inter
         %+  ~(incubate farm (~(dif by (~(uni by granary) all-diffs)) all-burns))
-          egg(from.p to.p.egg, to.p to.i.next, budget.p rem, q yolk.i.next)
+          egg(from.p to.p.egg, to.p to.i.next, budget.p rem, q action.i.next)
         [hits all-burns]
       ?.  =(%0 errorcode.inter)
         [(weld hits.inter hits) ~ ~ ~ rem.inter errorcode.inter]
@@ -369,14 +377,26 @@
         |=  [to=id budget=@ud]
         ^-  [hints (unit chick) rem=@ud =errorcode]
         ~>  %bout
-        =/  =cart  [to from now town-id owns.crop]
-        =/  payload   .*(q.library pay.cont.crop)
-        =/  battery   .*([q.library payload] bat.cont.crop)
+        ?~  cont.wheat  [~ ~ budget %6]
+        =/  =cart  [to from now town-id]
+        =/  payload   .*(q.library pay.u.cont.wheat)
+        =/  battery   .*([q.library payload] bat.u.cont.wheat)
         =/  dor=vase  [-:!>(*contract) battery]
+        ::
+        ::  take action from egg
+        =/  raw=*  (get-raw q.q.egg)  ::  from lump to *
+        ::  validate that action nests
+        ?~  find=(~(get by interface.wheat) p.q.egg)
+          ~&  >>>  "mill:error: action {<p.q.egg>} not found in {<interface.wheat>}"
+          [~ ~ budget %6]
+        ?~  wrapped=(nesting (type-lump u.find) raw)
+          ~&  >>>  "mill:error: action {<q.egg>} doesn't nest in {<u.find>}"
+          [~ ~ budget %6]
+        ::
         ?:  test-mode
           ::  run without zebra
           =/  res
-            :-  (mule |.(;;(chick q:(shut dor %write !>(cart) !>(embryo)))))
+            :-  (mule |.(;;(chick q:(shut dor %write !>(cart) u.wrapped))))
             (sub budget (mul rate.p.egg 7))
           ?:  ?=(%| -.-.res)
             ::  error in contract execution
@@ -384,7 +404,7 @@
           [~ `p.-.res +.res %0]
         ::  generate ZK-proof hints with zebra
         =/  gun
-          (ajar dor %write !>(cart) !>(embryo))
+          (ajar dor %write !>(cart) u.wrapped)
         =/  =book
           (zebra budget zink-cax gun)
         ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
