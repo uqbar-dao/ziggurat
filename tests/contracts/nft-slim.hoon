@@ -87,8 +87,8 @@
 ++  test-give-works
   ^-  tang
   =/  nft  (generate-item-grain 1 item-1 caller-id)
-  =/  =cart  [nft-wheat-id init-now 0x1 ~]
-  =/  =embryo  [caller-id `[%give 0xdead] (malt ~[[nft]])]
+  =/  =cart  [nft-wheat-id init-now 0x1 (malt ~[[nft]])]
+  =/  =embryo  [caller-id `[%give 0xdead] ~]
   =/  res  (~(write cont cart) embryo)
   =/  =crow   [%gave o+(malt ~[['nft' (numb:enjs:format -.nft)] ['from' (numb:enjs:format caller-id)] ['to' (numb:enjs:format 0xdead)]])]~
   =/  new-item  (generate-item-grain 1 item-1 0xdead)

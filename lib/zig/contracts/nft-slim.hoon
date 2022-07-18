@@ -81,10 +81,10 @@
       [%& (malt ~[[id.col-grain col-grain]]) new-issued crow]
     ::
         %give
-      =/  item=grain  -:~(val by grains.inp)
-      ?>  &(=(lord.item me.cart) ?=(%& -.germ.item))
-      ?>  =(caller-id holder.item)
+      =/  item=grain  -:~(val by owns.cart)
+      ?>  ?=(%& -.germ.item)
       =/  item-data  ;;(^item data.p.germ.item)
+      ?>  =(caller-id holder.item)
       ?>  transferrable.item-data
       =.  holder.item  to.action
       =/  =crow  [%gave o+(malt ~[['nft' (numb id.item)] ['from' (numb caller-id)] ['to' (numb to.action)]])]~
