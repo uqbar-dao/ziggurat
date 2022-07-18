@@ -59,8 +59,7 @@
 ::
 +$  rice   [salt=@ label=@tas data=lump]
 ::  contract contains itself and every imported library in pay
-+$  wheat  [cont=(unit [bat=* pay=*]) owns=(set id)]
-+$  crop   [cont=[bat=* pay=*] owns=(map id grain)]  ::  wheat that's been processed by mill.hoon
++$  wheat  [cont=(unit [bat=* pay=*]) =interface]
 ::
 ::  cart: state accessible by contract
 ::
@@ -79,7 +78,7 @@
   $_  ^|
   |_  cart
   ++  write
-    |$  [action]  ::  type information generated in mill
+    |~  [p=@tas q=*]  ::  type information generated in mill
     chick
   ::
   ++  read
@@ -113,7 +112,8 @@
       %9  ::  9: was not parallel / superceded by another egg in batch
   ==
 ::
-+$  egg  (pair shell action)
++$  egg     (pair shell action)
++$  action  (pair @tas lump)
 +$  shell
   $:  from=caller
       =sig               ::  sig on either hash of yolk or eth-hash
@@ -125,12 +125,7 @@
       status=@ud  ::  error code
   ==
 ::
-+$  interface  (map @tas action)
-+$  action     [label=@tas args=(map @tas lump)]
-::  need to convert this:
-::  =/  =action [%give (malt ~[[%to [%address 0xbeef]] [%amount [%ud 10.000]]])]
-::  to this:
-::  [%give to=0xbeef amount=10.000]
++$  interface  (map @tas lump)
 ::
 +$  chick    (each rooster hen)
 +$  crow     (list [@tas json])
@@ -139,6 +134,7 @@
 +$  hen      [next=(list [to=id town-id=id =action]) =rooster]
 ::
 +$  lump
+  %+  pair  @tas
   $~  *iota
   $%  iota
       [%set lump]
@@ -163,7 +159,7 @@
       [%p @p]    [%q @q]
       [%rs @rs]  [%rd @rd]  [%rh @rh]  [%rq @rq]
       ::  contract types
-      [%address @ux]  [%grain-id @ux]  [%grain grain]
+      [%address @ux]  [%grain-id @ux]  ::  maybe keep this? [%grain grain]
   ==
 ::
 ::  JSON, from lull.hoon and zuse.hoon

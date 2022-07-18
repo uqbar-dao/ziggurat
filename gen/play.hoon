@@ -1,20 +1,36 @@
 /+  *zig-sys-smart
 :-  %say
 |=  [[now=@da eny=@uvJ bek=beak] ~ ~]
-::  ideally need to convert this:
-::  =/  =action [%give (malt ~[[%to [%address 0xbeef]] [%amount [%ud 10.000]]])]
-::  to this:
-::  [%give to=0xbeef amount=10.000]
-|^
-=/  =action
-  :-  %give
-  %-  ~(gas by *(map @tas lump))
-  ~[[%to [%address 0xbeef]] [%amount [%ud 10.000]]]
-:-  %noun
-(convert action)
 ::
-++  convert
-  |=  =action
-  =/  stuff=(list [@tas lump])  ~(tap by args.action)
-  `hoon`[%cltr stuff]
+::  from (map @tas lump) to $%
+::
+|^
+=/  =lump
+  [%amount [%ud 100.000]]
+::  =/  gat  $-(* (get-type lump))
+?>  (levi -:!>((get-raw lump)) (get-type lump))
+:-  %noun
+::  (levi -:!>((get-raw lump)) (get-type lump))
+^-  vase
+[p=(get-type lump) q=(get-raw lump)]
+::
+++  get-type
+  |=  =lump
+  ^-  type
+  :+  %face  p.lump
+  ?@  q.lump  [%atom %tas ~]
+  ?+    -.q.lump  !!
+      $?  %ud  %ux
+      ==
+    [%atom -.q.lump ~]
+  ==
+::
+++  get-raw
+  |=  =lump
+  ^-  *
+  ?@  q.lump  q.lump
+  ?+    -.q.lump  !!
+      %ud
+    +.q.lump
+  ==
 --
