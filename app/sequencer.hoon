@@ -21,7 +21,7 @@
       status=?(%available %off)
   ==
 +$  inflated-state-0  [state-0 =mil smart-lib-vase=vase]
-+$  mil  $_  ~(mill mill !>(0) *(map * @))
++$  mil  $_  ~(mill mill !>(0) *(map * @) %.y)
 --
 ::
 =|  inflated-state-0
@@ -37,7 +37,7 @@
   =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
   =/  mil
     %~  mill  mill
-    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun)) %.y]
   :-  ~
   %_    this
       state
@@ -53,7 +53,7 @@
   =/  smart-lib=vase  ;;(vase (cue q.q.smart-lib-noun))
   =/  mil
     %~  mill  mill
-    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun))]
+    [smart-lib ;;((map * @) (cue q.q.zink-cax-noun)) %.y]
   `this(state [!<(state-0 old-vase) mil smart-lib])
 ::
 ++  on-watch
@@ -177,10 +177,11 @@
       =/  addr  p.sequencer.hall.town
       =+  /(scot %p our.bowl)/wallet/(scot %da now.bowl)/account/(scot %ux addr)/(scot %ux town-id.hall.town)/noun
       =+  .^(account:smart %gx -)
-      =/  new=state-transition
-        %+  ~(mill-all mil - town-id.hall.town now.bowl)
-          land.town
-        (turn ~(tap in `^basket`basket.state) tail)
+      =/  [new=state-transition rejected=carton]
+        %^    ~(mill-all mil - town-id.hall.town now.bowl)
+            land.town
+          basket.state
+        256  ::  number of parallel "passes"
       =/  new-root      `@ux`(sham land.new)
       =/  diff-hash     `@ux`(sham ~[diff.new])
       ::  2. generate our signature
@@ -190,7 +191,8 @@
       =/  sig
         (ecdsa-raw-sign:secp256k1:secp:crypto `@uvI`new-root u.private-key.state)
       ::  3. poke rollup
-      :_  state(proposed-batch `[basket.state land.new diff-hash new-root], basket ~)
+      ::  return rejected (not enough passes to cover them) to our basket
+      :_  state(proposed-batch `[basket.state land.new diff-hash new-root], basket (silt rejected))
       =-  [%pass /batch-submit/(scot %ux new-root) %agent [u.rollup.state %rollup] %poke -]~
       :-  %rollup-action
       !>  :-  %receive-batch

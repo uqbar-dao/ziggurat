@@ -32,7 +32,7 @@
       =/  lord               me.cart
       =/  holder             me.cart  ::  TODO should holder be me.cart or caller-id
       =/  new-sig-germ=germ  [%& salt [members.args init-thresh.args ~]]
-      =/  new-sig-id=id      (fry-rice holder lord town-id.cart salt)
+      =/  new-sig-id=id      (fry-rice lord holder town-id.cart salt)
       =/  new-sig=grain      [new-sig-id lord holder town-id.cart new-sig-germ]
       [%& changed=~ issued=(malt ~[[new-sig-id new-sig]]) crow=~]
     =/  my-grain=grain  -:~(val by owns.cart)

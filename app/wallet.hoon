@@ -13,6 +13,7 @@
       seed=[mnem=@t pass=@t address-index=@ud]
       keys=(map pub=@ux [priv=(unit @ux) nick=@t])  ::  keys created from master seed
       nonces=(map pub=@ux (map town=@ux nonce=@ud))
+      signatures=(list [=typed-message:smart =sig:smart])
       tokens=(map pub=@ux =book)
       =transaction-store
       pending=(unit [yolk-hash=@ =egg:smart args=supported-args])
@@ -30,7 +31,7 @@
 +*  this  .
     def   ~(. (default-agent this %|) bowl)
 ::
-++  on-init  `this(state [%0 ['' '' 0] ~ ~ ~ ~ ~ ~])
+++  on-init  `this(state [%0 ['' '' 0] ~ ~ ~ ~ ~ ~ ~])
 ::
 ++  on-save  !>(state)
 ++  on-load
@@ -143,6 +144,17 @@
       =+  -:(~(got by keys.state) address.act)
       `state(keys (~(put by keys) address.act [- nick.act]))
     ::
+        %sign-typed-message
+      =/  keypair  (~(got by keys.state) from.act)
+      =/  hash     (sham typed-message.act)
+      =/  signature
+        ?~  priv.keypair
+          !!  ::  put it into some temporary thing for cold storage. Make it pending
+        %+  ecdsa-raw-sign:secp256k1:secp:crypto
+          hash
+        u.priv.keypair
+      `state(signatures [[typed-message.act signature] signatures])
+    ::
         %set-nonce  ::  for testing/debugging
       =+  acc=(~(got by nonces.state) address.act)
       `state(nonces (~(put by nonces) address.act (~(put by acc) town.act new.act)))
@@ -200,8 +212,8 @@
       =/  our-nonces     (~(gut by nonces.state) from.act ~)
       =/  nonce=@ud      (~(gut by our-nonces) town.act 0)
       =/  =caller:smart  :+  from.act  +(nonce)
-                         (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
-      =/  =yolk:smart    [caller `q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
+                         (fry-rice:smart `@ux`'zigs-contract' from.act town.act `@`'zigs')
+      =/  =yolk:smart    [`q:(slap !>(+:(cue q.q.smart-lib)) (ream args.act)) my-grains.act cont-grains.act]
       =/  keypair        (~(got by keys.state) from.act)
       =/  =egg:smart
         :_  yolk
@@ -255,7 +267,7 @@
       ~|  "wallet: can't find tokens for that address!"
       =/  =book          (~(got by tokens.state) from.act)
       =/  =caller:smart  :+  from.act  +(nonce)
-                        (fry-rice:smart from.act `@ux`'zigs-contract' town.act `@`'zigs')
+                        (fry-rice:smart `@ux`'zigs-contract' from.act town.act `@`'zigs')
       ::  need to check transaction type and collect rice based on it
       ::  only supporting small subset of contract calls, for tokens and NFTs
       =/  formatted=[args=(unit *) our-grains=(set @ux) cont-grains=(set @ux)]
@@ -265,7 +277,7 @@
           =/  metadata  (~(got by metadata-store.state) salt.args.act)
           ~|  "wallet can't find our zigs account for that town!"
           =/  our-account=grain:smart  +:(~(got by book) [town.act to.act salt.metadata])
-          =/  their-account-id  (fry-rice:smart to.args.act to.act town.act salt.metadata)
+          =/  their-account-id  (fry-rice:smart to.act to.args.act town.act salt.metadata)
           ?~  exists=(scry:uqbar %grain their-account-id [our now]:bowl)
             ::  they don't have an account for this token
             ?:  =(to.act `@ux`'zigs-contract')  ::  zigs special case
@@ -284,7 +296,7 @@
           =/  metadata  (~(got by metadata-store.state) salt.args.act)
           ~|  "wallet can't find our zigs account for that town!"
           =/  our-account=grain:smart  +:(~(got by book) [town.act to.act salt.metadata])
-          =/  their-account-id  (fry-rice:smart to.args.act to.act town.act salt.metadata)
+          =/  their-account-id  (fry-rice:smart to.act to.args.act town.act salt.metadata)
           ?~  exists=(scry:uqbar %grain their-account-id [our now]:bowl)
             [`[%give to.args.act ~ item-id.args.act] (silt ~[id.our-account]) ~]
           :+  `[%give to.args.act `their-account-id item-id.args.act]
@@ -294,7 +306,7 @@
           %custom  !!
         ==
       =/  keypair       (~(got by keys.state) from.act)
-      =/  =yolk:smart   [caller args.formatted our-grains.formatted cont-grains.formatted]
+      =/  =yolk:smart   [args.formatted our-grains.formatted cont-grains.formatted]
       =/  sig           ?~  priv.keypair
                           [0 0 0]
                         (ecdsa-raw-sign:secp256k1:secp:crypto (sham yolk) u.priv.keypair)
@@ -456,7 +468,7 @@
     =/  pub  (slav %ux i.t.t.path)
     =/  town-id  (slav %ux i.t.t.t.path)
     =/  nonce  (~(gut by (~(gut by nonces.state) pub ~)) town-id 0)
-    =+  (fry-rice:smart pub `@ux`'zigs-contract' town-id `@`'zigs')
+    =+  (fry-rice:smart `@ux`'zigs-contract' pub town-id `@`'zigs')
     ``noun+!>(`account:smart`[pub nonce -])
   ::
       [%book ~]
@@ -509,6 +521,9 @@
     %+  turn  ~(tap by received.our-txs)
     |=  [hash=@ux t=egg:smart]
     (parse-transaction:wallet-parsing hash t ~)
+  ::
+      [%signatures ~]
+    ``noun+!>(signatures.state)
   ::
       [%pending ~]
     ?~  pending.state  [~ ~]

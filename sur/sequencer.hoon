@@ -1,6 +1,7 @@
 /+  smart=zig-sys-smart, zink=zink-zink
 |%
 +$  basket     (set [hash=@ux =egg:smart])  ::  transaction "mempool"
++$  carton     (list [@ux =egg:smart])      ::  basket that's been prioritized
 +$  sequencer  (pair address:smart ship)
 ::
 +$  availability-method
