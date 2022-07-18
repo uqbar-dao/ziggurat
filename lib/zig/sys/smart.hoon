@@ -230,7 +230,7 @@
 ::::  from ethereum.hoon
 ::
 ++  address-from-pub
-  =,  keccak:crypto-non-zuse
+  =,  keccak:crypto
   |=  pub=@
   %+  end  [3 20]
   %+  keccak-256  64
@@ -540,7 +540,7 @@
 ::
 ::  CRYPTO from zuse.hoon
 ::
-++  crypto-non-zuse  ^?
+++  crypto  ^?
   =,  ames
   =,  number
   |%

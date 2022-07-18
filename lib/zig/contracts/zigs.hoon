@@ -7,7 +7,7 @@
 ::  because %give must include their gas budget, in order for
 ::  zig spends to be guaranteed not to underflow.
 ::
-::  /+  *zig-sys-smart
+/+  *zig-sys-smart
 /=  zigs  /lib/zig/contracts/lib/zigs
 =,  zigs
 |_  =cart

@@ -1,7 +1,7 @@
 ::  [UQ| DAO]
 ::  zigs.hoon v0.8
 ::
-::  /+  *zig-sys-smart
+/+  *zig-sys-smart
 |%
 ++  sur
   |%
