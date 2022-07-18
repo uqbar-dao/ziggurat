@@ -100,7 +100,6 @@
   ++  noun
     ?+    args  !!
         [%mintable ~]
-      ?>  =(1 ~(wyt by owns.cart))
       =/  g=grain  -:~(val by owns.cart)
       ?>  ?=(%& -.germ.g)
       =/  collect  ;;(collection data.p.germ.g)
