@@ -25,14 +25,6 @@
   ^-  id
   ?:(?=(@ux caller) caller id.caller)
 ::
-++  call
-  |=  [to=id town-id=id action=* my=(list id) cont=(list id)]
-  ^-  [id id yolk]
-  :+  to  town-id
-  :+  `action
-    (~(gas in *(set id)) my)
-  (~(gas in *(set id)) cont)
-::
 ++  result
   |=  [changed=(list grain) issued=(list grain) burned=(list grain) =crow]
   ^-  chick
@@ -43,7 +35,7 @@
   crow
 ::
 ++  continuation
-  |=  [next=(list [to=id town-id=id args=yolk]) rooster=chick]
+  |=  [next=(list [to=id town-id=id =action]) rooster=chick]
   ^-  chick
   ?>  ?=(%& -.rooster)
   [%| next p.rooster]
@@ -65,7 +57,7 @@
 +$  grain  [=id lord=id holder=id town-id=id =germ]
 +$  germ   (each rice wheat)
 ::
-+$  rice   [salt=@ label=@tas data=*]
++$  rice   [salt=@ label=@tas data=lump]
 ::  contract contains itself and every imported library in pay
 +$  wheat  [cont=(unit [bat=* pay=*]) owns=(set id)]
 +$  crop   [cont=[bat=* pay=*] owns=(map id grain)]  ::  wheat that's been processed by mill.hoon
@@ -87,8 +79,8 @@
   $_  ^|
   |_  cart
   ++  write
-    |~  embryo
-    *chick
+    |$  [action]  ::  type information generated in mill
+    chick
   ::
   ++  read
     ^|  |_  path
@@ -121,7 +113,7 @@
       %9  ::  9: was not parallel / superceded by another egg in batch
   ==
 ::
-+$  egg  (pair shell yolk)
++$  egg  (pair shell action)
 +$  shell
   $:  from=caller
       =sig               ::  sig on either hash of yolk or eth-hash
@@ -132,32 +124,25 @@
       town-id=id
       status=@ud  ::  error code
   ==
-+$  yolk
-  $:  action=(unit *)
-      my-grains=(set id)
-      cont-grains=(set id)
-  ==
-::  yolk that's been "fertilized" with data by execution engine
-+$  embryo
-  $:  action=*
-      grains=(map id grain)
-  ==
 ::
-+$  interface  (set action)
-+$  action  (pair @tas lump)
-::  [%give [%pair %ux^0x1.beef %ud^10.000]]
++$  interface  (map @tas action)
++$  action     [label=@tas args=(map @tas lump)]
+::  need to convert this:
+::  =/  =action [%give (malt ~[[%to [%address 0xbeef]] [%amount [%ud 10.000]]])]
+::  to this:
+::  [%give to=0xbeef amount=10.000]
 ::
 +$  chick    (each rooster hen)
 +$  crow     (list [@tas json])
 ::
 +$  rooster  [changed=(map id grain) issued=(map id grain) burned=(map id grain) =crow]
-+$  hen      [next=(list [to=id town-id=id =yolk]) =rooster]
++$  hen      [next=(list [to=id town-id=id =action]) =rooster]
 ::
 +$  lump
-  $~  [%n ~]
+  $~  *iota
   $%  iota
-      [%list lump]
       [%set lump]
+      [%list lump]
       [%map lump lump]
       [%pair lump lump]
       [%trel lump lump lump]
