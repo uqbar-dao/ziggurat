@@ -47,10 +47,10 @@
       ::  pre-mint checks
       =/  mintable           (lth supply.collect cap.collect)
       =/  caller-can-mint    (~(has in minters.collect) caller-id)
-      =/  below-cap          (gte cap.collect (add supply.collect ~(wyt in items.action)))
+      =/  below-cap          (gte cap.collect (add supply.collect (lent items.action)))
       ?>  &(mintable caller-can-mint below-cap)
       ::  cleared to mint!
-      =/  items-list  ~(tap in items.action)
+      =*  items-list  items.action
       =|  issued=(map id grain)
       =/  [new-issued=(map id grain) new-collect=collection]
         |-

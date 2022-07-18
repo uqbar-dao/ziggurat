@@ -69,12 +69,10 @@
   
   (expect-eq !>(correct) !>(res))
 ++  test-mint-works
-  :: right now this won't work because the set doesn't gaurantee ordering
-  :: so the data is right but the NFT ids will be scrambled
   ^-  tang
   =/  =cart  [nft-wheat-id init-now 0x1 (malt ~[[collection-id (collection-metadata 0)]])]
   =/  =embryo  :+  caller-id
-                 `[%mint (silt ~[+>:item-1 +>:item-2 +>:item-3])]
+                 `[%mint ~[+>:item-1 +>:item-2 +>:item-3]]
                (malt ~[[collection-id (collection-metadata 0)]])
   =/  res  (~(write cont cart) embryo)
  

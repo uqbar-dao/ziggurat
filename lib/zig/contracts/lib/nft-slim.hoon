@@ -19,7 +19,7 @@
 ::
 +$  action
   $%  [%deploy name=@t symbol=@t cap=@ud minters=(set id)]  ::  expects no grains
-      [%mint items=(set item-contents)]                     ::  expects collection grain in owns.cart  / cont-grains
+      [%mint items=(list item-contents)]                     ::  expects collection grain in owns.cart  / cont-grains
       [%give to=id]                                         ::  expects the item grain in grains.inp / my-grains 
   ==
 --
