@@ -86,8 +86,8 @@
       ==
     ::
     :: for our specific case, id and salt were simply pre-calculated by calling the contract
-    ++  multisig-grain-id    0x5a0e.c09d.57d9.4bda.7524.50a3.ddbb.2248
-    ++  multisig-salt        0x96be.233c.46b2.2eea.4f01.2490.8a36.3041  
+    ++  multisig-grain-id  0x70ee.23b1.a907.a4d7.fafc.22bd.d812.7877.d02b.eeb3.37cf.5c01.6fa6.d01a.b23b.9fbb
+    ++  multisig-salt      0x96be.233c.46b2.2eea.4f01.2490.8a36.3041  
     ++  multisig-grain-1
       ^-  grain
       :*  id=multisig-grain-id
@@ -138,7 +138,7 @@
 ++  test-create-multisig
   ^-  tang
   =/  =embryo
-    :*  action=`[%create-multisig threshold=1 members=(silt ~[id:owner-1])]
+    :*  action=[%create-multisig threshold=1 members=(silt ~[id:owner-1])]
         grains=~
     ==
   =/  =cart  [multisig-wheat-id from=[id:owner-1 0] (add init-now ~s0) town-id owns=~]
@@ -152,7 +152,7 @@
   ::  setting up the tx to propose
   ::  creating the execution context by hand
   =/  =embryo
-    :*  action=`[%submit-tx egg-add-member]
+    :*  action=[%submit-tx egg-add-member]
         grains=~
     ==
   =/  =cart  [me=multisig-wheat-id from=[id:owner-1 0] (add init-now ~s1) town-id owns=(malt ~[[id:multisig-grain-1 multisig-grain-1]])]
@@ -165,7 +165,7 @@
 ++  test-vote-1
   ^-  tang
   =/  =embryo
-    :*  action=`[%vote egg-add-member-hash]
+    :*  action=[%vote egg-add-member-hash]
         grains=~
     ==
   =/  =cart  [me=multisig-wheat-id from=[id:owner-1 0] (add init-now ~s2) town-id owns=(malt ~[[id:multisig-grain-2 multisig-grain-2]])]
@@ -190,7 +190,7 @@
 ++  test-add-member
   ^-  tang
   =/  =embryo
-    :*  action.q:egg-add-member
+    :*  (need action.q:egg-add-member)
         grains=~
     ==
   =/  =cart  [me=multisig-wheat-id [multisig-wheat-id 0] (add init-now ~s3) town-id owns=(malt ~[[id:multisig-grain-3 multisig-grain-3]])]
@@ -203,7 +203,7 @@
   ^-  tang
   ::  skips the %vote tx for this, assumes it already happened
   =/  =embryo
-    :*  action=`[%set-threshold 2]
+    :*  action=[%set-threshold 2]
         grains=~
     ==
   ::  TODO does this make sense?? this is approximating a continuation call and isn't exact anyways
@@ -219,7 +219,7 @@
   ::  TX 1 - %submit-tx to remove owner-1 from multisig
   ::
   =/  =embryo
-    :*  action=`[%submit-tx egg-remove-member]
+    :*  action=[%submit-tx egg-remove-member]
         grains=~
     ==
   =/  =cart      [me=multisig-wheat-id [id:owner-2 0] (add init-now ~s5) town-id owns=(malt ~[[id:multisig-grain-5 multisig-grain-5]])]
@@ -229,7 +229,7 @@
   ::  TX 2 - %vote by owner-2  
   ::
   =.  embryo
-    :*  action=`[%vote egg-remove-member-hash]
+    :*  action=[%vote egg-remove-member-hash]
         grains=~
     ==
   =.  cart  [me=multisig-wheat-id from=[id:owner-2 0] (add init-now ~s6) town-id owns=(malt ~[[id:expected-grain-submit-tx expected-grain-submit-tx]])]  
@@ -239,7 +239,7 @@
   ::  TX 3 - %vote by owner-1, removes owner-1
   ::
   =.  embryo
-    :*  action=`[%vote egg-remove-member-hash]
+    :*  action=[%vote egg-remove-member-hash]
         grains=~
     ==
   =.  cart  [me=multisig-wheat-id from=[id:owner-1 0] (add init-now ~s7) town-id owns=(malt ~[[id:expected-grain-vote-tx-1 expected-grain-vote-tx-1]])]  
@@ -260,7 +260,7 @@
   ::  TX 4 - apply %remove-member
   ::
   =.  embryo
-    :*  action.q:egg-remove-member
+    :*  (need action.q:egg-remove-member)
         grains=~
     ==
   =.  cart  [me=multisig-wheat-id [multisig-wheat-id 0] (add init-now ~s8) town-id owns=(malt ~[[id:expected-grain-vote-tx-2 expected-grain-vote-tx-2]])]  
