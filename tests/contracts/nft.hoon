@@ -135,14 +135,22 @@
 ::
 ::  tests for %deploy
 ::
-++  test-deploy  ^-  tang
-    =/  =embryo
-    :+  owner-1
-      :*  %deploy 0xdead
-          (silt ~[]) :: actually you need jug logic here
-
-      ==
-    (malt ~[[id:`grain`nft-1 nft-1]])
+++  test-deploy
+  ^-  tang
+  =/  =embryo
+    :*  owner-1
+        %-  some
+        :*  %deploy 
+            distribution=(jug id item-contents)
+            minters=(set id)
+            name=@t
+            symbol=@t
+            attributes=(set @t)
+            cap=@ud
+            mintable=?
+        ==
+      (malt ~[[id:`grain`nft-1 nft-1]])
+    ==
   ~
 
 ::
