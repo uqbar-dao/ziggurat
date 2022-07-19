@@ -5,7 +5,7 @@
 ::  argument, and are stored in account-controlled rice.
 ::
 ::  Uncomment the following line to run tests
-::/+  *zig-sys-smart
+/+  *zig-sys-smart
 /=  lib  /lib/zig/contracts/lib/multisig
 =,  lib
 |_  =cart

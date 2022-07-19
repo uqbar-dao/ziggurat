@@ -1,4 +1,4 @@
-::/+  *zig-sys-smart
+/+  *zig-sys-smart
 |%
 ::  XX potentially add [%remove-tx tx-hash=@ux] if it makes sense?
 ::  XX potentially add expired txs?
