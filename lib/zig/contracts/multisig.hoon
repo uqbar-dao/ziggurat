@@ -28,7 +28,7 @@
     =/  new-sig-germ=germ  [%& salt %multisig [members.action init-thresh.action ~]]
     =/  new-sig-id=id      (fry-rice lord holder town-id.cart salt)
     =/  new-sig=grain      [new-sig-id lord holder town-id.cart new-sig-germ]
-    [%& changed=~ issued=(malt ~[[new-sig-id new-sig]]) ~ crow=~]
+    (result ~ issued=new-sig^~ ~ ~)
   =/  my-grain=grain  -:~(val by owns.cart)
   ?>  ?=(%& -.germ.my-grain)
   =/  state=multisig-state  ;;(multisig-state data.p.germ.my-grain)
@@ -56,8 +56,9 @@
     =/  crow=(list [@tas json])
       :~  (event-to-json [%vote-passed tx-hash votes.prop id.my-grain])
       ==
-    =/  roost=rooster  [changed=(malt ~[[id.my-grain my-grain]]) ~ ~ crow]
-    [%| [[to.p.egg town-id.p.egg q.egg]:prop]~ roost]
+    %+  continuation
+      [[to.p.egg town-id.p.egg q.egg]:prop]^~
+    (result my-grain^~ ~ ~ crow)
 
   ::
       %submit-tx
@@ -71,7 +72,7 @@
     =/  egg-hash              (sham-egg egg.action from.cart `@ud`now.cart)
     =.  pending.state         (~(put by pending.state) egg-hash [egg.action *(set id)])
     =.  data.p.germ.my-grain  state
-    [%& (malt ~[[id.my-grain my-grain]]) ~ ~ ~]
+    (result my-grain^~ ~ ~ ~)
   ::
     ::  The following must be sent by the contract itself
     ::
@@ -80,7 +81,7 @@
     ?>  !(~(has in members.state) id.action)  :: adding an existing member is disallowed
     =.  members.state         (~(put in members.state) id.action)
     =.  data.p.germ.my-grain  state
-    [%& (malt ~[[id.my-grain my-grain]]) ~ ~ ~]
+    (result my-grain^~ ~ ~ ~)
   ::
       %remove-member
     =/  member-count  ~(wyt in members.state)
@@ -94,14 +95,14 @@
       new-member-count
     =.  members.state         (~(del in members.state) id.action)
     =.  data.p.germ.my-grain  state
-    [%& (malt ~[[id.my-grain my-grain]]) ~ ~ ~]
+    (result my-grain^~ ~ ~ ~)
   ::
       %set-threshold
     ?>  =(me.cart caller-id)
     ?>  (lte threshold.state ~(wyt in members.state))  :: cannot set threshold higher than member count
     =.  threshold.state       new-thresh.action
     =.  data.p.germ.my-grain  state
-    [%& (malt ~[[id.my-grain my-grain]]) ~ ~ ~]
+    (result my-grain^~ ~ ~ ~)
   ==
 ::
 ++  read
