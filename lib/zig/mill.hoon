@@ -43,20 +43,28 @@
 ::
 ::  parsing and nest-checking lumps
 ::
-::  from [type *] to (unit vase)
 ++  nesting
-  |=  [typ=type raw=*]
+  |=  [=interface =action]
   ^-  (unit vase)
-  ?.  (levi -:!>(raw) typ)  ~
-  `[typ raw]
+  ?~  choice=(~(get by interface) p.action)  ~
+  =/  typ  (make-action p.action u.choice)
+  ::  this isn't doing much, since * fits into pretty much everything...
+  ?.  (levi -:!>(q.action) typ)  ~
+  `[typ [p.action q.action]]
 ::
-++  get-raw
+++  make-action
+  |=  [tag=@tas =lump]
+  ^-  type
+  [%cell [%atom %tas `tag] (type-lump lump)]
+::
+++  type-lump
   |=  =lump
-  ^-  *
-  ?@  q.lump  q.lump
-  ?+    -.q.lump  !!
+  ^-  type
+  :+  %face  p.lump
+  ?@  q.lump  [%atom %tas ~]
+  ?-    -.q.lump
       %n
-    ~
+    %void
   ::
       $?  %ub  %uc  %ud  %ui
           %ux  %uv  %uw
@@ -68,23 +76,30 @@
           %t   %ta
           %p   %q
           %rs  %rd  %rh  %rq
-          %address  %grain-id
-      ==
-    +.q.lump
-  ::
-      %list
-    [(get-raw )]
-  ==
-::
-++  type-lump
-  |=  =lump
-  ^-  type
-  :+  %face  p.lump
-  ?@  q.lump  [%atom %tas ~]
-  ?+    -.q.lump  !!
-      $?  %ud  %ux
       ==
     [%atom -.q.lump ~]
+  ::
+      ?(%address %grain)
+    [%atom %ux ~]
+  ::
+      %pair
+    [%cell $(lump p.+.q.lump) $(lump q.+.q.lump)]
+  ::
+      %trel
+    :+  %cell
+      $(lump p.+.q.lump)
+    :+  %cell
+      $(lump q.+.q.lump)
+    $(lump r.+.q.lump)
+  ::
+      %qual
+    :+  %cell
+      $(lump p.+.q.lump)
+    :+  %cell
+      $(lump q.+.q.lump)
+    :+  %cell
+      $(lump r.+.q.lump)
+    $(lump s.+.q.lump)
   ==
 ::
 ::  +hole: vase-checks your types for you
@@ -257,10 +272,10 @@
       ^-  ?
       ?.  ?=(account from.p.egg)                    %.n
       ?~  zigs=(~(get by granary) zigs.from.p.egg)  %.n
-      ?.  =(id.from.p.egg holder.u.zigs)            %.n
-      ?.  =(zigs-wheat-id lord.u.zigs)              %.n
-      ?.  ?=(%& -.germ.u.zigs)                      %.n
-      =/  acc  (hole token-account data.p.germ.u.zigs)
+      ?.  =(id.from.p.egg holder.p.u.zigs)          %.n
+      ?.  =(zigs-wheat-id lord.p.u.zigs)            %.n
+      ?.  ?=(%& -.u.zigs)                           %.n
+      =/  acc  (hole token-account data.p.u.zigs)
       (gte balance.acc (mul budget.p.egg rate.p.egg))
     ::  +charge: extract gas fee from caller's zigs balance
     ::  returns a single modified grain to be inserted into a diff
@@ -274,10 +289,10 @@
         ::  got will never crash since +audit proved existence
         %+  ~(gut by diff)  zigs.payee
         (~(got by granary) zigs.payee)
-      ?>  ?=(%& -.germ.zigs)
-      =/  acc  (hole token-account data.p.germ.zigs)
+      ?>  ?=(%& -.zigs)
+      =/  acc  (hole token-account data.p.zigs)
       =.  balance.acc  (sub balance.acc fee)
-      [zigs.payee zigs(data.p.germ acc)]
+      [zigs.payee zigs(data.p acc)]
     ::  +pay: give fees from eggs to miller
     ++  pay
       |=  total=@ud
@@ -287,13 +302,13 @@
         ::  create a new account rice for the sequencer if needed
         =/  =token-account  [total ~ `@ux`'zigs-metadata']
         =/  =id  (fry-rice zigs-wheat-id id.miller town-id `@`'zigs')
-        [id zigs-wheat-id id.miller town-id [%& 'zigs' %account token-account]]
-      ?.  ?=(%& -.germ.acc)  granary
-      =/  account  (hole token-account data.p.germ.acc)
+        [%& id zigs-wheat-id id.miller town-id 'zigs' %account token-account]
+      ?.  ?=(%& -.acc)  granary
+      =/  account  (hole token-account data.p.acc)
       ?.  =(`@ux`'zigs-metadata' metadata.account)  granary
       =.  balance.account  (add balance.account total)
-      =.  data.p.germ.acc  account
-      (~(put by granary) id.acc acc)
+      =.  data.p.acc  account
+      (~(put by granary) id.p.acc acc)
     --
   ::
   ::  +farm: execute a call to a contract
@@ -322,9 +337,9 @@
       =/  from=[=id nonce=@ud]
         ?:  ?=(@ux from.p.egg)  [from.p.egg 0]
         [id.from.p.egg nonce.from.p.egg]
-      ?~  gra=(~(get by granary) find)  [~ ~ ~ ~ budget.p.egg %5]
-      ?.  ?=(%| -.germ.u.gra)           [~ ~ ~ ~ budget.p.egg %5]
-      (grow p.germ.u.gra egg hits burned)
+      ?~  gra=(~(get by granary) to.p.egg)  [~ ~ ~ ~ budget.p.egg %5]
+      ?.  ?=(%| -.u.gra)                    [~ ~ ~ ~ budget.p.egg %5]
+      (grow from p.u.gra egg hits burned)
     ::  +grow: recursively apply any calls stemming from egg,
     ::  return on rooster or failure
     ++  grow
@@ -378,20 +393,19 @@
         ^-  [hints (unit chick) rem=@ud =errorcode]
         ~>  %bout
         ?~  cont.wheat  [~ ~ budget %6]
-        =/  =cart  [to from now town-id]
+        =/  =cart       [to from now town-id (plant q.q.egg)]
         =/  payload   .*(q.library pay.u.cont.wheat)
         =/  battery   .*([q.library payload] bat.u.cont.wheat)
         =/  dor=vase  [-:!>(*contract) battery]
         ::
-        ::  take action from egg
-        =/  raw=*  (get-raw q.q.egg)  ::  from lump to *
         ::  validate that action nests
-        ?~  find=(~(get by interface.wheat) p.q.egg)
-          ~&  >>>  "mill:error: action {<p.q.egg>} not found in {<interface.wheat>}"
+        ~&  >  "action: {<q.egg>}"
+        ?~  wrapped=(nesting interface.wheat q.egg)
+          ~&  >>>  "mill:error: action {<q.egg>} not found in {<~(key by interface.wheat)>}"
           [~ ~ budget %6]
-        ?~  wrapped=(nesting (type-lump u.find) raw)
-          ~&  >>>  "mill:error: action {<q.egg>} doesn't nest in {<u.find>}"
-          [~ ~ budget %6]
+        ::
+        ~&  >>  q.u.wrapped
+        ~&  >>>  cart
         ::
         ?:  test-mode
           ::  run without zebra
@@ -418,6 +432,20 @@
           ~&  >>>  "mill: ran out of gas"
           [~ 0 %8]
         [(hole (unit chick) p.p.book) bud.q.book %0]
+      ::
+      ++  plant
+        |=  act=*
+        ^-  ^granary
+        =|  gra=^granary
+        |-
+        ^-  ^granary
+        ~&  act
+        ?@  act  gra
+        ?:  ?=([%grain id] act)
+          ?~  found=(~(get by granary) +.act)
+            gra
+          (~(put by (~(uni by $(act -.act)) $(act +.act))) +.act u.found)
+        (~(uni by $(act -.act)) $(act +.act))
       --
     ::
     ::  +harvest: take a completed execution and validate all changes 
@@ -440,12 +468,12 @@
           ::  only grains that proclaim us lord may be changed
           =/  old  (~(get by granary) id)
           ?&  ?=(^ old)
-              ?:  ?=(%& -.germ.u.old)
-                &(?=(%& -.germ.grain) =(salt.p.germ.u.old salt.p.germ.grain))
-              =(%| -.germ.grain)
-              =(id id.grain)
-              =(lord.grain lord.u.old)
-              =(lord lord.u.old)
+              ?:  ?=(%& -.u.old)
+                &(?=(%& -.grain) =(salt.p.u.old salt.p.grain))
+              =(%| -.grain)
+              =(id id.p.grain)
+              =(lord.p.grain lord.p.u.old)
+              =(lord lord.p.u.old)
           ==
         ::
           %-  ~(all in issued.res)
@@ -454,12 +482,12 @@
           ::  lord of grain must be contract issuing it AND
           ::  grain must not yet exist at that id AND
           ::  grain IDs must match defined hashing functions
-          ?&  =(id id.grain)
-              =(lord lord.grain)
-              !(~(has by granary) id.grain)
-              ?:  ?=(%| -.germ.grain)
-                =(id (fry-contract lord town-id.grain cont.p.germ.grain))
-              =(id (fry-rice lord holder.grain town-id.grain salt.p.germ.grain))
+          ?&  =(id id.p.grain)
+              =(lord lord.p.grain)
+              !(~(has by granary) id.p.grain)
+              ?:  ?=(%| -.grain)
+                =(id (fry-contract lord town-id.p.grain cont.p.grain))
+              =(id (fry-rice lord holder.p.grain town-id.p.grain salt.p.grain))
           ==
         ::
           %-  ~(all in burned.res)
@@ -473,10 +501,10 @@
           ::  NOTE: you *CAN* modify a grain in-contract before burning it.
           =/  old  (~(get by granary) id)
           ?&  ?=(^ old)
-              =(id id.grain)
+              =(id id.p.grain)
               !(~(has by changed.res) id)
-              =(lord.grain lord.u.old)
-              =(lord lord.u.old)
+              =(lord.p.grain lord.p.u.old)
+              =(lord lord.p.u.old)
               !=(zigs.from id)
           ==
       ==

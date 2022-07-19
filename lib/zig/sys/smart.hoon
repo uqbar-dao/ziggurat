@@ -29,9 +29,9 @@
   |=  [changed=(list grain) issued=(list grain) burned=(list grain) =crow]
   ^-  chick
   :-  %&
-  :^    (~(gas by *(map id grain)) (turn changed |=(=grain [id.grain grain])))
-      (~(gas by *(map id grain)) (turn issued |=(=grain [id.grain grain])))
-    (~(gas by *(map id grain)) (turn burned |=(=grain [id.grain grain])))
+  :^    (~(gas by *(map id grain)) (turn changed |=(=grain [id.p.grain grain])))
+      (~(gas by *(map id grain)) (turn issued |=(=grain [id.p.grain grain])))
+    (~(gas by *(map id grain)) (turn burned |=(=grain [id.p.grain grain])))
   crow
 ::
 ++  continuation
@@ -54,12 +54,11 @@
 ::
 ::  a grain holds either rice (data) or wheat (functions)
 ::
-+$  grain  [=id lord=id holder=id town-id=id =germ]
-+$  germ   (each rice wheat)
++$  grain  (each rice wheat)
 ::
-+$  rice   [salt=@ label=@tas data=lump]
++$  rice   [=id lord=id holder=id town-id=id salt=@ label=@tas data=*]
 ::  contract contains itself and every imported library in pay
-+$  wheat  [cont=(unit [bat=* pay=*]) =interface]
++$  wheat  [=id lord=id holder=id town-id=id cont=(unit [bat=* pay=*]) =interface]
 ::
 ::  cart: state accessible by contract
 ::
@@ -69,7 +68,7 @@
       now=@da
       ::  TODO: bring back batch #
       town-id=id
-      owns=(map id grain)
+      grains=(map id grain)
   ==
 ::
 ::  contract definition
@@ -78,7 +77,7 @@
   $_  ^|
   |_  cart
   ++  write
-    |~  [p=@tas q=*]  ::  type information generated in mill
+    |~  *  ::  type information generated in mill
     chick
   ::
   ++  read
@@ -89,6 +88,7 @@
       *^noun
     --
   --
+::
 ::  transaction types, fed into contract
 ::
 ::  egg error codes:
@@ -113,7 +113,7 @@
   ==
 ::
 +$  egg     (pair shell action)
-+$  action  (pair @tas lump)
++$  action  (pair @tas *)
 +$  shell
   $:  from=caller
       =sig               ::  sig on either hash of yolk or eth-hash
@@ -137,12 +137,12 @@
   %+  pair  @tas
   $~  *iota
   $%  iota
-      [%set lump]
-      [%list lump]
-      [%map lump lump]
-      [%pair lump lump]
-      [%trel lump lump lump]
-      [%qual lump lump lump lump]
+      ::  [%set lump]
+      ::  [%list lump]
+      ::  [%map lump lump]
+      [%pair p=lump q=lump]
+      [%trel p=lump q=lump r=lump]
+      [%qual p=lump q=lump r=lump s=lump]
   ==
 ::
 +$  iota                                                ::  typed path segment
@@ -159,7 +159,7 @@
       [%p @p]    [%q @q]
       [%rs @rs]  [%rd @rd]  [%rh @rh]  [%rq @rq]
       ::  contract types
-      [%address @ux]  [%grain-id @ux]  ::  maybe keep this? [%grain grain]
+      [%address @ux]  [%grain @ux]
   ==
 ::
 ::  JSON, from lull.hoon and zuse.hoon
