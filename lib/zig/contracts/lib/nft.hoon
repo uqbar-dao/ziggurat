@@ -16,7 +16,8 @@
   ::
   ::  item id is # in collection (<=supply)
   +$  item  
-    $:  id=@ud
+    $:  collection=id
+        item-num=@ud  :: used to be id=@ud
         allowance=(unit id)
         item-contents
     ==
@@ -25,11 +26,6 @@
         desc=@t
         uri=@t
         transferrable=?
-    ==
-  ::
-  +$  mint
-    $:  to=id
-        items=(set item-contents)
     ==
   +$  arguments
     $%  [%give to=id]
@@ -58,10 +54,10 @@
       |=  =item:sur
       ^-  json
       %-  pairs
-      :^    [%id (numb id.item)]
+      :^    [%id (numb item-num.item)]
           ?~  allowance.item  [%allowance ~]
           [%allowance %s (scot %ux u.allowance.item)]
-        [%item-contents (item-contents +>.item)]
+        [%item-contents (item-contents +>+.item)]
       ~
     ::
     ++  collection-metadata
@@ -111,7 +107,7 @@
         %-  pairs
         :^    [%collection %s (scot %ux collection.a)]
             [%to %s (scot %ux to.a)]
-          [%item-contents (item-contents item-contents.a)]
+          [%item-contents (item-contents +>+.a)]
         ~
       ::
           %deploy

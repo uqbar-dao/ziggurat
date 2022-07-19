@@ -55,8 +55,9 @@
       =/  collection=grain  (~(got by owns.cart) collection.args)
       ?>  &(=(lord.collection me.cart) ?=(%& -.germ.collection))
       =/  meta  ;;(collection-metadata:sur data.p.germ.collection)
-      ?>  &(mintable.meta ?=(^ cap.meta) ?=(^ minters.meta))  ::  first, check if token is mintable
+      ?>  &(mintable.meta ?=(^ cap.meta) !=(~ minters.meta))  ::  first, check if token is mintable
       ?>  (gth u.cap.meta +(supply.meta))                     ::  check if mint will surpass supply cap
+      ?>  (~(has in minters.meta) caller-id)
       ::  TODO validate attributes
       ::  cleared to execute!
       =/  new-item=grain
@@ -66,16 +67,14 @@
             town-id.cart
             :+  %&  salt.meta
             ^-  item:sur
-            :+  +(supply.meta)  ::  increase supply by one
-              ~
-            item-contents.args
+            :*  id.collection
+                +(supply.meta)
+                ~
+                item-contents.args
+            ==
         ==
       =.  data.p.germ.collection  meta(supply +(supply.meta))
-      :*  %&
-          (~(put by *(map id grain)) -.collection collection)
-          (~(put by *(map id grain)) -.new-item new-item)
-          ~
-      ==
+      [%& (malt ~[[id.collection collection]]) (malt ~[[id.new-item new-item]]) ~]
     ::
         %deploy
       ::  no rice expected as input, only arguments
@@ -112,54 +111,40 @@
                 deployer=caller-id
                 salt
         ==  ==
-      ::  TODO distribution
-      ::  map from id to set of items
-      :: all-items = map(id item-grain)
-      :: for (id in map)
-      ::   for item in (map[id])
-      ::     all-items[(fry-rice data)] = contruct-grain
-      =+  next-item-id=`@ud`0
-      =/  items
-        %-  ~(gas by *(map id grain))
-        %+  turn  ~(tap by distribution.args)
+      :: all-items = map of grain-id -> new-item-grain (aka newly minted grains)
+      :: for ([holder-id items-to-mint] in distribution)  :: holder-id is who the items will be minted to
+      ::   for item in items-to-mint
+      ::     new-item = make-item-grain(...)
+      ::     metadata = update_supply()
+      ::     all-items.push(new-item)
+      =/  next-item-id=@ud  0 
+      =/  all-items=(map id grain)
+        %-  ~(gas by *(map id grain))         :: you goal is to create a list of [id grain]
+        %-  zing
+        %+  turn  ~(tap by distribution.args) :: for id in distribution
         |=  [=id items=(set item-contents:sur)]
+        ^-  (list [^id grain])
         =/  mint-list  ~(tap in items)
-        =/  new-items=(map @ud item-contents:sur)
-          =+  new-items=*(map @ud item-contents:sur)
-          |-  ?~  mint-list
-            new-items
-          =+  [+(next-item-id) i.mint-list]
-          %=  $
-            mint-list     t.mint-list
-            :: new-items     (~(put by new-items) -.- -)
-            next-item-id  +(next-item-id)
+        =|  new-items=(list [^id grain])
+        |-
+        ?~  mint-list
+          new-items
+        =/  the-item   `item:sur`[id.metadata-grain +(next-item-id) ~ i.mint-list]
+        =/  item-salt  (sham salt item-num.the-item)
+        =/  item-id    (fry-rice id me.cart town-id.cart item-salt)
+        =/  item-grain=grain
+          :*  item-id
+              me.cart
+              id
+              town-id.cart 
+              [%& item-salt the-item]
           ==
-        =+  (fry-rice id me.cart town-id.cart 0)
-        :-  -
-        [- me.cart id town-id.cart [%& 0 ~]]
-      ~&  >>>  items
-      [%& ~ ~ ~]
-      ::  TODO: WIP
-      :: =+  next-item-id=0
-      :: =/  items  :: map of id (fry-rice) to item grains
-      ::   %-  ~(gas by *(map id grain))         :: you goal is to create a list of [id grain]
-      ::   %+  turn  ~(tap by distribution.args) :: for id in distribution
-      ::   |=  [=id items=(set item-contents:sur)]
-      ::   =/  mint-list  ~(tap in items)        :: for item in distribution[id]
-      ::   =/  new-items=(map @ud item:sur)
-      ::     =+  new-items=*(map @ud item:sur)
-      ::     |-  ?~  mint-list
-      ::       new-items
-      ::     =+  [+(next-item-id) i.mint-list]
-      ::     %=  $
-      ::       mint-list     t.mint-list
-      ::       new-items     (~(put by new-items) -.- -)
-      ::       next-item-id  +(next-item-id)
-      ::     ==
-      ::   =+  (fry-rice id me.card town-id.cart salt)
-      ::   :-  -
-      ::   [- me.cart id town-id.cart [%& id.metadata-grain ~ ]]
-      :: [%& ~ (~(put by *(map id grain)) id.metadata-grain metadata-grain) ~]
+        %=  $
+          mint-list     t.mint-list
+          new-items     [[id.item-grain item-grain] new-items]
+          next-item-id  +(next-item-id)
+        ==
+      [%& (~(put by all-items) [id.metadata-grain metadata-grain]) ~ ~]
     ==
   --
 ::
