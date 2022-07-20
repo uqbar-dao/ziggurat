@@ -117,34 +117,39 @@
       ::     new-item = make-item-grain(...)
       ::     metadata = update_supply()
       ::     all-items.push(new-item)
-      =/  next-item-id=@ud  0 
+      ::
+      ::  NOTE: Yeah this recursion is ugly if you know better please fix it.
       =/  all-items=(map id grain)
-        %-  ~(gas by *(map id grain))         :: you goal is to create a list of [id grain]
-        %-  zing
-        %+  turn  ~(tap by distribution.args) :: for id in distribution
-        |=  [=id items=(set item-contents:sur)]
-        ^-  (list [^id grain])
-        =/  mint-list  ~(tap in items)
-        =|  new-items=(list [^id grain])
+        =|  all-items=(map id grain)
+        =/  next-item-id=@ud  0
+        =/  dist  ~(tap by distribution.args)
         |-
-        ?~  mint-list
-          new-items
-        =/  the-item   `item:sur`[id.metadata-grain +(next-item-id) ~ i.mint-list]
-        =/  item-salt  (sham salt item-num.the-item)
-        =/  item-id    (fry-rice id me.cart town-id.cart item-salt)
-        =/  item-grain=grain
-          :*  item-id
-              me.cart
-              id
-              town-id.cart 
-              [%& item-salt the-item]
+        ?~  dist
+          all-items
+        =/  [=id items=(set item-contents:sur)]  i.dist
+        =/  mint-list  ~(tap in items)
+        =/  [new-items=(list (pair ^id grain)) current-item-id=@ud]
+          =|  new-items=(list (pair ^id grain))
+          |-
+          ?~  mint-list
+            [new-items next-item-id]
+          =.  next-item-id  +(next-item-id)
+          =/  the-item   `item:sur`[id.metadata-grain next-item-id ~ i.mint-list]
+          =/  item-salt  (sham salt item-num.the-item)
+          =/  item-id    (fry-rice id me.cart town-id.cart item-salt)
+          =/  item-grain=grain
+            :*  item-id
+                me.cart
+                id
+                town-id.cart 
+                [%& item-salt the-item]
+            ==
+          %=  $
+            mint-list     t.mint-list
+            new-items     [[id.item-grain item-grain] new-items]
           ==
-        %=  $
-          mint-list     t.mint-list
-          new-items     [[id.item-grain item-grain] new-items]
-          next-item-id  +(next-item-id)
-        ==
-      [%& (~(put by all-items) [id.metadata-grain metadata-grain]) ~ ~]
+        $(dist t.dist, next-item-id current-item-id, all-items (~(gas by all-items) new-items))
+      [%& ~ (~(put by all-items) [id.metadata-grain metadata-grain]) ~]
     ==
   --
 ::
