@@ -1,11 +1,11 @@
 /-  *zink
 /+  *zink-pedersen, *zink-json
 =>  |%
-    +$  good      (unit *)
+    +$  good      (unit (pair * hints))
     +$  fail      (list [@ta *])
     +$  body      (each good fail)
     +$  cache     (map * phash)
-    +$  appendix  [cax=cache hit=hints bud=@]
+    +$  appendix  [cax=cache bud=@]
     +$  book      (pair body appendix)
     --
 |%
@@ -14,7 +14,7 @@
   ^-  book
   %.  [s f]
   %*  .  zink
-    app  [cax ~ bud]
+    app  [cax bud]
   ==
 ::
 ++  hash
@@ -51,11 +51,13 @@
   ^-  book
   |^
   |-
+  ::~&  >  f
   ?+    f
     ~&  f
     [%|^trace app]
   ::
       [^ *]
+    ~&  >  "%cons"
     =^  hed=body  app
       $(f -.f)
     ?:  ?=(%| -.hed)  ~&  61  [%|^trace app]
@@ -68,10 +70,12 @@
     ?~  hhed  [%&^~ app]
     =^  htal=(unit phash)  app  (hash +.f)
     ?~  htal  [%&^~ app]
-    :-  [%& ~ u.p.hed^u.p.tal]
-    app(hit [%cons u.hhed u.htal]^hit)
+    =/  hit  [%cons u.hhed u.htal]^(welp q.u.p.hed q.u.p.tal)
+    :-  [%& ~ [p.u.p.hed p.u.p.tal] hit]
+    app
   ::
       [%0 axis=@]
+      ~&  >  "%0"
     =^  part  bud
       (frag axis.f s bud)
     ?~  part  [%&^~ app]
@@ -80,16 +84,18 @@
     ?~  hpart  [%&^~ app]
     =^  hsibs=(unit (list phash))  app  (merk-sibs s axis.f)
     ?~  hsibs  [%&^~ app]
-    :-  [%& ~ u.u.part]
-    app(hit [%0 axis.f u.hpart u.hsibs]^hit)
+    :-  [%& ~ u.u.part ~[[%0 axis.f u.hpart u.hsibs]]]
+    app
   ::
       [%1 const=*]
+      ~&  >  "%1"
     =^  hres=(unit phash)  app  (hash const.f)
     ?~  hres  [%&^~ app]
-    :-  [%& ~ const.f]
-    app(hit [%1 u.hres]^hit)
+    :-  [%& ~ const.f ~[[%1 u.hres]]]
+    app
   ::
       [%2 sub=* for=*]
+      ~&  >  "%2"
     =^  hsub=(unit phash)  app  (hash sub.f)
     ?~  hsub  [%&^~ app]
     =^  hfor=(unit phash)  app  (hash for.f)
@@ -102,41 +108,45 @@
       $(f for.f)
     ?:  ?=(%| -.formula)  ~&  103  [%|^trace app]
     ?~  p.formula  [%&^~ app]
-    %_  $
-      s    u.p.subject
-      f    u.p.formula
-      hit  [%2 u.hsub u.hfor]^hit
+    =/  res
+      %_  $
+        s    p.u.p.subject
+        f    p.u.p.formula
     ==
+   (append-hints res [%2 u.hsub u.hfor]^(welp q.u.p.subject q.u.p.formula))
   ::
       [%3 arg=*]
+      ~&  >  "%3"
     =^  argument=body  app
       $(f arg.f)
     ?:  ?=(%| -.argument)  ~&  114  [%|^trace app]
     ?~  p.argument  [%&^~ app]
     =^  harg=(unit phash)  app  (hash arg.f)
     ?~  harg  [%&^~ app]
-    ?@  u.p.argument
-      :-  [%& ~ %.n]
-      app(hit [%3 u.harg %atom u.p.argument]^hit)
-    =^  hhash=(unit phash)  app  (hash -.u.p.argument)
+    ?@  p.u.p.argument
+      :-  [%& ~ %.n [%3 u.harg %atom p.u.p.argument]^q.u.p.argument]
+      app
+    =^  hhash=(unit phash)  app  (hash -.p.u.p.argument)
     ?~  hhash  [%&^~ app]
-    =^  thash=(unit phash)  app  (hash +.u.p.argument)
+    =^  thash=(unit phash)  app  (hash +.p.u.p.argument)
     ?~  thash  [%&^~ app]
-    :-  [%& ~ %.y]
-    app(hit [%3 u.harg %cell u.hhash u.thash]^hit)
+    :-  [%& ~ %.y [%3 u.harg %cell u.hhash u.thash]^q.u.p.argument]
+    app
   ::
       [%4 arg=*]
+      ~&  >  "%4"
     =^  argument=body  app
       $(f arg.f)
     ?:  ?=(%| -.argument)  ~&  131  [%|^trace app]
     =^  harg=(unit phash)  app  (hash arg.f)
     ?~  harg  [%&^~ app]
     ?~  p.argument  [%&^~ app]
-    ?^  u.p.argument  ~&  135  [%|^trace app]
-    :-  [%& ~ .+(u.p.argument)]
-    app(hit [%4 u.harg u.p.argument]^hit)
+    ?^  p.u.p.argument  ~&  135  [%|^trace app]
+    :-  [%& ~ .+(p.u.p.argument) [%4 u.harg p.u.p.argument]^q.u.p.argument]
+    app
   ::
       [%5 a=* b=*]
+      ~&  >  "%5"
     =^  ha=(unit phash)  app  (hash a.f)
     ?~  ha  [%&^~ app]
     =^  hb=(unit phash)  app  (hash b.f)
@@ -149,10 +159,11 @@
       $(f b.f)
     ?:  ?=(%| -.b)  ~&  150  [%|^trace app]
     ?~  p.b  [%&^~ app]
-    :-  [%& ~ =(u.p.a u.p.b)]
-    app(hit [%5 u.ha u.hb]^hit)
+    :-  [%& ~ =(p.u.p.a p.u.p.b) [%5 u.ha u.hb]^(welp q.u.p.a q.u.p.b)]
+    app
   ::
       [%6 test=* yes=* no=*]
+      ~&  >  "%6"
     =^  htest=(unit phash)  app  (hash test.f)
     ?~  htest  [%&^~ app]
     =^  hyes=(unit phash)   app  (hash yes.f)
@@ -163,13 +174,14 @@
       $(f test.f)
     ?:  ?=(%| -.result)  ~&  164  [%|^trace app]
     ?~  p.result  [%&^~ app]
-    =.  hit  [%6 u.htest u.hyes u.hno]^hit
-    ?+  u.p.result  ~&  167  [%|^trace app]
+    =/  res  ?+  p.u.p.result  ~&  167  [%|^trace app]
       %&  $(f yes.f)
       %|  $(f no.f)
     ==
+    (append-hints res [%6 u.htest u.hyes u.hno]^q.u.p.result)
   ::
       [%7 subj=* next=*]
+      ~&  >  "%7"
     =^  hsubj=(unit phash)  app  (hash subj.f)
     ?~  hsubj  [%&^~ app]
     =^  hnext=(unit phash)  app  (hash next.f)
@@ -178,17 +190,18 @@
       $(f subj.f)
     ?:  ?=(%| -.subject)  ~&  179  [%|^trace app]
     ?~  p.subject  [%&^~ app]
-    %_  $
-      s    u.p.subject
+    =/  res  %_  $
+      s    p.u.p.subject
       f    next.f
-      hit  [%7 u.hsubj u.hnext]^hit
     ==
+    (append-hints res [%7 u.hsubj u.hnext]^q.u.p.subject)
   ::
       [%8 head=* next=*]
-    =^  jax=body  app
-      (jet head.f next.f)
-    ?:  ?=(%| -.jax)  ~&  190  [%|^trace app]
-    ?^  p.jax  [%& p.jax]^app
+      ~&  >  "%8"
+   :: =^  jax=body  app
+    ::  (jet head.f next.f)
+    ::?:  ?=(%| -.jax)  ~&  190  [%|^trace app]
+    ::?^  p.jax  [%& p.jax]^app
     =^  hhead=(unit phash)  app  (hash head.f)
     ?~  hhead  [%&^~ app]
     =^  hnext=(unit phash)  app  (hash next.f)
@@ -197,13 +210,14 @@
       $(f head.f)
     ?:  ?=(%| -.head)  ~&  198  [%|^trace app]
     ?~  p.head  [%&^~ app]
-    %_  $
-      s    [u.p.head s]
+    =/  res  %_  $
+      s    [p.u.p.head s]
       f    next.f
-      hit  [%8 u.hhead u.hnext]^hit
     ==
+    (append-hints res [%8 u.hhead u.hnext]^q.u.p.head)
   ::
       [%9 axis=@ core=*]
+      ~&  >  "%9"
     =^  hcore=(unit phash)  app  (hash core.f)
     ?~  hcore  [%&^~ app]
     =^  core=body  app
@@ -211,20 +225,21 @@
     ?:  ?=(%| -.core)  ~&  211  [%|^trace app]
     ?~  p.core  [%&^~ app]
     =^  arm  bud
-      (frag axis.f u.p.core bud)
+      (frag axis.f p.u.p.core bud)
     ?~  arm  [%&^~ app]
     ?~  u.arm  ~&  216  [%|^trace app]
     =^  harm=(unit phash)  app  (hash u.u.arm)
     ?~  harm  [%&^~ app]
-    =^  hsibs=(unit (list phash))  app  (merk-sibs u.p.core axis.f)
+    =^  hsibs=(unit (list phash))  app  (merk-sibs p.u.p.core axis.f)
     ?~  hsibs  [%&^~ app]
-    %_  $
-      s    u.p.core
+    =/  res  %_  $
+      s    p.u.p.core
       f    u.u.arm
-      hit  [%9 axis.f u.hcore u.harm u.hsibs]^hit
     ==
+    (append-hints res [%9 axis.f u.hcore u.harm u.hsibs]^q.u.p.core)
   ::
       [%10 [axis=@ value=*] target=*]
+      ~&  >  "%10"
     =^  hval=(unit phash)  app  (hash value.f)
     ?~  hval  [%&^~ app]
     =^  htar=(unit phash)  app  (hash target.f)
@@ -239,31 +254,35 @@
     ?:  ?=(%| -.value)  ~&  239  [%|^trace app]
     ?~  p.value  [%&^~ app]
     =^  mutant=(unit (unit *))  bud
-      (edit axis.f u.p.target u.p.value bud)
+      (edit axis.f p.u.p.target p.u.p.value bud)
     ?~  mutant  [%&^~ app]
     ?~  u.mutant  ~&  244  [%|^trace app]
     =^  oldleaf  bud
-      (frag axis.f u.p.target bud)
+      (frag axis.f p.u.p.target bud)
     ?~  oldleaf  [%&^~ app]
     ?~  u.oldleaf  ~&  248  [%|^trace app]
     =^  holdleaf=(unit phash)  app  (hash u.u.oldleaf)
     ?~  holdleaf  [%&^~ app]
-    =^  hsibs=(unit (list phash))  app  (merk-sibs u.p.target axis.f)
+    =^  hsibs=(unit (list phash))  app  (merk-sibs p.u.p.target axis.f)
     ?~  hsibs  [%&^~ app]
-    :-  [%& ~ u.u.mutant]
-    app(hit [%10 axis.f u.hval u.htar u.holdleaf u.hsibs]^hit)
+    :-
+    [%& ~ u.u.mutant [%10 axis.f u.hval u.htar u.holdleaf u.hsibs]^(welp q.u.p.target q.u.p.value)]
+    app
+    ::app(hit [%10 axis.f u.hval u.htar u.holdleaf u.hsibs]^(welp hit1 hit2))
   ::
        [%11 tag=@ next=*]
+       ~&  >  "%11"
     =^  next=body  app
       $(f next.f)
     :_  app
     ?:  ?=(%| -.next)  ~&  260  %|^trace
     ?~  p.next  %&^~
-    :+  %&  ~
+    :^  %&  ~
     .*  s
-    [11 tag.f 1 u.p.next]
+    [11 tag.f 1 -.u.p.next]
+    ~  :: Do we need hints?
   ::
-      [%11 [tag=@ clue=*] next=*]
+     [%11 [tag=@ clue=*] next=*]
     =^  clue=body  app
       $(f clue.f)
     ?:  ?=(%| -.clue)  ~&  269  [%|^trace app]
@@ -276,10 +295,28 @@
     :_  app
     ?:  ?=(%| -.next)  ~&  277  %|^trace
     ?~  p.next  %&^~
-    :+  %&  ~
+    :^  %&  ~
     .*  s
-    [11 [tag.f 1 u.p.clue] 1 u.p.next]
+    [11 [tag.f 1 -.u.p.clue] 1 -.u.p.next]
+    ~  :: Do we need hints?
   ==
+  ++  append-hints
+    |=  [[bod=body app=appendix] hin=hints]
+    ^-  book
+    ::?.  ?=([[%& ~ * bit=hints] *] b)  b
+    ?:  ?=(%| -.bod)  bod^app
+    ?~  +.bod  bod^app
+    ::=/  h  -.u.p.bod
+    [%& ~ p.u.p.bod (welp hin q.u.p.bod)]^app
+    ::bod^app
+    ::?:  |(?=(%| -<.b) ?=(~ p.-<.b))  b
+    ::=/  h  q.u.p.p.b
+    ::b(q.u.p.p.b hin^q.u.p.p.b)
+    ::b(hit hin^hit.b)
+
+
+::?:  ?=(%| -.hed)  ~&  61  [%|^trace app]
+::?~  p.hed  [%&^~ app]
   :: Check if we are calling an arm in a core and if so lookup the axis
   :: in the jet map
   :: Calling convention is
@@ -289,45 +326,45 @@
   ::
   :: Note that this arm should only be called on an 8
   :: TODO Figure out what CORE-AXIS should be
-  ++  jet
-    |=  [head=* next=*]
-    ^-  book
-    =^  mj  app  (match-jet head next)
-    ?~  mj  [%&^~ app]
-    (run-jet u.mj)^app
+  ::++  jet
+    ::|=  [head=* next=*]
+    ::^-  book
+    ::=^  mj  app  (match-jet head next)
+    ::?~  mj  [%&^~ app]
+    ::(run-jet u.mj)^app
   ::
-  ++  match-jet
-    |=  [head=* next=*]
-    ^-  [(unit [@tas *]) appendix]
-    ?:  (lth bud 1)  `app
-    =.  bud  (sub bud 1)
-    ?.  ?=([%9 arm-axis=@ %0 core-axis=@] head)  `app
-    ?.  ?=([%9 %2 %10 [%6 sam=*] %0 %2] next)  `app
-    ?~  mjet=(~(get by jets) arm-axis.head)  `app
-    =^  sub=body  app
-      ^$(f head)
-    ?:  ?=(%| -.sub)  `app
-    ?~  p.sub  `app
-    =^  arg=body  app
-      ^$(s sub^s, f sam.next)
-    ?:  ?=(%| -.arg)  `app
-    ?~  p.arg  `app
-    [~ u.mjet u.p.arg]^app
+  ::++  match-jet
+    ::|=  [head=* next=*]
+    ::^-  [(unit [@tas *]) appendix]
+    ::?:  (lth bud 1)  `app
+    ::=.  bud  (sub bud 1)
+    ::?.  ?=([%9 arm-axis=@ %0 core-axis=@] head)  `app
+    ::?.  ?=([%9 %2 %10 [%6 sam=*] %0 %2] next)  `app
+    ::?~  mjet=(~(get by jets) arm-axis.head)  `app
+    ::=^  sub=body  app
+      ::^$(f head, hit ~)
+    ::?:  ?=(%| -.sub)  `app
+    ::?~  p.sub  `app
+    ::=^  arg=body  app
+      ::^$(s sub^s, f sam.next)
+    ::?:  ?=(%| -.arg)  `app
+    ::?~  p.arg  `app
+    ::[~ u.mjet u.p.arg]^app
   ::
-  ++  run-jet
-    |=  [arm=@tas sam=*]
-    ^-  body
-    ~&  arm
-    ?+    arm  %|^trace
-        %dec
-      ?:  (lth bud 1)  %&^~
-      =.  bud  (sub bud 1)
-      ?.  ?=(@ sam)  %|^trace
+  ::++  run-jet
+    ::|=  [arm=@tas sam=*]
+    ::^-  body
+    ::~&  arm
+    ::?+    arm  %|^trace
+        ::%dec
+      ::?:  (lth bud 1)  %&^~
+      ::=.  bud  (sub bud 1)
+      ::?.  ?=(@ sam)  %|^trace
       ::  TODO: probably unsustainable to need to include assertions to
       ::  make all jets crash safe
-      ?.  (gth sam 0)  %|^trace
-      %&^(some (dec sam))
-    ==
+      ::?.  (gth sam 0)  %|^trace
+      ::%&^(some (dec sam))
+    ::==
   ::
   ++  frag
     |=  [axis=@ noun=* bud=@ud]
