@@ -1,6 +1,6 @@
 /-  *sequencer
 /+  smart=zig-sys-smart, ethereum
-/*  zigs-contract     %noun  /lib/zig/compiled/zigs-parallel/noun
+/*  zigs-contract     %noun  /lib/zig/compiled/zigs/noun
 /*  nft-contract      %noun  /lib/zig/compiled/nft/noun
 /*  publish-contract  %noun  /lib/zig/compiled/publish/noun
 /*  trivial-contract  %noun  /lib/zig/compiled/trivial/noun
@@ -9,16 +9,16 @@
 =/  pubkey-1  0x7772.b8a7.6840.8922.2903.5b28.7494.436f.8850.713c
 =/  pubkey-2  0xc7ec.a38c.5c74.d58d.04b0.6650.4772.f3a6.d02e.92f5
 =/  pubkey-3  0x435a.11af.b1f8.24b8.a1d7.de8a.c8c1.cce1.363c.6f3b
-=/  zigs-1  (fry-rice:smart zigs-wheat-id:smart  pubkey-1 town-id `@`'zigs')
-=/  zigs-2  (fry-rice:smart zigs-wheat-id:smart  pubkey-2 town-id `@`'zigs')
-=/  zigs-3  (fry-rice:smart zigs-wheat-id:smart  pubkey-3 town-id `@`'zigs')
+=/  zigs-1  (fry-rice:smart zigs-wheat-id:smart pubkey-1 town-id `@`'zigs')
+=/  zigs-2  (fry-rice:smart zigs-wheat-id:smart pubkey-2 town-id `@`'zigs')
+=/  zigs-3  (fry-rice:smart zigs-wheat-id:smart pubkey-3 town-id `@`'zigs')
 =/  beef-zigs-grain
   ^-  grain:smart
   :*  zigs-1
       zigs-wheat-id:smart
       pubkey-1
       town-id
-      [%& `@`'zigs' [10.321.055.000.000.000.000 ~ `@ux`'zigs-metadata']]
+      [%& `@`'zigs' %account [10.321.055.000.000.000.000 ~ `@ux`'zigs-metadata']]
   ==
 =/  dead-zigs-grain
   ^-  grain:smart
@@ -26,7 +26,7 @@
       zigs-wheat-id:smart
       pubkey-2
       town-id
-      [%& `@`'zigs' [50.000.000.000.000.000.000 ~ `@ux`'zigs-metadata']]
+      [%& `@`'zigs' %account [50.000.000.000.000.000.000 ~ `@ux`'zigs-metadata']]
   ==
 =/  cafe-zigs-grain
   ^-  grain:smart
@@ -34,7 +34,7 @@
       zigs-wheat-id:smart
       pubkey-3
       town-id
-      [%& `@`'zigs' [50.000.000.000.000.000.000 ~ `@ux`'zigs-metadata']]
+      [%& `@`'zigs' %account [50.000.000.000.000.000.000 ~ `@ux`'zigs-metadata']]
   ==
 =/  zigs-metadata-grain
   ^-  grain:smart
@@ -42,7 +42,7 @@
       zigs-wheat-id:smart
       zigs-wheat-id:smart
       town-id
-      :+  %&  `@`'zigs'
+      :^  %&  `@`'zigs'  %metadata 
       :*  name='UQ| Tokens'
           symbol='ZIG'
           decimals=18

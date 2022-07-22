@@ -1,7 +1,7 @@
 ::  UQ| token standard v0.1
 ::  last updated: 2022/07/14
 ::
-/+  *zig-sys-smart
+::  /+  *zig-sys-smart
 |%
 ++  sur
   |%
@@ -24,6 +24,15 @@
     $:  balance=@ud                     ::  the amount of tokens someone has
         allowances=(map sender=id @ud)  ::  a map of pubkeys they've permitted to spend their tokens and how much
         metadata=id                     ::  address of the rice holding this token's metadata
+        nonce=@ud                       ::  necessary for gasless approves
+    ==
+  ::
+  +$  approve
+    $:  from=id       ::  pubkey giving
+        to=id         ::  pubkey permitted to take
+        amount=@ud    ::  how many tokens the taker can take
+        nonce=@ud     ::  current nonce of the giver
+        deadline=@da  ::  how long this approve is valid
     ==
   ::
   ::  patterns of arguments supported by this contract
@@ -35,6 +44,7 @@
         ::
         [%give to=id amount=@ud]
         [%take to=id account=(unit id) from-account=id amount=@ud]
+        [%take-with-sig to=id account=(unit id) from-account=id amount=@ud nonce=@ud deadline=@da =sig]
         [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
         ::  token management actions
         ::
@@ -115,6 +125,13 @@
             [%amount (numb amount.a)]
         ==
       ::
+          %take-with-sig  ::  placeholder, not finished
+        %-  pairs
+        :~  [%to %s (scot %ux to.a)]
+            [%account ?~(account.a ~ [%s (scot %ux u.account.a)])]
+            [%from-rice %s (scot %ux from-account.a)]
+            [%amount (numb amount.a)]
+        ==
           %set-allowance
         %-  pairs
         :~  [%who %s (scot %ux who.a)]

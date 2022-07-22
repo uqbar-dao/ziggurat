@@ -28,6 +28,7 @@
       [%derive-new-address hdpath=tape nick=@t]
       [%delete-address address=@ux]
       [%edit-nickname address=@ux nick=@t]
+      [%sign-typed-message from=id:smart =typed-message:smart]
       ::  HW wallet stuff
       [%add-tracked-address address=@ux nick=@t]
       [%submit-signed hash=@ eth-hash=@ sig=[v=@ r=@ s=@]]

@@ -1,5 +1,7 @@
+~%  %ped  ..part  ~
 |%
 ++  pedersen
+  ~%  %pedersen  +  ~
   |%
   ++  t
     ^-  domain:secp:crypto
@@ -58,18 +60,63 @@
           758.586.525.933.812.536.653.089.401.905.
           292.063.708.816.422
   ++  hash
+    ~/  %phash
     |=  [a=@ b=@]
-    =+  alow=(mod a (bex 248))
-    =+  ahig=(rsh [0 248] a)
-    =+  blow=(mod b (bex 248))
-    =+  bhig=(rsh [0 248] b)
-    =-  x
-    ;:  add-points
-      p0
-      (mul-point-scalar p1 alow)
-      (mul-point-scalar p2 ahig)
-      (mul-point-scalar p3 blow)
-      (mul-point-scalar p4 bhig)
-    ==
+    ^-  @
+    |^
+    =/  x  (has a)
+    =/  y  (has b)
+    +:(do-hash y x)
+    ::
+    ++  has
+      |=  n=@
+      ^-  @
+      ?:  (lte (met 2 n) 63)  n
+      =/  rips
+        %^  spin  (tear [3 32] n)  0
+        |=  [x=@ ext=@]
+        ?:  (lth (met 3 x) 32)
+           [x ext]
+        :-  (zero-nib x)
+        (cat 3 ext (first-nib x))
+      =/  r
+        ?:  =(q:rips 0)  p.rips
+        (into p.rips (lent p.rips) q.rips)
+      ?~  r  n
+      =/  hed  (snag 0 `(list @)`r)
+      =/  tal  (slag 1 `(list @)`r)
+      q:(spin tal hed do-hash)
+    ::
+    ++  first-nib
+      |=  n=@
+      (end 2 (rev 2 (met 2 n) n))
+    ::
+    ++  zero-nib
+      |=  n=@
+      (rev 2 (dec (met 2 n)) (rsh [2 1] (rev 2 (met 2 n) n)))
+    ::
+    ++  tear
+      |=  [s=[@ @] n=@]
+      ^-  (list @)
+      ?:  =(n 0)  ~[0]
+      (rip s n)
+    ::
+    ++  do-hash
+      |=  [b=@ a=@]
+      ^-  [@ @]
+      =+  alow=(mod a (bex 248))
+      =+  ahig=(rsh [0 248] a)
+      =+  blow=(mod b (bex 248))
+      =+  bhig=(rsh [0 248] b)
+      :-  0
+      =-  x
+      ;:  add-points
+        p0
+        (mul-point-scalar p1 alow)
+        (mul-point-scalar p2 ahig)
+        (mul-point-scalar p3 blow)
+        (mul-point-scalar p4 bhig)
+      ==
+    --
   --
 --

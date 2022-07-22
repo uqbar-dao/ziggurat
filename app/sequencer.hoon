@@ -181,7 +181,7 @@
         %^    ~(mill-all mil - town-id.hall.town now.bowl)
             land.town
           basket.state
-        1  ::  number of parallel "passes"
+        256  ::  number of parallel "passes"
       =/  new-root      `@ux`(sham land.new)
       =/  diff-hash     `@ux`(sham ~[diff.new])
       ::  2. generate our signature
