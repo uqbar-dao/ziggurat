@@ -48,17 +48,17 @@
     ?.  =(b p.n.a)
       ?:  (sore b p.n.a)
         =.  l.a  $(a l.a)
-        a(n [p.n.a (mer a p.n.a q.q.n.a) q.q.n.a])
+        a(n [p.n.a (mer a [p q.q]:n.a) q.q.n.a])
       =.  r.a  $(a r.a)
-      a(n [p.n.a (mer a p.n.a q.q.n.a) q.q.n.a])
+      a(n [p.n.a (mer a [p q.q]:n.a) q.q.n.a])
     |-  ^-  [$?(~ _a)]
     ?~  l.a  r.a
     ?~  r.a  l.a
     ?:  (sure p.n.l.a p.n.r.a)
       =.  r.l.a  $(l.a r.l.a)
-      l.a(n [p.n.l.a (mer l.a p.n.l.a q.q.n.l.a) q.q.n.l.a])
+      l.a(n [p.n.l.a (mer l.a [p q.q]:n.l.a) q.q.n.l.a])
     =.  l.r.a  $(r.a l.r.a)
-    r.a(n [p.n.r.a (mer r.a p.n.r.a q.q.n.r.a) q.q.n.r.a])
+    r.a(n [p.n.r.a (mer r.a [p q.q]:n.r.a) q.q.n.r.a])
   ::
   ++  apt                                               ::  check correctness
     |=  a=mert
@@ -71,7 +71,7 @@
         &((sure p.n.a p.n.l.a) !=(p.n.a p.n.l.a) $(a l.a, l `p.n.a))
         ?~  r.a   &
         &((sure p.n.a p.n.r.a) !=(p.n.a p.n.r.a) $(a r.a, r `p.n.a))
-        =(p.q.n.a (mer a [p.n.a q.q.n.a]))
+        =(p.q.n.a (mer a [p q.q]:n.a))
     ==
   ::
   ++  gas                                               ::  concatenate
@@ -138,14 +138,39 @@
       =.  a
         ?:  (sure p.n.a p.n.d)
           a(l d)
-        d(r a(l r.d, p.q.n (mer a(l r.d) p.n.a q.q.n.a)))
-      a(p.q.n (mer a p.n.a q.q.n.a))
+        d(r a(l r.d, p.q.n (mer a(l r.d) [p q.q]:n.a)))
+      a(p.q.n (mer a [p q.q]:n.a))
     =/  d  $(a r.a)
     ?>  ?=(^ d)
     =.  a
       ?:  (sure p.n.a p.n.d)
         a(r d)
-      d(l a(r l.d, p.q.n (mer a(r l.d) p.n.a q.q.n.a)))
-    a(p.q.n (mer a p.n.a q.q.n.a))
+      d(l a(r l.d, p.q.n (mer a(r l.d) [p q.q]:n.a)))
+    a(p.q.n (mer a [p q.q]:n.a))
+  ::
+  ++  uni
+    |=  [a=mert b=mert]
+    ?:  =(a b)  a
+    |-  ^+  a
+    ?~  b
+      a
+    ?~  a
+      b
+    ?:  =(p.n.b p.n.a)
+      =:  l.a  $(a l.a, b l.b)
+          r.a  $(a r.a, b r.b)
+        ==
+      a(p.q.n (mer a [p q.q]:n.a))
+    ?:  (sure p.n.a p.n.b)
+      ?:  (sore p.n.b p.n.a)
+        =.  l.a  $(a l.a, r.b ~, p.q.n.b (mer b(r ~) [p q.q]:n.b))
+        $(b r.b, p.q.n.a (mer a [p q.q]:n.a))
+      =.  r.a  $(a r.a, l.b ~, p.q.n.b (mer b(l ~) [p q.q]:n.b))
+      $(b l.b, p.q.n.a (mer a [p q.q]:n.a))
+    ?:  (sore p.n.a p.n.b)
+      =.  l.b  $(b l.b, r.a ~, p.q.n.a (mer a(r ~) [p q.q]:n.a))
+      $(a r.a, p.q.n.b (mer b [p q.q]:n.b))
+    =.  r.b  $(b r.b, l.a ~, p.q.n.a (mer a(l ~) [p q.q]:n.a))
+    $(a l.a, p.q.n.b (mer b [p q.q]:n.b))
   --
 --
