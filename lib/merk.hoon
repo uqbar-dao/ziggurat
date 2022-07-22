@@ -40,6 +40,25 @@
       +$  mert  (tree (pair key (pair hash val)))
       --
   |%
+  ++  bif                                               ::  splits a by b
+    |=  [a=mert b=key c=val]
+    ^+  [l=a r=a]
+    =<  +
+    |-  ^+  a
+    ?~  a
+      [[b (mer a b c) c] ~ ~]
+    ?:  =(b p.n.a)
+      ?:  =(c q.q.n.a)
+        a
+      a(n [b (mer a b c) c])
+    ?:  (sore b p.n.a)
+      =/  d  $(a l.a)
+      ?>  ?=(^ d)
+      d(r a(l r.d, p.q.n (mer a(l r.d) [p q.q]:n.a)))
+    =/  d  $(a r.a)
+    ?>  ?=(^ d)
+    d(l a(r l.d, p.q.n (mer a(r l.d) [p q.q]:n.a)))
+  ::
   ++  del                                               ::  delete at key b
     |=  [a=mert b=key]
     |-  ^+  a
@@ -59,6 +78,24 @@
       l.a(n [p.n.l.a (mer l.a [p q.q]:n.l.a) q.q.n.l.a])
     =.  l.r.a  $(r.a l.r.a)
     r.a(n [p.n.r.a (mer r.a [p q.q]:n.r.a) q.q.n.r.a])
+  ::
+  ++  dif                                               ::  difference
+    |=  [a=mert b=mert]
+    |-  ^+  a
+    ?~  b
+      a
+    =/  c  (bif a p.n.b q.q.n.b)
+    ?>  ?=(^ c)
+    =/  d  $(a l.c, b l.b)
+    =/  e  $(a r.c, b r.b)
+    |-  ^-  [$?(~ _a)]
+    ?~  d  e
+    ?~  e  d
+    ?:  (sure p.n.d p.n.e)
+      =/  dr  $(d r.d)
+      d(r dr, p.q.n (mer d(r dr) [p q.q]:n.d))
+    =/  el  $(e l.e)
+    e(l el, p.q.n (mer e(l el) [p q.q]:n.e))
   ::
   ++  apt                                               ::  check correctness
     |=  a=mert
