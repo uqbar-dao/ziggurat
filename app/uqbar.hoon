@@ -130,10 +130,10 @@
     ::  and unsub when either status is received, or batch is rejected. (TODO how to determine latter?)
     ::
         %submit
-      =/  town-id  `@ux`town-id.p.egg.write
+      =/  town-id  `@ux`town-id.shell.egg.write
       ?~  seq=(~(get by sequencers.state) town-id)
         ~|("%uqbar: no known sequencer for that town" !!)
-      =/  egg-hash  (scot %ux `@ux`(sham q.egg.write))
+      =/  egg-hash  (scot %ux `@ux`(sham [shell yolk]:egg.write))
       :_  state
       =+  [%sequencer-town-action !>([%receive (silt ~[egg.write])])]
       :~  [%pass /submit-transaction/egg-hash %agent [q.u.seq %sequencer] %poke -]
@@ -195,7 +195,7 @@
     =/  path  ~[/track/[i.t.wire]]
     :_  this
     ?~  p.sign  ~
-    [%give %fact path %write-result !>([%rejected src.bowl])]~  
+    [%give %fact path %write-result !>([%rejected src.bowl])]~
   ==
   ::
   ++  pass-through

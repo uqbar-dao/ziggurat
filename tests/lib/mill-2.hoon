@@ -25,7 +25,6 @@
 ::
 ::  constants / dummy info for mill
 ::
-++  init-now  *@da
 ++  town-id    0x0
 ++  set-fee    7
 ++  fake-sig   [0 0 0]
@@ -142,9 +141,9 @@
   =/  =action  [%give 100 [%grain 0x1.beef]]
   =/  hash=@ux  `@ux`(sham action)
   =/  shel=shell
-    [caller-1 fake-sig ~ id.p:triv-wheat 1 333 town-id 0]
+    [caller-1 fake-sig ~ id.p:triv-wheat 1 1.000 town-id 0]
   =/  [res=state-transition rej=carton]
-    %^  ~(mill-all mil miller town-id init-now)
+    %^  ~(mill-all mil miller town-id 1)  ::  batch-num
     fake-land  (silt ~[[hash [shel action]]])  1.024
   ~&  >>>  crows.res
   ;:  weld

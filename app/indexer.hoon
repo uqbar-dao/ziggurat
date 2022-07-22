@@ -629,7 +629,7 @@
           ==
       ^-  (quip card _state)
       =*  town-id  town-id.hall.town
-      =+  ^=  [egg from grain grain-eggs holder lord to]
+      =+  ^=  [egg from grain holder lord to]
           (parse-batch root town-id eggs land.town)
       :: =:  egg-index     (gas-ja egg-index egg town-id)
       ::     from-index    (gas-ja from-index from town-id)
@@ -640,7 +640,6 @@
       =:  egg-index         (gas-ja-egg egg-index egg town-id)
           from-index        (gas-ja-second-order from-index from town-id)
           grain-index       (gas-ja-batch grain-index grain town-id)
-          grain-eggs-index  (gas-ja-second-order grain-eggs-index grain-eggs town-id)
           holder-index      (gas-ja-second-order holder-index holder town-id)
           lord-index        (gas-ja-second-order lord-index lord town-id)
           to-index          (gas-ja-second-order to-index to town-id)
@@ -790,12 +789,11 @@
               (list [@ux second-order-location:ui])
               (list [@ux second-order-location:ui])
               (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
           ==
       =*  granary  p.land
       =+  [grain holder lord]=(parse-granary root town-id granary)
-      =+  [egg from grain-eggs to]=(parse-transactions root town-id eggs)
-      [egg from grain grain-eggs holder lord to]
+      =+  [egg from to]=(parse-transactions root town-id eggs)
+      [egg from grain holder lord to]
     ::
     ++  parse-granary
       |=  [root=@ux town-id=@ux =granary:seq]
@@ -810,9 +808,9 @@
         ~(tap by granary)
       |-
       ?~  grains  [parsed-grain parsed-holder parsed-lord]
-      =*  grain-id   id.i.grains
-      =*  holder-id  holder.i.grains
-      =*  lord-id    lord.i.grains
+      =*  grain-id   id.p.i.grains
+      =*  holder-id  holder.p.i.grains
+      =*  lord-id    lord.p.i.grains
       %=  $
           grains  t.grains
           parsed-grain
@@ -832,39 +830,27 @@
       ^-  $:  (list [@ux egg-location:ui])
               (list [@ux second-order-location:ui])
               (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
           ==
       =|  parsed-egg=(list [@ux egg-location:ui])
       =|  parsed-from=(list [@ux second-order-location:ui])
-      =|  parsed-grain-eggs=(list [@ux second-order-location:ui])
       =|  parsed-to=(list [@ux second-order-location:ui])
       =/  egg-num=@ud  0
       |-
       ?~  txs
-        [parsed-egg parsed-from parsed-grain-eggs parsed-to]
+        [parsed-egg parsed-from parsed-to]
       =*  egg-hash     -.i.txs
       =*  egg          +.i.txs
-      =*  to           to.p.egg
-      =*  my-grains    `(set id:smart)`my-grains.q.egg
-      =*  cont-grains  `(set id:smart)`cont-grains.q.egg
+      =*  to           to.shell.egg
       =*  from
-        ?:  ?=(@ux from.p.egg)  from.p.egg
-        id.from.p.egg
+        ?:  ?=(@ux from.shell.egg)  from.shell.egg
+        id.from.shell.egg
       =/  =egg-location:ui  [town-id root egg-num]
-      =/  new-grain-eggs=(list [@ux second-order-location:ui])
-        %+  turn  ~(tap in (~(uni in my-grains) cont-grains))
-        |=  grain-id=id:smart
-        [grain-id egg-hash]
       %=  $
           txs          t.txs
           parsed-egg   [[egg-hash egg-location] parsed-egg]
           parsed-from  [[from egg-hash] parsed-from]
           parsed-to    [[to egg-hash] parsed-to]
           egg-num      +(egg-num)
-          parsed-grain-eggs
-        ?~  parsed-grain-eggs  new-grain-eggs
-        ?~  new-grain-eggs     parsed-grain-eggs
-        (weld new-grain-eggs parsed-grain-eggs)
       ==
     --
   ::

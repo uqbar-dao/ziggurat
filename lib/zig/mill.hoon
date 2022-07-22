@@ -5,15 +5,17 @@
 ++  verify-sig
   |=  =egg
   ^-  ?
-  ?>  ?=(account from.p.egg)
+  ?>  ?=(account from.shell.egg)
   =/  hash=@
-    ?~(eth-hash.p.egg (sham q.egg) u.eth-hash.p.egg)
-  =?  v.sig.p.egg  (gte v.sig.p.egg 27)  (sub v.sig.p.egg 27)
-  .=  id.from.p.egg
+    ?~  eth-hash.shell.egg
+      (sham [shell yolk]:egg)
+    u.eth-hash.shell.egg
+  =?  v.sig.egg  (gte v.sig.egg 27)  (sub v.sig.egg 27)
+  .=  id.from.shell.egg
   %-  address-from-pub:key:ethereum
   %-  serialize-point:secp256k1:secp:crypto
   %+  ecdsa-raw-recover:secp256k1:secp:crypto
-  hash  sig.p.egg
+  hash  sig.egg
 ::
 ++  shut                                               ::  slam a door
   |=  [dor=vase arm=@tas dor-sam=vase arm-sam=vase]
@@ -49,14 +51,14 @@
   !<(typ [-:!>(*typ) val])
 ::
 ++  mill
-  |_  [miller=account town-id=id now=@da]
+  |_  [miller=account town-id=id batch=@ud]
   ::
   ::  +mill-all
   ::
-  ::  All eggs must be run through mill in parallel -- they should all operate against
+  ::  All calls must be run through mill in parallel -- they should all operate against
   ::  the same starting state passed through `land` at the beginning. Each run of mill
   ::  should create a (validated) diff set, which can then be compared with an
-  ::  accumulated set of diffs. If there is overlap, that egg should be discarded or
+  ::  accumulated set of diffs. If there is overlap, that call should be discarded or
   ::  pushed into the next parallel "pass", depending on sequencer parameters.
   ::
   ++  mill-all
@@ -69,7 +71,7 @@
       ::  rejected to front, so need to +flop before each pass
       %+  sort  ~(tap in basket)
       |=  [a=[@ux =egg] b=[@ux =egg]]
-      (lth rate.p.egg.a rate.p.egg.b)
+      (lth rate.shell.egg.a rate.shell.egg.b)
     ::
     =|  final=state-transition
     =|  reward=@ud
@@ -82,7 +84,7 @@
       :-  final(land land)
       %+  turn  pending
       |=  [h=@ux =egg]
-      [h egg(status.p %9)]
+      [h egg(status.shell %9)]
     ::  otherwise, perform a pass
     =/  [passed=state-transition rejected=carton]
       (pass land (flop pending))
@@ -118,7 +120,7 @@
             all-burns
         ==
       ::
-      =/  caller-id  (pin from.p.egg.i.pending)
+      =/  caller-id  (pin from.shell.egg.i.pending)
       ?:  (~(has in callers) caller-id)
         %=  $
           pending   t.pending
@@ -136,7 +138,7 @@
           ::  but do increment nonce
           %=  $
             pending    t.pending
-            processed  [i.pending(status.p.egg errorcode) processed]
+            processed  [i.pending(status.shell.egg errorcode) processed]
             q.land     nonces
             callers    (~(put in callers) caller-id)
             reward     (add reward fee)
@@ -153,7 +155,7 @@
       ::
       %=  $
         pending    t.pending
-        processed  [i.pending(status.p.egg errorcode) processed]
+        processed  [i.pending(status.shell.egg errorcode) processed]
         q.land     nonces
         reward     (add reward fee)
         lis-hits   [hits lis-hits]
@@ -169,15 +171,15 @@
   ++  mill
     |=  [=land =egg]
     ^-  [fee=@ud ^land burned=granary =errorcode hits=(list hints) =crow]
-    ?.  ?=(account from.p.egg)  [0 [~ q.land] ~ %1 ~ ~]
+    ?.  ?=(account from.shell.egg)  [0 [~ q.land] ~ %1 ~ ~]
     ::  validate transaction signature
     ?.  ?:(!test-mode (verify-sig egg) %.y)
       ~&  >>>  "mill: signature mismatch"
       [0 [~ q.land] ~ %2 ~ ~]  ::  signed tx doesn't match account
     ::
-    =/  expected-nonce  +((~(gut by q.land) id.from.p.egg 0))
-    ?.  =(nonce.from.p.egg expected-nonce)
-      ~&  >>>  "mill: expected nonce={<expected-nonce>}, got {<nonce.from.p.egg>}"
+    =/  expected-nonce  +((~(gut by q.land) id.from.shell.egg 0))
+    ?.  =(nonce.from.shell.egg expected-nonce)
+      ~&  >>>  "mill: expected nonce={<expected-nonce>}, got {<nonce.from.shell.egg>}"
       [0 [~ q.land] ~ %3 ~ ~]  ::  bad nonce
     ::
     ?.  (~(audit tax p.land) egg)
@@ -185,13 +187,13 @@
       [0 [~ q.land] ~ %4 ~ ~]  ::  can't afford gas
     ::
     =/  res      (~(work farm p.land) egg)
-    =/  fee=@ud  (sub budget.p.egg rem.res)
+    =/  fee=@ud  (sub budget.shell.egg rem.res)
     :+  fee
-      :_  (~(put by q.land) id.from.p.egg nonce.from.p.egg)
+      :_  (~(put by q.land) id.from.shell.egg nonce.from.shell.egg)
       ::  charge gas fee by including their designated zigs grain inside the diff
       ?:  =(0 fee)  ~
       %-  ~(put by (fall diff.res ~))
-      (~(charge tax p.land) (fall diff.res ~) from.p.egg fee)
+      (~(charge tax p.land) (fall diff.res ~) from.shell.egg fee)
     [burned errorcode hits crow]:res
   ::
   ::  +tax: manage payment for egg in zigs
@@ -209,13 +211,13 @@
     ++  audit
       |=  =egg
       ^-  ?
-      ?.  ?=(account from.p.egg)                    %.n
-      ?~  zigs=(~(get by granary) zigs.from.p.egg)  %.n
-      ?.  =(id.from.p.egg holder.p.u.zigs)          %.n
+      ?.  ?=(account from.shell.egg)                    %.n
+      ?~  zigs=(~(get by granary) zigs.from.shell.egg)  %.n
+      ?.  =(id.from.shell.egg holder.p.u.zigs)          %.n
       ?.  =(zigs-wheat-id lord.p.u.zigs)            %.n
       ?.  ?=(%& -.u.zigs)                           %.n
       =/  acc  (hole token-account data.p.u.zigs)
-      (gte balance.acc (mul budget.p.egg rate.p.egg))
+      (gte balance.acc (mul budget.shell.egg rate.shell.egg))
     ::  +charge: extract gas fee from caller's zigs balance
     ::  returns a single modified grain to be inserted into a diff
     ::  cannot crash after audit, as long as zigs contract adequately
@@ -274,13 +276,13 @@
       |=  [=egg hits=(list hints) burned=^granary]
       ^-  hatchling
       =/  from=[=id nonce=@ud]
-        ?:  ?=(@ux from.p.egg)  [from.p.egg 0]
-        [id.from.p.egg nonce.from.p.egg]
+        ?:  ?=(@ux from.shell.egg)  [from.shell.egg 0]
+        [id.from.shell.egg nonce.from.shell.egg]
       ::  insert budget argument if egg is %give-ing zigs
-      =?  q.q.egg  &(=(to.p.egg zigs-wheat-id) =(p.q.egg %give))
-        [budget.p.egg q.q.egg]
-      ?~  gra=(~(get by granary) to.p.egg)  [~ ~ ~ ~ budget.p.egg %5]
-      ?.  ?=(%| -.u.gra)                    [~ ~ ~ ~ budget.p.egg %5]
+      =?  q.yolk.egg  &(=(to.shell.egg zigs-wheat-id) =(p.yolk.egg %give))
+        [budget.shell.egg q.yolk.egg]
+      ?~  gra=(~(get by granary) to.shell.egg)  [~ ~ ~ ~ budget.shell.egg %5]
+      ?.  ?=(%| -.u.gra)                    [~ ~ ~ ~ budget.shell.egg %5]
       (grow from p.u.gra egg hits burned)
     ::  +grow: recursively apply any calls stemming from egg,
     ::  return on rooster or failure
@@ -288,11 +290,11 @@
       |=  [from=[=id nonce=@ud] =wheat =egg hits=(list hints) burned=^granary]
       ^-  hatchling
       |^
-      =+  [hit chick rem err]=(weed to.p.egg budget.p.egg)
+      =+  [hit chick rem err]=(weed to.shell.egg budget.shell.egg)
       ?~  chick  [hit^hits ~ ~ ~ rem err]
       ?:  ?=(%& -.u.chick)
         ::  rooster result, finished growing
-        ?~  diff=(harvest p.u.chick to.p.egg from.p.egg)
+        ?~  diff=(harvest p.u.chick to.shell.egg from.shell.egg)
           ::  failed validation
           [hit^hits ~ ~ ~ rem %7]
         ::  harvest passed
@@ -303,7 +305,7 @@
       =/  all-burns  burned.rooster.p.u.chick
       =*  next  next.p.u.chick
       =.  hits  hit^hits
-      =/  last-diff  (harvest rooster.p.u.chick to.p.egg from.p.egg)
+      =/  last-diff  (harvest rooster.p.u.chick to.shell.egg from.shell.egg)
       |-
       ?~  last-diff
         ::  diff from last call failed validation
@@ -315,7 +317,12 @@
       ::  continue continuing
       =/  inter
         %+  ~(incubate farm (~(dif by (~(uni by granary) all-diffs)) all-burns))
-          egg(from.p to.p.egg, to.p to.i.next, budget.p rem, q action.i.next)
+          %=  egg
+            from.shell    to.shell.egg
+            to.shell      to.i.next
+            budget.shell  rem
+            yolk          yolk.i.next
+          ==
         [hits all-burns]
       ?.  =(%0 errorcode.inter)
         [(weld hits.inter hits) ~ ~ ~ rem.inter errorcode.inter]
@@ -335,33 +342,33 @@
         ^-  [hints (unit chick) rem=@ud =errorcode]
         ~>  %bout
         ?~  cont.wheat  [~ ~ budget %6]
-        =/  =cart       [to from now town-id (plant q.q.egg)]
+        =/  =cart       [to from batch town-id (plant q.yolk.egg)]
         =/  payload   .*(q.library pay.u.cont.wheat)
         =/  battery   .*([q.library payload] bat.u.cont.wheat)
         =/  dor=vase  [-:!>(*contract) battery]
         ::
         ::  validate that action nests
-        ~&  >  "action: {<q.egg>}"
-        ::  ?~  wrapped=(nesting interface.wheat q.egg)
-        ::    ~&  >>>  "mill:error: action {<q.egg>} not found in {<~(key by interface.wheat)>}"
+        ~&  >  "yolk: {<yolk.egg>}"
+        ::  ?~  wrapped=(nesting interface.wheat action.egg)
+        ::    ~&  >>>  "mill:error: action {<action.egg>} not found in {<~(key by interface.wheat)>}"
         ::    [~ ~ budget %6]
         ::
         ::  note that we can actually push whatever vased noun into the contract
         ::
         ~&  >>>  cart
         ::
-        ?:  test-mode
+        ?.  test-mode
           ::  run without zebra
           =/  res
-            :-  (mule |.(;;(chick q:(shut dor %write !>(cart) !>(q.egg)))))
-            (sub budget (mul rate.p.egg 7))
+            :-  (mule |.(;;(chick q:(shut dor %write !>(cart) !>(yolk.egg)))))
+            (sub budget (mul rate.shell.egg 7))
           ?:  ?=(%| -.-.res)
             ::  error in contract execution
             [~ ~ +.res %6]
           [~ `p.-.res +.res %0]
         ::  generate ZK-proof hints with zebra
         =/  gun
-          (ajar dor %write !>(cart) !>(q.egg))
+          (ajar dor %write !>(cart) !>(yolk.egg))
         =/  =book
           (zebra budget zink-cax search gun)
         ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)

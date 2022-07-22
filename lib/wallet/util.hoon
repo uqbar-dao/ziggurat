@@ -7,7 +7,7 @@
   |=  =egg:smart
   ^-  @ux
   ::  hash the immutable+unique aspects of a transaction
-  `@ux`(sham q.egg)
+  `@ux`(sham [shell yolk]:egg)
 ::
 ++  tx-update-card
   |=  [=egg:smart args=(unit supported-args)]
@@ -62,7 +62,7 @@
     ~(val by book)
   |=  [=token-type =grain:smart]
   =-  [%pass - %agent [indexer %indexer] %watch -]
-  /grain/(scot %ux id.grain)
+  /grain/(scot %ux id.p.grain)
 ::
 ++  clear-asset-subscriptions
   |=  wex=boat:gall
@@ -83,16 +83,16 @@
   ?~  grains-list  book
   =/  =grain:smart  grain.i.grains-list
   ::  currently only storing owned *rice*
-  ?.  ?=(%& -.germ.grain)  $(grains-list t.grains-list)
+  ?.  ?=(%& -.grain)  $(grains-list t.grains-list)
   ::  determine type token/nft/unknown
   =/  =token-type
-    ?~  stored=(~(get by metadata-store) salt.p.germ.grain)
+    ?~  stored=(~(get by metadata-store) salt.p.grain)
       %unknown
     -.u.stored
   %=    $
       book
     %+  ~(put by book)
-      [town-id.grain lord.grain salt.p.germ.grain]
+      [town-id.p.grain lord.p.grain salt.p.grain]
     [token-type grain]
     ::
     grains-list  t.grains-list
@@ -109,8 +109,8 @@
   ::  if we don't know the type of an asset, we need to try and fit it to
   ::  a mold we know of. this is not great and should be eventually provided
   ::  from some central authority
-  ?.  ?=(%& -.germ.grain.i.book)  $(book t.book)
-  =*  rice  p.germ.grain.i.book
+  ?.  ?=(%& -.grain.i.book)  $(book t.book)
+  =*  rice  p.grain.i.book
   ::  put %token / %nft label inside chain standard?
   =/  found=(unit asset-metadata)
     =+  tok=(mule |.(;;(token-account data.rice)))
@@ -132,13 +132,13 @@
     ~
   ?>  ?=(%grain -.update)
   =/  meta-grain=grain:smart  +.+.-.+.-:~(tap by grains.update)
-  ?>  ?=(%& -.germ.meta-grain)
+  ?>  ?=(%& -.meta-grain)
   =/  found=(unit asset-metadata)
     ?+  token-type  ~
-      %token  `[%token ;;(token-metadata data.p.germ.meta-grain)]
-      %nft    `[%nft ;;(nft-metadata data.p.germ.meta-grain)]
+      %token  `[%token ;;(token-metadata data.p.meta-grain)]
+      %nft    `[%nft ;;(nft-metadata data.p.meta-grain)]
     ==
   ?~  found  ~
-  ?>  =(salt.p.germ.meta-grain salt.u.found)
+  ?>  =(salt.p.meta-grain salt.u.found)
   found
 --

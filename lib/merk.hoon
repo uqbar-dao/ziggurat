@@ -40,6 +40,9 @@
       +$  mert  (tree (pair key (pair hash val)))
       --
   |%
+  ::
+  ::  TODO: dif, uni, int, gut
+  ::
   ++  del                                               ::  delete at key b
     |=  [a=mert b=key]
     |-  ^+  a
