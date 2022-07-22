@@ -24,8 +24,7 @@
 =/  dor  [-:!>(*contract:smart) perfect]
 ::
 :-  %noun
-^-  wheat:smart
-[`[bat=q.cont pay=full-nock] ~]
+[bat=q.cont pay=full-nock]
 ::
 ::  parser helpers
 ::

@@ -74,6 +74,9 @@
           a+(turn path.hin |=(p=phash s+(num p)))
       ==
     ::
+        %12
+      !!
+    ::
         %cons
       ~[s+'cons' s+(num subf1.hin) s+(num subf2.hin)]
     ==

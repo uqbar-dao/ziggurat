@@ -35,16 +35,16 @@
     ?:  =('~' addr)  ~
     `(slav %ux addr)
   ?~  res=(~(get by granary) id)  ``noun+!>(~)
-  ?.  ?=(%| -.germ.u.res)         ``noun+!>(~)
-  ?~  cont.p.germ.u.res           ``noun+!>(~)
-  =*  cont  u.cont.p.germ.u.res
+  ?.  ?=(%| -.u.res)              ``noun+!>(~)
+  ?~  cont.p.u.res                ``noun+!>(~)
+  =*  cont  u.cont.p.u.res
   =/  owns
     %-  ~(gas by *(map id:smart grain:smart))
     %+  murn  contract-rice
     |=  find=id:smart
     ?~  found=(~(get by granary) find)  ~
-    ?.  ?=(%& -.germ.u.found)           ~
-    ?.  =(lord.u.found id)              ~
+    ?.  ?=(%& -.u.found)                ~
+    ?.  =(lord.p.u.found id)            ~
     `[find u.found]
   ::  this isn't an ideal method but okay for now
   ::  goal is to return ~ if some rice weren't found

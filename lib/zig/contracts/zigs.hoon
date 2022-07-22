@@ -1,5 +1,5 @@
 ::  [UQ| DAO]
-::  zigs.hoon v0.8
+::  zigs.hoon v0.9
 ::
 ::  Contract for 'zigs' (official name TBD) token, the gas-payment
 ::  token for the Uqbar network.
@@ -12,9 +12,8 @@
 =,  zigs
 |_  =cart
 ++  write
-  |=  inp=embryo
+  |=  act=action
   ^-  chick
-  =/  act  ;;(action:sur action.inp)
   ?-    -.act
       %give
     =/  giv=grain  +.-:grains.inp

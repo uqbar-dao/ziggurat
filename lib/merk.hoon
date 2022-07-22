@@ -9,8 +9,8 @@
 ++  shag                                                ::  256bit noun hash
   |=  yux=*  ^-  hash  ^-  @
   ?@  yux
-    (shas %gash yux)
-  (shas %shag (jam yux))
+    (pedersen-hash %gash yux)
+  (pedersen-hash %shag (jam yux))
 ::
 ::  +sore: single sha-256 hash in ascending order, uses +dor as
 ::  fallback
@@ -40,6 +40,9 @@
       +$  mert  (tree (pair key (pair hash val)))
       --
   |%
+  ::
+  ::  TODO: dif, uni, int, gut
+  ::
   ++  del                                               ::  delete at key b
     |=  [a=mert b=key]
     |-  ^+  a

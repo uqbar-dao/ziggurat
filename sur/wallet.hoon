@@ -43,9 +43,7 @@
           to=id:smart
           town=id:smart
           gas=[rate=@ud bud=@ud]
-          args=@t  ::  literally `ream`ed to form args
-          my-grains=(set id:smart)
-          cont-grains=(set id:smart)
+          yolk=[label=@tas args=@t]  ::  literally `ream`ed to form args
       ==
       $:  %submit
           from=id:smart

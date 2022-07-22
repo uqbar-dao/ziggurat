@@ -10,9 +10,9 @@
     --
 |%
 ++  zebra                                                 ::  bounded zk +mule
-  |=  [bud=@ud cax=cache [s=* f=*]]
+  |=  [bud=@ud cax=cache scry=granary-scry [s=* f=*]]
   ^-  book
-  %.  [s f]
+  %.  [s f scry]
   %*  .  zink
     app  [cax ~ bud]
   ==
@@ -47,7 +47,7 @@
   =|  appendix
   =*  app  -
   =|  trace=fail
-  |=  [s=* f=*]
+  |=  [s=* f=* scry=granary-scry]
   ^-  book
   |^
   |-
@@ -279,6 +279,23 @@
     :+  %&  ~
     .*  s
     [11 [tag.f 1 u.p.clue] 1 u.p.next]
+  ::
+      [%12 ref=* path=*]
+    ::  TODO hash ref, path and grain id parsed as last item in path
+    ::       hash product and path through granary merkle tree
+    ::       (similar process in nock 0)
+    =^  ref=body  app
+      $(f ref.f)
+    ?:  ?=(%| -.ref)     [%|^trace app]
+    ?~  p.ref            [%&^~ app]
+    =^  path=body  app
+      $(f path.f)
+    ?:  ?=(%| -.path)    [%|^trace app]
+    ?~  p.path           [%&^~ app]
+    =/  result  (scry p.ref p.path)
+    ?~  result
+      [%|^trace app]
+    [%&^result app]
   ==
   :: Check if we are calling an arm in a core and if so lookup the axis
   :: in the jet map

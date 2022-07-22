@@ -1,4 +1,8 @@
 |%
++$  granary-scry
+  $-  ^
+  (unit [path=(list phash) product=*])
+::
 +$  child  *
 +$  parent  *
 +$  phash  @                     ::  Pedersen hash
@@ -29,6 +33,7 @@
       [%8 subf1=phash subf2=phash]
       [%9 axis=@ subf1=phash leaf=phash path=(list phash)]
       [%10 axis=@ subf1=phash subf2=phash oldleaf=phash path=(list phash)]
+      [%12 grain-id=@ leaf=phash path=(list phash)]  ::  leaf should be hash of grain-id, path is through granary
       [%cons subf1=phash subf2=phash]
       ::[%jet core=phash sample=* jet=@t]
   ==

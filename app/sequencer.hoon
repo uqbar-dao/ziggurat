@@ -139,20 +139,19 @@
         %receive
       ?.  =(%available status.state)
         ~|("%sequencer: error: got egg while not active" !!)
+      =/  received=^basket
+        %-  ~(run in eggs.act)
+        |=  =egg:smart
+        [`@ux`(sham [shell yolk]:egg) egg]
       ::  give a "receipt" to sender, with signature they can show
       ::  a counterparty for "business finality"
-      :-  %+  turn  ~(tap in eggs.act)
-          |=  =egg:smart
-          ^-  card
-          =/  hash  (sham q.egg)
-          =/  usig  (ecdsa-raw-sign:secp256k1:secp:crypto hash (need private-key.state))
-          =+  [%uqbar-write !>([%receipt `@ux`hash (sign:sig our.bowl now.bowl hash) usig])]
-          [%pass /submit-transaction/(scot %ux hash) %agent [src.bowl %uqbar] %poke -]
-      =-  state(basket (~(uni in basket) -))
-      ^+  basket
-      %-  ~(run in eggs.act)
-      |=  =egg:smart
-      [`@ux`(sham q.egg) egg]
+      :_  state(basket (~(uni in basket) received))
+      %+  turn  ~(tap in received)
+      |=  [hash=@ux =egg:smart]
+      ^-  card
+      =/  usig  (ecdsa-raw-sign:secp256k1:secp:crypto `@uvI`hash (need private-key.state))
+      =+  [%uqbar-write !>([%receipt hash (sign:sig our.bowl now.bowl hash) usig])]
+      [%pass /submit-transaction/(scot %ux hash) %agent [src.bowl %uqbar] %poke -]
     ::
     ::  batching
     ::
@@ -174,11 +173,12 @@
       ::  publish full diff data
       ::
       ::  1. produce diff and new state with mill
+      =/  batch-num  1  ::  TODO
       =/  addr  p.sequencer.hall.town
       =+  /(scot %p our.bowl)/wallet/(scot %da now.bowl)/account/(scot %ux addr)/(scot %ux town-id.hall.town)/noun
       =+  .^(account:smart %gx -)
       =/  [new=state-transition rejected=carton]
-        %^    ~(mill-all mil - town-id.hall.town now.bowl)
+        %^    ~(mill-all mil - town-id.hall.town batch-num)
             land.town
           basket.state
         256  ::  number of parallel "passes"

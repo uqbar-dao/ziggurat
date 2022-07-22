@@ -5,28 +5,28 @@
 ++  parse-asset
   |=  [=token-type =grain:smart]
   ^-  [p=@t q=json]
-  ?.  ?=(%& -.germ.grain)  !!
-  :-  (scot %ux id.grain)
+  ?.  ?=(%& -.grain)  !!
+  :-  (scot %ux id.p.grain)
   %-  pairs
-  :~  ['id' [%s (scot %ux id.grain)]]
-      ['lord' [%s (scot %ux lord.grain)]]
-      ['holder' [%s (scot %ux holder.grain)]]
-      ['town' [%s (scot %ux town-id.grain)]]
+  :~  ['id' [%s (scot %ux id.p.grain)]]
+      ['lord' [%s (scot %ux lord.p.grain)]]
+      ['holder' [%s (scot %ux holder.p.grain)]]
+      ['town' [%s (scot %ux town-id.p.grain)]]
       ['token_type' [%s (scot %tas token-type)]]
       :-  'data'
       %-  pairs
       ?+    token-type  ~[['unknown_data_structure' [%s '?']]]
           %token
-        =+  ;;(token-account data.p.germ.grain)
+        =+  ;;(token-account data.p.grain)
         :~  ['balance' (numb balance.-)]
             ['metadata' [%s (scot %ux metadata.-)]]
-            ['salt' [%s (scot %u salt.p.germ.grain)]]
+            ['salt' [%s (scot %u salt.p.grain)]]
         ==
       ::
           %nft
-        =+  ;;(nft-account data.p.germ.grain)
+        =+  ;;(nft-account data.p.grain)
         :~  ['metadata' [%s (scot %ux metadata.-)]]
-            ['salt' [%s (scot %u salt.p.germ.grain)]]
+            ['salt' [%s (scot %u salt.p.grain)]]
             :-  'items'
             %-  pairs
             %+  turn  ~(tap by items.-)
@@ -44,16 +44,16 @@
 ++  parse-transaction
   |=  [hash=@ux t=egg:smart args=(unit supported-args)]
   ^-  [p=@t q=json]
-  ?.  ?=(account:smart from.p.t)  !!
+  ?.  ?=(account:smart from.shell.t)  !!
   :-  (scot %ux hash)
   %-  pairs
-  :~  ['from' [%s (scot %ux id.from.p.t)]]
-      ['nonce' (numb nonce.from.p.t)]
-      ['to' [%s (scot %ux to.p.t)]]
-      ['rate' (numb rate.p.t)]
-      ['budget' (numb budget.p.t)]
-      ['town' [%s (scot %ux town-id.p.t)]]
-      ['status' (numb status.p.t)]
+  :~  ['from' [%s (scot %ux id.from.shell.t)]]
+      ['nonce' (numb nonce.from.shell.t)]
+      ['to' [%s (scot %ux to.shell.t)]]
+      ['rate' (numb rate.shell.t)]
+      ['budget' (numb budget.shell.t)]
+      ['town' [%s (scot %ux town-id.shell.t)]]
+      ['status' (numb status.shell.t)]
       ?~  args  ['args' [%s 'received']]
       :-  'args'
       %-  frond
