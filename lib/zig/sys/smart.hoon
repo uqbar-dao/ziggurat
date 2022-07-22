@@ -56,9 +56,17 @@
 ::
 +$  grain  (each rice wheat)
 ::
-+$  rice   [=id lord=id holder=id town-id=id salt=@ label=@tas data=*]
+::  metadata stored in all grains
++$  bran   [=id lord=id holder=id town-id=id]
+::
+::  rice contains data as noun plus contract-defined salt and label indicating type
++$  rice   [salt=@ label=@tas data=* bran]
+::
 ::  contract contains itself and every imported library in pay
-+$  wheat  [=id lord=id holder=id town-id=id cont=(unit [bat=* pay=*]) =interface]
++$  wheat  [cont=(unit [bat=* pay=*]) interface=lumps types=lumps bran]
+::
+::  tagged "restricted types" that define contract actions and rice data
++$  lumps  (map @tas lump)
 ::
 ::  cart: state accessible by contract
 ::
@@ -77,7 +85,7 @@
   $_  ^|
   |_  cart
   ++  write
-    |~  *  ::  type information generated in mill
+    |~  *
     chick
   ::
   ++  read
@@ -125,21 +133,28 @@
       status=@ud  ::  error code
   ==
 ::
-+$  interface  (map @tas lump)
+::  contract result types
 ::
 +$  chick    (each rooster hen)
-+$  crow     (list [@tas json])
 ::
 +$  rooster  [changed=(map id grain) issued=(map id grain) burned=(map id grain) =crow]
 +$  hen      [next=(list [to=id town-id=id =action]) =rooster]
+::
++$  crow     (list [@tas json])
+::
+::  lump: restricted type
+::  published inside wheat to share representation of action and rice nouns
+::  allows outside users to create vases to wrap around data and use
 ::
 +$  lump
   %+  pair  @tas
   $~  *iota
   $%  iota
+      ::  TODO:
       ::  [%set lump]
       ::  [%list lump]
       ::  [%map lump lump]
+      ::  [%unit u=lump]
       [%pair p=lump q=lump]
       [%trel p=lump q=lump r=lump]
       [%qual p=lump q=lump r=lump s=lump]

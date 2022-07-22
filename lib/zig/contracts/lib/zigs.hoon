@@ -1,7 +1,7 @@
 ::  [UQ| DAO]
-::  zigs.hoon v0.8
+::  zigs.hoon v0.9
 ::
-::  /+  *zig-sys-smart
+/+  *zig-sys-smart
 |%
 ++  sur
   |%
@@ -27,8 +27,20 @@
     ==
   ::
   +$  action
-    $%  [%give budget=@ud to=id amount=@ud]
-        [%take to=id account=(unit id) from-account=id amount=@ud]
+    $%  $:  %give
+            budget=@ud
+            to=address
+            amount=@ud
+            from-account=[%grain =id]
+            to-account=(unit [%grain =id])
+        ==
+    ::
+        $:  %take
+            to=address
+            account=(unit [%grain =id])
+            from-account=[%grain id]
+            amount=@ud
+        ==
         [%set-allowance who=id amount=@ud]  ::  (to revoke, call with amount=0)
     ==
   --

@@ -53,68 +53,72 @@
   ++  miller-account
     ^-  grain
     :*  %&
+        `@`'zigs'
+        %account
+        [1.000.000 ~ `@ux`'zigs-metadata']
         0x1.1512.3341
         zigs-wheat-id
         0x1512.3341
         town-id
-        `@`'zigs'
-        %account
-        [1.000.000 ~ `@ux`'zigs-metadata']
     ==
   ++  beef-account
     ^-  grain
     :*  %&
+        `@`'zigs'
+        %account
+        [300.000 ~ `@ux`'zigs-metadata']
         0x1.beef
         zigs-wheat-id
         holder-1
         town-id
-        `@`'zigs'
-        %account
-        [300.000 ~ `@ux`'zigs-metadata']
     ==
   ++  dead-account
     ^-  grain
     :*  %&
-        0x1.dead
-        zigs-wheat-id
-        0xdead
-        town-id
-        %&
         `@`'zigs'
         %account
         [200.000 ~ `@ux`'zigs-metadata']
+        0x1.dead
+        zigs-wheat-id
+        holder-2
+        town-id
     ==
   ++  cafe-account
     ^-  grain
     :*  %&
-        0x1.cafe
-        zigs-wheat-id
-        0xcafe
-        town-id
         `@`'zigs'
         %account
         [100.000 ~ `@ux`'zigs-metadata']
+        0x1.cafe
+        zigs-wheat-id
+        holder-3
+        town-id
     ==
   --
 ::
 ++  triv-wheat
   ^-  grain
   =/  cont  ;;([bat=* pay=*] (cue q.q.triv-contract))
-  =/  =interface
-    %-  ~(gas by *interface)
-    :~  [%give [%give [%pair [%amount [%ud *@ud]] [%my-account [%grain *@ux]]]]]
+  =/  interface=lumps
+    %-  ~(gas by *lumps)
+    :~  %give^[%give [%pair [%amount [%ud *@ud]] [%my-account [%grain *@ux]]]]
+    ==
+  =/  types=lumps
+    %-  ~(gas by *lumps)
+    :~  %account^[%account [%pair [%balance [%ud *@ud]] [%metadata [%grain *@ux]]]]
     ==
   :*  %|
+      `cont
+      interface
+      types
       0xdada.dada  ::  id
       0xdada.dada  ::  lord
       0xdada.dada  ::  holder
       town-id
-      `cont
-      interface
   ==
 ::
 ++  fake-granary
-  ^-  granary 
+  ^-  granary
   %-  ~(gas by *(map id grain))
   :~  [id.p:triv-wheat triv-wheat]
       [id.p:beef-account:zigs beef-account:zigs]

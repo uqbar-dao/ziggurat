@@ -41,67 +41,6 @@
   =/  gun  (~(mint ut typ) %noun gen)
   [[q.dor [q.dor-sam q.arm-sam]] q.gun]
 ::
-::  parsing and nest-checking lumps
-::
-++  nesting
-  |=  [=interface =action]
-  ^-  (unit vase)
-  ?~  choice=(~(get by interface) p.action)  ~
-  =/  typ  (make-action p.action u.choice)
-  ::  this isn't doing much, since * fits into pretty much everything...
-  ?.  (levi -:!>(q.action) typ)  ~
-  `[typ [p.action q.action]]
-::
-++  make-action
-  |=  [tag=@tas =lump]
-  ^-  type
-  [%cell [%atom %tas `tag] (type-lump lump)]
-::
-++  type-lump
-  |=  =lump
-  ^-  type
-  :+  %face  p.lump
-  ?@  q.lump  [%atom %tas ~]
-  ?-    -.q.lump
-      %n
-    %void
-  ::
-      $?  %ub  %uc  %ud  %ui
-          %ux  %uv  %uw
-          %sb  %sc  %sd  %si
-          %sx  %sv  %sw
-          %da  %dr
-          %f
-          %if  %is
-          %t   %ta
-          %p   %q
-          %rs  %rd  %rh  %rq
-      ==
-    [%atom -.q.lump ~]
-  ::
-      ?(%address %grain)
-    [%atom %ux ~]
-  ::
-      %pair
-    [%cell $(lump p.+.q.lump) $(lump q.+.q.lump)]
-  ::
-      %trel
-    :+  %cell
-      $(lump p.+.q.lump)
-    :+  %cell
-      $(lump q.+.q.lump)
-    $(lump r.+.q.lump)
-  ::
-      %qual
-    :+  %cell
-      $(lump p.+.q.lump)
-    :+  %cell
-      $(lump q.+.q.lump)
-    :+  %cell
-      $(lump r.+.q.lump)
-    $(lump s.+.q.lump)
-  ==
-::
 ::  +hole: vase-checks your types for you
 ::
 ++  hole
@@ -168,7 +107,7 @@
       =|  crows=(list crow)
       =|  all-burns=granary
       =|  reward=@ud
-      |-
+      |-  ::  TODO: make this a +turn
       ?~  pending
         :_  rejected
         :*  [(~(pay tax (~(uni by p.land) all-diffs)) reward) q.land]
@@ -302,7 +241,7 @@
         ::  create a new account rice for the sequencer if needed
         =/  =token-account  [total ~ `@ux`'zigs-metadata']
         =/  =id  (fry-rice zigs-wheat-id id.miller town-id `@`'zigs')
-        [%& id zigs-wheat-id id.miller town-id 'zigs' %account token-account]
+        [%& 'zigs' %account token-account id zigs-wheat-id id.miller town-id]
       ?.  ?=(%& -.acc)  granary
       =/  account  (hole token-account data.p.acc)
       ?.  =(`@ux`'zigs-metadata' metadata.account)  granary
@@ -322,7 +261,7 @@
           =crow
           rem=@ud
           =errorcode
-      ==     
+      ==
     ::  +work: take egg and return diff granary, remaining budget,
     ::  and errorcode (0=success)
     ++  work
@@ -337,6 +276,9 @@
       =/  from=[=id nonce=@ud]
         ?:  ?=(@ux from.p.egg)  [from.p.egg 0]
         [id.from.p.egg nonce.from.p.egg]
+      ::  insert budget argument if egg is %give-ing zigs
+      =?  q.q.egg  &(=(to.p.egg zigs-wheat-id) =(p.q.egg %give))
+        [budget.p.egg q.q.egg]
       ?~  gra=(~(get by granary) to.p.egg)  [~ ~ ~ ~ budget.p.egg %5]
       ?.  ?=(%| -.u.gra)                    [~ ~ ~ ~ budget.p.egg %5]
       (grow from p.u.gra egg hits burned)
@@ -400,17 +342,18 @@
         ::
         ::  validate that action nests
         ~&  >  "action: {<q.egg>}"
-        ?~  wrapped=(nesting interface.wheat q.egg)
-          ~&  >>>  "mill:error: action {<q.egg>} not found in {<~(key by interface.wheat)>}"
-          [~ ~ budget %6]
+        ::  ?~  wrapped=(nesting interface.wheat q.egg)
+        ::    ~&  >>>  "mill:error: action {<q.egg>} not found in {<~(key by interface.wheat)>}"
+        ::    [~ ~ budget %6]
         ::
-        ~&  >>  q.u.wrapped
+        ::  note that we can actually push whatever vased noun into the contract
+        ::
         ~&  >>>  cart
         ::
         ?:  test-mode
           ::  run without zebra
           =/  res
-            :-  (mule |.(;;(chick q:(shut dor %write !>(cart) u.wrapped))))
+            :-  (mule |.(;;(chick q:(shut dor %write !>(cart) !>(q.egg)))))
             (sub budget (mul rate.p.egg 7))
           ?:  ?=(%| -.-.res)
             ::  error in contract execution
@@ -418,9 +361,9 @@
           [~ `p.-.res +.res %0]
         ::  generate ZK-proof hints with zebra
         =/  gun
-          (ajar dor %write !>(cart) u.wrapped)
+          (ajar dor %write !>(cart) !>(q.egg))
         =/  =book
-          (zebra budget zink-cax gun)
+          (zebra budget zink-cax search gun)
         ~&  >>  p.book  ::  chick+(hole (unit chick) p.p.book)
         :-  hit.q.book
         ?:  ?=(%| -.p.book)
@@ -433,13 +376,22 @@
           [~ 0 %8]
         [(hole (unit chick) p.p.book) bud.q.book %0]
       ::
+      ++  search
+        |=  pax=^
+        ^-  (unit [path=(list phash) product=*])
+        ?~  pat=((soft path) pax)     ~
+        ?.  ?=([%granary @ ~] u.pat)  ~
+        =/  id  (slav %ux i.t.u.pat)
+        =/  grain  (~(get by granary) id)
+        ::  TODO populate path using +mek in merk
+        `[~ grain]
+      ::
       ++  plant
         |=  act=*
         ^-  ^granary
         =|  gra=^granary
         |-
         ^-  ^granary
-        ~&  act
         ?@  act  gra
         ?:  ?=([%grain id] act)
           ?~  found=(~(get by granary) +.act)
@@ -448,7 +400,7 @@
         (~(uni by $(act -.act)) $(act +.act))
       --
     ::
-    ::  +harvest: take a completed execution and validate all changes 
+    ::  +harvest: take a completed execution and validate all changes
     ::  and additions to granary state
     ::
     ++  harvest
