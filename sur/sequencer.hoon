@@ -24,7 +24,7 @@
       roots=(list @ux)
   ==
 ::  capitol: tracks sequencer and state roots / diffs for all towns
-+$  capitol  (map id:smart hall:sequencer)
++$  capitol  (map id:smart hall)
 ::
 +$  diff   granary  ::  state transitions for one batch
 +$  state-transition

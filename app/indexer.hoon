@@ -90,6 +90,11 @@
 ::
 ::    ##  Pokes
 ::
+::    %indexer-catchup:
+::      Get historical state from target indexer.
+::      WARNING: Overwrites current state, so should
+::      only be used when bootstrapping a new indexer.
+::
 ::    %set-sequencer:
 ::      Subscribe to sequencer for new batches.
 ::
@@ -115,8 +120,7 @@
 +$  card  card:agent:gall
 ::
 +$  versioned-state
-  :: $%  base-state-0  ::  TODO: make inflated state real
-  $%  state-0
+  $%  base-state-0
   ==
 ::
 +$  base-state-0
@@ -135,11 +139,11 @@
       lord-index=(map @ux (jar @ux second-order-location:ui))
       to-index=(map @ux (jar @ux second-order-location:ui))
   ==
-+$  state-0  [base-state-0 indices-0]
++$  inflated-state-0  [base-state-0 indices-0]
 ::
 --
 ::
-=|  state-0
+=|  inflated-state-0
 =*  state  -
 ::
 %-  agent:dbug
@@ -155,15 +159,18 @@
       ic            ~(. indexer-core bowl)
   ::
   ++  on-init  `this
-  :: ++  on-save  !>(-.state)  ::  TODO: make inflated state real
-  ++  on-save  !>(state)
+  ++  on-save  !>(-.state)
   ++  on-load
     |=  =old=vase
     =/  old  !<(versioned-state old-vase)
-    :: ?-  -.old
-    ::   %0  `this(state [old *indices-0])  ::  TODO: index old -> indices-0  ::  TODO: make inflated state real
-    ?-  -.-.old
-      %0  `this(state old)
+    ?-    -.old
+        %0
+      :-  ~
+      %=  this
+          state
+        :-  old
+        (inflate-state ~(tap by batches-by-town.old))
+      ==
     ==
   ::
   ++  on-poke
@@ -190,6 +197,13 @@
         !<(dock vase)
       rollup-root-path
     ::
+        %indexer-catchup
+      :_  this
+      %^    set-watch-target:ic
+          indexer-catchup-wire
+        !<(dock vase)
+      indexer-catchup-path
+    ::
     ::  TODO: add %consume-update and %serve-update pokes
     ::  https://github.com/uqbar-dao/ziggurat/blob/da1d37adf538ee908945557a68387d3c87e1c32e/app/uqbar-indexer.hoon#L138
     ==
@@ -206,6 +220,11 @@
       :: %-  fact:io
       :: :_  ~
       :: [%indexer-update !>(`update:ui`update)]
+    ::
+        [%indexer-catchup ~]
+      :_  this
+      %-  fact-init-kick:io
+      [%indexer-catchup !>(`batches-by-town:ui`batches-by-town)]
     ::
         [%capitol-updates ~]
       :_  this
@@ -262,10 +281,13 @@
     ?+    path  (on-leave:def path)
         $?  [%grain *]
             :: [%hash @ ~]
+            [%grain-eggs *]
             [%holder *]
             [%id *]
             [%lord *]
             [%town *]
+            [%capitol-updates ~]
+            [%indexer-catchup ~]
         ==
       `this
     ==
@@ -379,7 +401,6 @@
     ?+    wire  (on-agent:def wire sign)
         ?([%rollup-capitol-update ~] [%rollup-root-update ~])
       ?+    -.sign  (on-agent:def wire sign)
-      ::
           %kick
         :_  this
         =/  old-source=(unit dock)
@@ -402,7 +423,6 @@
     ::
         [%sequencer-update ~]
       ?+    -.sign  (on-agent:def wire sign)
-      ::
           %kick
         :_  this
         =/  old-source=(unit dock)
@@ -421,19 +441,27 @@
         [cards this]
       ==
     ::
-    ::     [%epochs-catchup ~]
-    ::   ?+    -.sign  (on-agent:def wire sign)
-    ::   ::
-    ::       %kick
-    ::     `this
-    ::   ::
-    ::       %fact
-    ::     =^  cards  state
-    ::       %-  consume-ziggurat-update
-    ::       !<(update:zig q.cage.sign)
-    ::     [cards this]
-    ::   ::
-    ::   ==
+        [%indexer-catchup-update ~]
+      ?+    -.sign  (on-agent:def wire sign)
+          %fact
+        =.  town-update-queue
+          %-  ~(gas by town-update-queue)
+          %+  turn  ~(tap by capitol)
+          |=  [town-id=id:smart =hall:seq]
+          :-  town-id
+          %-  %~  gas  by
+              (~(gut by town-update-queue) town-id *(map @ux @da))
+          %+  turn  roots.hall
+          |=  root=@ux
+          [root now.bowl]  ::  TODO: improve initial timestamping
+        =.  batches-by-town
+          !<(batches-by-town:ui q.cage.sign)
+        :-  ~
+        %=  this
+            +.state
+          (inflate-state ~(tap by batches-by-town))
+        ==
+      ==
     ==
     ::
     :: +consume-indexer-update:
@@ -450,31 +478,26 @@
         :_  state(capitol capitol.update)
         :_  ~
         %+  fact:io
-          [%sequencer-capitol-update !>(`capitol-update:seq`update)]
+          :-  %sequencer-capitol-update
+          !>(`capitol-update:seq`update)
         ~[rollup-capitol-path]
       ::
           %new-peer-root
         =*  town-id  town-id.update
-        ?~  town-q=(~(get by sequencer-update-queue) town-id)
+        =/  indexer-update
+          ^-  (unit [eggs=(list [@ux egg:smart]) =town:seq])
+          %.  root.update
+          %~  get  by
+          %+  ~(gut by sequencer-update-queue)  town-id
+          *(map @ux [(list [@ux egg:smart]) town:seq])
+        ?~  indexer-update
           :-  ~
           %=  state
               town-update-queue
             %+  ~(put by town-update-queue)  town-id
             %+  %~  put  by
-              ?~  inner-queue=(~(get by town-update-queue) town-id)
+                %+  ~(gut by town-update-queue)  town-id
                 *(map batch-id=@ux timestamp=@da)
-              u.inner-queue
-            root.update  timestamp.update
-          ==
-        ?~  indexer-update=(~(get by u.town-q) root.update)
-          :-  ~
-          %=  state
-              town-update-queue
-            %+  ~(put by town-update-queue)  town-id
-            %+  %~  put  by
-              ?~  inner-queue=(~(get by town-update-queue) town-id)
-                *(map batch-id=@ux timestamp=@da)
-              u.inner-queue
             root.update  timestamp.update
           ==
         =^  cards  state
@@ -483,13 +506,14 @@
               eggs.u.indexer-update
               town.u.indexer-update
               timestamp.update
+              %.y
           ==
         :-  cards
         %=  state
             sequencer-update-queue
           %+  ~(jab by sequencer-update-queue)  town-id
           |=  town-queue=(map @ux [(list [@ux egg:smart]) town:seq])
-          %-  ~(del by town-queue)  root.update
+          (~(del by town-queue) root.update)
         ==
       ==
     ::
@@ -497,43 +521,22 @@
       |=  update=indexer-update:seq
       ^-  (quip card _state)
       ?-    -.update
-        :: ~|  "indexer: not consuming unexpected update {<-.update>}"
-        :: !!
-        ::   %epochs-catchup
-        :: =/  =epochs:zig  epochs.update
-        :: =|  cards=(list card)
-        :: |-
-        :: ?~  epochs  [cards state]
-        :: =/  epoch  (pop:poc:zig epochs)
-        :: =*  epoch-num         num.val.head.epoch
-        :: =*  epoch-start-time  start-time.val.head.epoch
-        :: =/  =slots:zig  slots.val.head.epoch
-        :: =+  ^=  [new-cards new-state]
-        ::     |-
-        ::     ?~  slots  [cards state]
-        ::     =/  slot  (pop:sot:zig slots)
-        ::     =+  ^=  [new-cards new-state]
-        ::         %^  consume-slot  epoch-num  epoch-start-time
-        ::         val.head.slot
-        ::     $(slots rest.slot, cards new-cards, state new-state)
-        :: $(epochs rest.epoch, cards new-cards, state new-state)
-      ::
           %update
+        ?>  =(root.update (sham land.town.update))
         =*  town-id  town-id.hall.town.update
-        =/  town-queue=(unit (map @ux @da))
-          (~(get by town-update-queue) town-id)
         =/  timestamp=(unit @da)
-          ?~  town-queue  ~
-          (~(get by u.town-queue) root.update)
+          %.  root.update
+          %~  get  by
+          %+  ~(gut by town-update-queue)  town-id
+          *(map @ux @da)
         ?~  timestamp
           :-  ~
           %=  state
               sequencer-update-queue
             %+  ~(put by sequencer-update-queue)  town-id
             %+  %~  put  by
-                ?~  town-q=(~(get by sequencer-update-queue) town-id)
-                  *(map @ux [(list [@ux egg:smart]) town:seq])
-                u.town-q
+                %+  ~(gut by sequencer-update-queue)  town-id
+                *(map @ux [(list [@ux egg:smart]) town:seq])
               root.update
             [eggs.update town.update]
           ==
@@ -543,6 +546,7 @@
               eggs.update
               town.update
               u.timestamp
+              %.y
           ==
         :-  cards
         %=  state
@@ -551,320 +555,6 @@
           %.  root.update
           ~(del by (~(got by town-update-queue) town-id))
         ==
-        :: (consume-batch root.update eggs.update town.update)
-      ::
-      ::  add %chunk handling? see e.g.
-      ::  https://github.com/uqbar-dao/ziggurat/blob/da1d37adf538ee908945557a68387d3c87e1c32e/app/uqbar-indexer.hoon#L923
-      ==
-    ::
-    :: ++  gas-ja
-    ::   |=  $:  index=(map town-id=@ux (jar @ux location:ui))
-    ::           new=(list [hash=@ux =location:ui])
-    ::           town-id=id:smart
-    ::       ==
-    ::   %+  ~(put by index)  town-id
-    ::   =/  town-index=(jar @ux location:ui)
-    ::     ?~(ti=(~(get by index) town-id) ~ u.ti)
-    ::   |-
-    ::   ?~  new  town-index
-    ::   %=  $
-    ::       new  t.new
-    ::       town-index
-    ::     (~(add ja town-index) hash.i.new location.i.new)
-    ::   ==
-    ::
-    ++  gas-ja-egg
-      |=  $:  index=(map town-id=@ux (jar @ux egg-location:ui))
-              new=(list [hash=@ux location=egg-location:ui])
-              town-id=id:smart
-          ==
-      %+  ~(put by index)  town-id
-      =/  town-index=(jar @ux egg-location:ui)
-        ?~(ti=(~(get by index) town-id) ~ u.ti)
-      |-
-      ?~  new  town-index
-      %=  $
-          new  t.new
-          town-index
-        (~(add ja town-index) hash.i.new location.i.new)
-      ==
-    ::
-    ++  gas-ja-batch
-      |=  $:  index=(map town-id=@ux (jar @ux batch-location:ui))
-              new=(list [hash=@ux location=batch-location:ui])
-              town-id=id:smart
-          ==
-      %+  ~(put by index)  town-id
-      =/  town-index=(jar @ux batch-location:ui)
-        ?~(ti=(~(get by index) town-id) ~ u.ti)
-      |-
-      ?~  new  town-index
-      %=  $
-          new  t.new
-          town-index
-        (~(add ja town-index) hash.i.new location.i.new)
-      ==
-    ::
-    ++  gas-ja-second-order
-      |=  $:  index=(map town-id=@ux (jar @ux second-order-location:ui))
-              new=(list [hash=@ux location=second-order-location:ui])
-              town-id=id:smart
-          ==
-      %+  ~(put by index)  town-id
-      =/  town-index=(jar @ux second-order-location:ui)
-        ?~(ti=(~(get by index) town-id) ~ u.ti)
-      |-
-      ?~  new  town-index
-      %=  $
-          new  t.new
-          town-index
-        (~(add ja town-index) hash.i.new location.i.new)
-      ==
-    ::
-    ++  consume-batch
-      |=  $:  root=@ux
-              eggs=(list [@ux egg:smart])
-              =town:seq
-              timestamp=@da
-          ==
-      ^-  (quip card _state)
-      =*  town-id  town-id.hall.town
-      =+  ^=  [egg from grain grain-eggs holder lord to]
-          (parse-batch root town-id eggs land.town)
-      :: =:  egg-index     (gas-ja egg-index egg town-id)
-      ::     from-index    (gas-ja from-index from town-id)
-      ::     grain-index   (gas-ja grain-index grain town-id)
-      ::     holder-index  (gas-ja holder-index holder town-id)
-      ::     lord-index    (gas-ja lord-index lord town-id)
-      ::     to-index      (gas-ja to-index to town-id)
-      =:  egg-index         (gas-ja-egg egg-index egg town-id)
-          from-index        (gas-ja-second-order from-index from town-id)
-          grain-index       (gas-ja-batch grain-index grain town-id)
-          grain-eggs-index  (gas-ja-second-order grain-eggs-index grain-eggs town-id)
-          holder-index      (gas-ja-second-order holder-index holder town-id)
-          lord-index        (gas-ja-second-order lord-index lord town-id)
-          to-index          (gas-ja-second-order to-index to town-id)
-          batches-by-town
-        %+  ~(put by batches-by-town)  town-id
-        ?~  b=(~(get by batches-by-town) town-id)
-          :_  ~[root]
-          (malt ~[[root [timestamp eggs town]]])
-        :_  [root batch-order.u.b]
-        (~(put by batches.u.b) root [timestamp eggs town])
-      ==
-      |^
-      [make-all-sub-cards state]
-      ::
-      ++  make-sub-paths
-        ^-  (jug @tas path)
-        %-  ~(gas ju *(jug @tas path))
-        %+  turn  ~(val by sup.bowl)
-        |=  [ship sub-path=path]
-        ^-  [@tas path]
-        ?>  ?=(^ sub-path)
-        [`@tas`i.sub-path t.sub-path]
-      ::
-      ++  make-all-sub-cards
-        ^-  (list card)
-        =/  sub-paths=(jug @tas path)  make-sub-paths
-        |^
-        %-  zing
-        :~  :: (make-sub-cards %batch %batch)
-            (make-sub-cards %from %id)
-            (make-sub-cards %to %id)
-            (make-sub-cards %grain %grain)
-            (make-sub-cards %holder %holder)
-            (make-sub-cards %lord %lord)
-            (make-sub-cards %town %town)
-        ==
-        ::
-        ++  make-sub-cards
-          |=  [=query-type:ui path-type=@tas]
-          ^-  (list card)
-          %+  murn  ~(tap in (~(get ju sub-paths) path-type))
-          |=  sub-path=path
-          ::  TODO: can improve performance here by:
-          ::  * call get-locations
-          ::  * handle second-order-locations
-          ::  * compare batch-root with first element of batch-order
-          ::  * same -> got diff; different -> pass
-          =/  payload=?(@ux [@ux @ux])
-            ?:  ?=([@ ~] sub-path)  (slav %ux i.sub-path)
-            ?>  ?=([@ @ ~] sub-path)
-            [(slav %ux i.sub-path) (slav %ux i.t.sub-path)]
-          =/  =update:ui
-            (serve-update query-type payload)
-          ?~  update  ~
-          ::  is update timestamped now?
-          ?:  ?=(?(%batch %egg) -.update)
-            ?.  %-  %~  any  by
-                    ?-  -.update
-                      %batch  batches.update
-                      %egg    eggs.update
-                    ==
-                |=  [timestamp=@da *]
-                =(now.bowl timestamp)
-              ~
-            :-  ~
-            %+  fact:io
-              [%indexer-update !>(`update:ui`update)]
-            ~[[path-type sub-path]]
-          ?.  ?=(%grain -.update)  ~
-          =.  grains.update
-            %-  ~(gas by *(jar id:smart [@da batch-location:ui grain:smart]))
-            %+  murn  ~(tap by grains.update)
-            |=  [=id:smart gs=(list [@da batch-location:ui grain:smart])]
-            ?~(gs ~ `[id ~[i.gs]])
-          =/  timestamp-index=(unit @ud)
-            %+  find  [now.bowl]~
-            %+  turn
-              ^-  (list [@da batch-location:ui grain:smart])
-              (zing ~(val by grains.update))
-            |=  [timestamp=@da *]
-            timestamp
-          ?~  timestamp-index  ~
-          :-  ~
-          %+  fact:io
-            [%indexer-update !>(`update:ui`update)]
-          ~[[path-type sub-path]]
-        ::
-        ++  are-updates-same
-          ::  %.y if non-location portion of update is same
-          ::  %.n if different
-          |=  [p=update:ui q=update:ui]
-          |^  ^-  ?
-          ?~  p  ?=(~ q)
-          ?~  q  %.n
-          ?+    -.p  !!
-              %batch
-            ?.  ?=(%batch -.q)  %.n
-            .=  (make-id-batch-set batches.p)
-            (make-id-batch-set batches.q)
-          ::
-              %egg
-            ?.  ?=(%egg -.q)  %.n
-            .=  (make-id-egg-set eggs.p)
-            (make-id-egg-set eggs.q)
-          ::
-              %grain
-            ?.  ?=(%grain -.q)  %.n
-            .=  (make-id-grain-set grains.p)
-            (make-id-grain-set grains.q)
-          ==
-          ::
-          ++  make-id-batch-set
-            |=  batches=(map id:smart [@da town-location:ui batch:ui])
-            ^-  (set [id:smart batch:ui])
-            %-  silt
-            %+  turn  ~(tap by batches)
-            |=  [=id:smart @da town-location:ui =batch:ui]
-            [id batch]
-          ::
-          ++  make-id-egg-set
-            |=  eggs=(map id:smart [@da egg-location:ui egg:smart])
-            ^-  (set [id:smart egg:smart])
-            %-  silt
-            %+  turn  ~(tap by eggs)
-            |=  [=id:smart @da egg-location:ui =egg:smart]
-            [id egg]
-          ::
-          ++  make-id-grain-set
-            |=  grains=(jar id:smart [@da batch-location:ui grain:smart])
-            ^-  (set [id:smart grain:smart])
-            %-  ~(gas in *(set [id:smart grain:smart]))
-            %-  zing
-            %+  turn  ~(tap by grains)
-            |=  [=id:smart gs=(list [@da batch-location:ui grain:smart])]
-            %+  turn  gs
-            |=  [@da batch-location:ui =grain:smart]
-            [id grain]
-          --
-        --
-      --
-    ::
-    ++  parse-batch
-      |=  [root=@ux town-id=@ux eggs=(list [@ux egg:smart]) =land:seq]
-      ^-  $:  (list [@ux egg-location:ui])
-              (list [@ux second-order-location:ui])
-              (list [@ux batch-location:ui])
-              (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
-          ==
-      =*  granary  p.land
-      =+  [grain holder lord]=(parse-granary root town-id granary)
-      =+  [egg from grain-eggs to]=(parse-transactions root town-id eggs)
-      [egg from grain grain-eggs holder lord to]
-    ::
-    ++  parse-granary
-      |=  [root=@ux town-id=@ux =granary:seq]
-      ^-  $:  (list [@ux batch-location:ui])
-              (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
-          ==
-      =|  parsed-grain=(list [@ux batch-location:ui])
-      =|  parsed-holder=(list [@ux second-order-location:ui])
-      =|  parsed-lord=(list [@ux second-order-location:ui])
-      =/  grains=(list [@ux grain:smart])
-        ~(tap by granary)
-      |-
-      ?~  grains  [parsed-grain parsed-holder parsed-lord]
-      =*  grain-id   id.i.grains
-      =*  holder-id  holder.i.grains
-      =*  lord-id    lord.i.grains
-      %=  $
-          grains  t.grains
-          parsed-grain
-        :_  parsed-grain
-        :-  grain-id
-        [town-id root]
-      ::
-          parsed-holder
-        [[holder-id grain-id] parsed-holder]
-      ::
-          parsed-lord
-        [[lord-id grain-id] parsed-lord]
-      ==
-    ::
-    ++  parse-transactions
-      |=  [root=@ux town-id=@ux txs=(list [@ux egg:smart])]
-      ^-  $:  (list [@ux egg-location:ui])
-              (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
-              (list [@ux second-order-location:ui])
-          ==
-      =|  parsed-egg=(list [@ux egg-location:ui])
-      =|  parsed-from=(list [@ux second-order-location:ui])
-      =|  parsed-grain-eggs=(list [@ux second-order-location:ui])
-      =|  parsed-to=(list [@ux second-order-location:ui])
-      =/  egg-num=@ud  0
-      |-
-      ?~  txs
-        [parsed-egg parsed-from parsed-grain-eggs parsed-to]
-      =*  egg-hash     -.i.txs
-      =*  egg          +.i.txs
-      =*  to           to.p.egg
-      =*  my-grains    `(set id:smart)`my-grains.q.egg
-      =*  cont-grains  `(set id:smart)`cont-grains.q.egg
-      =*  from
-        ?:  ?=(@ux from.p.egg)  from.p.egg
-        id.from.p.egg
-      =/  =egg-location:ui  [town-id root egg-num]
-      =/  new-grain-eggs=(list [@ux second-order-location:ui])
-        %+  turn  ~(tap in (~(uni in my-grains) cont-grains))
-        |=  grain-id=id:smart
-        [grain-id egg-hash]
-      %=  $
-          txs          t.txs
-          parsed-egg   [[egg-hash egg-location] parsed-egg]
-          parsed-from  [[from egg-hash] parsed-from]
-          parsed-to    [[to egg-hash] parsed-to]
-          egg-num      +(egg-num)
-          parsed-grain-eggs
-        ?~  parsed-grain-eggs  new-grain-eggs
-        ?~  new-grain-eggs     parsed-grain-eggs
-        (weld new-grain-eggs parsed-grain-eggs)
       ==
     --
   ::
@@ -874,10 +564,6 @@
 ::
 |_  =bowl:gall
 +*  io  ~(. agentio bowl)
-::
-++  epochs-catchup-wire
-  ^-  wire
-  /epochs-catchup
 ::
 ++  rollup-capitol-wire
   ^-  wire
@@ -891,6 +577,10 @@
   ^-  wire
   /sequencer-update
 ::
+++  indexer-catchup-wire
+  ^-  wire
+  /indexer-catchup-update
+::
 ++  rollup-capitol-path
   ^-  path
   /capitol-updates
@@ -903,11 +593,9 @@
   ^-  path
   /indexer/updates
 ::
-++  get-epoch-catchup
-  |=  d=dock
-  ^-  card
-  %+  ~(watch pass:io epochs-catchup-wire)
-  d  /validator/epoch-catchup/0
+++  indexer-catchup-path
+  ^-  path
+  /indexer-catchup
 ::
 ++  watch-target
   |=  [w=wire d=dock p=path]
@@ -930,7 +618,6 @@
   =/  watch-card=card  (watch-target w d p)
   =/  leave-card=(unit card)  (leave-wire w)
   ?~  leave-card
-    :: ~[(get-epoch-catchup d) watch-card]
     ~[watch-card]
   ~[u.leave-card watch-card]
 ::
@@ -1022,28 +709,6 @@
   ?.  ?=(%grain -.update)  ~
   ~(tap by grains.update)
 ::
-:: ++  combine-updates-to-map
-::   |=  [updates=(list update:ui) type=?(%batch %egg %grain)]
-::   =/  map-type
-::     %+  map  id:smart
-::     :-  @da
-::     ?-  type
-::       %batch  [town-location:ui batch:ui]
-::       %egg    [egg-location:ui egg:smart]
-::       %grain  [batch-location:ui grain:smart]
-::     ==
-::   ^-  map-type
-::   ?~  updates  ~
-::   =/  combined=map-type
-::     %-  ~(gas by *map-type)
-::     %-  zing
-::     %+  turn  updates
-::     |=  =update:ui
-::     ?~  update            ~
-::     ?.  =(type -.update)  ~  ::  TODO: works? if yes, get rid of +combine-*-updates-to-map
-::     ~(tap by +.update)
-::   combined
-::
 ++  combine-updates
   |=  $:  batch-updates=(list update:ui)
           egg-updates=(list update:ui)
@@ -1061,18 +726,42 @@
     (combine-egg-updates-to-map egg-updates)
   =/  combined-grain=(jar id:smart [@da batch-location:ui grain:smart])
     (combine-grain-updates-to-jar grain-updates)
-  :: =/  combined-batch=(map id:smart [@da town-location:ui batch:ui])
-  ::   (combine-updates-to-map batch-updates %batch)
-  :: =/  combined-egg=(map id:smart [@da egg-location:ui egg:smart])
-  ::   (combine-updates-to-map egg-updates %egg)
-  :: =/  combined-grain=(map id:smart [@da batch-location:ui grain:smart])
-  ::   (combine-updates-to-map grain-updates %grain)
   ?:  ?&  ?=(~ combined-batch)
           ?=(~ combined-egg)
           ?=(~ combined-grain)
       ==
     ~
   [%hash combined-batch combined-egg combined-grain]
+::
+++  inflate-state
+  |=  batches-by-town-list=(list [@ux =batches:ui batch-order:ui])
+  ^-  indices-0
+  =|  temporary-state=_state
+  |^
+  |-
+  ?~  batches-by-town-list  +.temporary-state
+  =/  batches-list=(list [root=@ux timestamp=@da =batch:ui])
+    ~(tap by batches.i.batches-by-town-list)
+  %=  $
+      batches-by-town-list  t.batches-by-town-list
+      temporary-state       (inflate-town batches-list)
+  ==
+  ::
+  ++  inflate-town
+    |=  batches-list=(list [root=@ux timestamp=@da =batch:ui])
+    ^-  _state
+    |-
+    ?~  batches-list  temporary-state
+    =^  cards  temporary-state  ::  throw away cards (empty)
+      %:  consume-batch(state temporary-state)
+          root.i.batches-list
+          transactions.batch.i.batches-list
+          +.batch.i.batches-list
+          timestamp.i.batches-list
+          %.n
+      ==
+    $(batches-list t.batches-list)
+  --
 ::
 ++  serve-update
   |=  [=query-type:ui =query-payload:ui]
@@ -1260,5 +949,294 @@
       |=  [town-index=(jar @ux location:ui) out=(list location:ui)]
       (weld out (~(get ja town-index) item-hash))
     --
+  --
+::
+++  consume-batch
+  |=  $:  root=@ux
+          eggs=(list [@ux egg:smart])
+          =town:seq
+          timestamp=@da
+          should-update-subs=?
+      ==
+  |^  ^-  (quip card _state)
+  =*  town-id  town-id.hall.town
+  =+  ^=  [egg from grain grain-eggs holder lord to]
+      (parse-batch root town-id eggs land.town)
+  =:  egg-index         (gas-ja-egg egg-index egg town-id)
+      from-index        (gas-ja-second-order from-index from town-id)
+      grain-index       (gas-ja-batch grain-index grain town-id)
+      grain-eggs-index  (gas-ja-second-order grain-eggs-index grain-eggs town-id)
+      holder-index      (gas-ja-second-order holder-index holder town-id)
+      lord-index        (gas-ja-second-order lord-index lord town-id)
+      to-index          (gas-ja-second-order to-index to town-id)
+      batches-by-town
+    %+  ~(put by batches-by-town)  town-id
+    ?~  b=(~(get by batches-by-town) town-id)
+      :_  ~[root]
+      (malt ~[[root [timestamp eggs town]]])
+    :_  [root batch-order.u.b]
+    (~(put by batches.u.b) root [timestamp eggs town])
+  ==
+  :_  state
+  ?.(should-update-subs ~ make-all-sub-cards)
+  ::
+  ++  gas-ja-egg
+    |=  $:  index=(map town-id=@ux (jar @ux egg-location:ui))
+            new=(list [hash=@ux location=egg-location:ui])
+            town-id=id:smart
+        ==
+    %+  ~(put by index)  town-id
+    =/  town-index=(jar @ux egg-location:ui)
+      ?~(ti=(~(get by index) town-id) ~ u.ti)
+    |-
+    ?~  new  town-index
+    %=  $
+        new  t.new
+        town-index
+      (~(add ja town-index) hash.i.new location.i.new)
+    ==
+  ::
+  ++  gas-ja-batch
+    |=  $:  index=(map town-id=@ux (jar @ux batch-location:ui))
+            new=(list [hash=@ux location=batch-location:ui])
+            town-id=id:smart
+        ==
+    %+  ~(put by index)  town-id
+    =/  town-index=(jar @ux batch-location:ui)
+      ?~(ti=(~(get by index) town-id) ~ u.ti)
+    |-
+    ?~  new  town-index
+    %=  $
+        new  t.new
+        town-index
+      (~(add ja town-index) hash.i.new location.i.new)
+    ==
+  ::
+  ++  gas-ja-second-order
+    |=  $:  index=(map town-id=@ux (jar @ux second-order-location:ui))
+            new=(list [hash=@ux location=second-order-location:ui])
+            town-id=id:smart
+        ==
+    %+  ~(put by index)  town-id
+    =/  town-index=(jar @ux second-order-location:ui)
+      (~(gut by index) town-id ~)
+    |-
+    ?~  new  town-index
+    %=  $
+        new  t.new
+        town-index
+      (~(add ja town-index) hash.i.new location.i.new)
+    ==
+  ::
+  ++  make-sub-paths
+    ^-  (jug @tas path)
+    %-  ~(gas ju *(jug @tas path))
+    %+  turn  ~(val by sup.bowl)
+    |=  [ship sub-path=path]
+    ^-  [@tas path]
+    ?>  ?=(^ sub-path)
+    [`@tas`i.sub-path t.sub-path]
+  ::
+  ++  make-all-sub-cards
+    ^-  (list card)
+    =/  sub-paths=(jug @tas path)  make-sub-paths
+    |^
+    %-  zing
+    :~  :: (make-sub-cards %batch %batch)
+        (make-sub-cards %from %id)
+        (make-sub-cards %to %id)
+        (make-sub-cards %grain %grain)
+        (make-sub-cards %holder %holder)
+        (make-sub-cards %lord %lord)
+        (make-sub-cards %town %town)
+    ==
+    ::
+    ++  make-sub-cards
+      |=  [=query-type:ui path-type=@tas]
+      ^-  (list card)
+      %+  murn  ~(tap in (~(get ju sub-paths) path-type))
+      |=  sub-path=path
+      ::  TODO: can improve performance here by:
+      ::  * call get-locations
+      ::  * handle second-order-locations
+      ::  * compare batch-root with first element of batch-order
+      ::  * same -> got diff; different -> pass
+      =/  payload=?(@ux [@ux @ux])
+        ?:  ?=([@ ~] sub-path)  (slav %ux i.sub-path)
+        ?>  ?=([@ @ ~] sub-path)
+        [(slav %ux i.sub-path) (slav %ux i.t.sub-path)]
+      =/  =update:ui
+        (serve-update query-type payload)
+      ?~  update  ~
+      ::  is update timestamped now?
+      ?:  ?=(?(%batch %egg) -.update)
+        ?.  %-  %~  any  by
+                ?-  -.update
+                  %batch  batches.update
+                  %egg    eggs.update
+                ==
+            |=  [timestamp=@da *]
+            =(now.bowl timestamp)
+          ~
+        :-  ~
+        %+  fact:io
+          [%indexer-update !>(`update:ui`update)]
+        ~[[path-type sub-path]]
+      ?.  ?=(%grain -.update)  ~
+      =.  grains.update
+        %-  ~(gas by *(jar id:smart [@da batch-location:ui grain:smart]))
+        %+  murn  ~(tap by grains.update)
+        |=  [=id:smart gs=(list [@da batch-location:ui grain:smart])]
+        ?~(gs ~ `[id ~[i.gs]])
+      =/  timestamp-index=(unit @ud)
+        %+  find  [now.bowl]~
+        %+  turn
+          ^-  (list [@da batch-location:ui grain:smart])
+          (zing ~(val by grains.update))
+        |=  [timestamp=@da *]
+        timestamp
+      ?~  timestamp-index  ~
+      :-  ~
+      %+  fact:io
+        [%indexer-update !>(`update:ui`update)]
+      ~[[path-type sub-path]]
+    ::
+    ++  are-updates-same
+      ::  %.y if non-location portion of update is same
+      ::  %.n if different
+      |=  [p=update:ui q=update:ui]
+      |^  ^-  ?
+      ?~  p  ?=(~ q)
+      ?~  q  %.n
+      ?+    -.p  !!
+          %batch
+        ?.  ?=(%batch -.q)  %.n
+        .=  (make-id-batch-set batches.p)
+        (make-id-batch-set batches.q)
+      ::
+          %egg
+        ?.  ?=(%egg -.q)  %.n
+        .=  (make-id-egg-set eggs.p)
+        (make-id-egg-set eggs.q)
+      ::
+          %grain
+        ?.  ?=(%grain -.q)  %.n
+        .=  (make-id-grain-set grains.p)
+        (make-id-grain-set grains.q)
+      ==
+      ::
+      ++  make-id-batch-set
+        |=  batches=(map id:smart [@da town-location:ui batch:ui])
+        ^-  (set [id:smart batch:ui])
+        %-  silt
+        %+  turn  ~(tap by batches)
+        |=  [=id:smart @da town-location:ui =batch:ui]
+        [id batch]
+      ::
+      ++  make-id-egg-set
+        |=  eggs=(map id:smart [@da egg-location:ui egg:smart])
+        ^-  (set [id:smart egg:smart])
+        %-  silt
+        %+  turn  ~(tap by eggs)
+        |=  [=id:smart @da egg-location:ui =egg:smart]
+        [id egg]
+      ::
+      ++  make-id-grain-set
+        |=  grains=(jar id:smart [@da batch-location:ui grain:smart])
+        ^-  (set [id:smart grain:smart])
+        %-  ~(gas in *(set [id:smart grain:smart]))
+        %-  zing
+        %+  turn  ~(tap by grains)
+        |=  [=id:smart gs=(list [@da batch-location:ui grain:smart])]
+        %+  turn  gs
+        |=  [@da batch-location:ui =grain:smart]
+        [id grain]
+      --
+    --
+  ::
+  ++  parse-batch
+    |=  [root=@ux town-id=@ux eggs=(list [@ux egg:smart]) =land:seq]
+    ^-  $:  (list [@ux egg-location:ui])
+            (list [@ux second-order-location:ui])
+            (list [@ux batch-location:ui])
+            (list [@ux second-order-location:ui])
+            (list [@ux second-order-location:ui])
+            (list [@ux second-order-location:ui])
+            (list [@ux second-order-location:ui])
+        ==
+    =*  granary  p.land
+    =+  [grain holder lord]=(parse-granary root town-id granary)
+    =+  [egg from grain-eggs to]=(parse-transactions root town-id eggs)
+    [egg from grain grain-eggs holder lord to]
+  ::
+  ++  parse-granary
+    |=  [root=@ux town-id=@ux =granary:seq]
+    ^-  $:  (list [@ux batch-location:ui])
+            (list [@ux second-order-location:ui])
+            (list [@ux second-order-location:ui])
+        ==
+    =|  parsed-grain=(list [@ux batch-location:ui])
+    =|  parsed-holder=(list [@ux second-order-location:ui])
+    =|  parsed-lord=(list [@ux second-order-location:ui])
+    =/  grains=(list [@ux grain:smart])
+      ~(tap by granary)
+    |-
+    ?~  grains  [parsed-grain parsed-holder parsed-lord]
+    =*  grain-id   id.i.grains
+    =*  holder-id  holder.i.grains
+    =*  lord-id    lord.i.grains
+    %=  $
+        grains  t.grains
+        parsed-grain
+      :_  parsed-grain
+      :-  grain-id
+      [town-id root]
+    ::
+        parsed-holder
+      [[holder-id grain-id] parsed-holder]
+    ::
+        parsed-lord
+      [[lord-id grain-id] parsed-lord]
+    ==
+  ::
+  ++  parse-transactions
+    |=  [root=@ux town-id=@ux txs=(list [@ux egg:smart])]
+    ^-  $:  (list [@ux egg-location:ui])
+            (list [@ux second-order-location:ui])
+            (list [@ux second-order-location:ui])
+            (list [@ux second-order-location:ui])
+        ==
+    =|  parsed-egg=(list [@ux egg-location:ui])
+    =|  parsed-from=(list [@ux second-order-location:ui])
+    =|  parsed-grain-eggs=(list [@ux second-order-location:ui])
+    =|  parsed-to=(list [@ux second-order-location:ui])
+    =/  egg-num=@ud  0
+    |-
+    ?~  txs
+      [parsed-egg parsed-from parsed-grain-eggs parsed-to]
+    =*  egg-hash     -.i.txs
+    =*  egg          +.i.txs
+    =*  to           to.p.egg
+    =*  my-grains    `(set id:smart)`my-grains.q.egg
+    =*  cont-grains  `(set id:smart)`cont-grains.q.egg
+    =*  from
+      ?:  ?=(@ux from.p.egg)  from.p.egg
+      id.from.p.egg
+    =/  =egg-location:ui  [town-id root egg-num]
+    =/  new-grain-eggs=(list [@ux second-order-location:ui])
+      %+  turn  ~(tap in (~(uni in my-grains) cont-grains))
+      |=  grain-id=id:smart
+      [grain-id egg-hash]
+    %=  $
+        txs          t.txs
+        parsed-egg   [[egg-hash egg-location] parsed-egg]
+        parsed-from  [[from egg-hash] parsed-from]
+        parsed-to    [[to egg-hash] parsed-to]
+        egg-num      +(egg-num)
+        parsed-grain-eggs
+      ?~  parsed-grain-eggs  new-grain-eggs
+      ?~  new-grain-eggs     parsed-grain-eggs
+      (weld new-grain-eggs parsed-grain-eggs)
+    ==
   --
 --
