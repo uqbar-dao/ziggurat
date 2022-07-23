@@ -1,4 +1,4 @@
-::/+  *zig-sys-smart
+/+  *zig-sys-smart
 |%
 ::  XX potentially add [%remove-tx tx-hash=@ux] if it makes sense?
 ::  XX potentially add expired txs?
@@ -64,15 +64,15 @@
   |=  [=id hash=@uvH]
   [~ (sham (cat 3 hash (sham id)))]
 ++  sham-egg
-  |=  [=egg submitter=caller block=@ud]
+  |=  [=egg from=_from:*cart block=@ud]
   ^-  @uvH
   ::  blocknum + town-id + caller-id + nonce (if avail)
-  =/  part-a  (cat 3 (sham block) (sham town-id.p.egg))
-  =/  part-b
-    ?^  submitter
-      (cat 3 (sham id.submitter) (sham nonce.submitter))
-    (sham submitter)
-  (cat 3 part-a part-b)
+  ;:  (cury cat 3)
+    (sham block)
+    (sham town-id.p.egg)
+    (sham id.from)
+    (sham nonce.from)
+  ==
 ++  event-to-json
   |=  [=event]
   ^-  [@tas json]
