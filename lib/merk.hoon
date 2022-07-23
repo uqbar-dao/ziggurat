@@ -156,9 +156,44 @@
     ^-  val
     (need (get a b))
   ::
+  ++  gut                                               ::  fall value by key
+    |=  [a=mert b=key c=val]
+    ^-  val
+    (fall (get a b) c)
+  ::
   ++  has                                               ::  key existence check
     |=  [a=mert b=key]
     !=(~ (get a b))
+  ::
+  ++  int                                               ::  intersection
+    |=  [a=mert b=mert]
+    ?:  =(a b)  a
+    ::  mor ->  sure
+    ::  gor ->  sore
+    |-  ^+  a
+    ?~  b
+      ~
+    ?~  a
+      ~
+    ?:  (sure p.n.a p.n.b)
+      ?:  =(p.n.b p.n.a)
+        =:  l.a  $(a l.a, b l.b)
+            r.a  $(a r.a, b r.b)
+        ==
+        b(p.q.n (mer a [p q.q]:n.a))
+      ?:  (sore p.n.b p.n.a)
+        ::
+        !!
+      ::
+      !!
+    ?:  =(p.n.a p.n.b)
+      ::
+      !!
+    ?:  (sore p.n.a p.n.b)
+      ::
+      !!
+    ::
+    !!
   ::
   ++  put                                               ::  adds key-value pair
     |=  [a=mert b=key c=val]
@@ -196,7 +231,7 @@
     ?:  =(p.n.b p.n.a)
       =:  l.a  $(a l.a, b l.b)
           r.a  $(a r.a, b r.b)
-        ==
+      ==
       a(p.q.n (mer a [p q.q]:n.a))
     ?:  (sure p.n.a p.n.b)
       ?:  (sore p.n.b p.n.a)
